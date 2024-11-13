@@ -1,0 +1,15 @@
+[submodule "admin"]
+	path = admin
+	url = https://github.com/motionbit95/redswitch.git
+[submodule "bdsm"]
+    path = bdsm
+    url = https://github.com/motionbit95/redswitch.git
+[submodule "landing"]
+    path = landing
+    url = https://github.com/motionbit95/redswitch.git
+[submodule "main"]
+    path = main
+    url = https://github.com/motionbit95/redswitch.git
+[submodule "server"]
+    path = server
+    url = https://github.com/motionbit95/redswitch.git
