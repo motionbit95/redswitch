@@ -108,7 +108,7 @@ function Questions(props) {
               .then((res) => {
                 if (res.status === 200) {
                   console.log(res.data);
-                  // navigate("/result", { state: { answers: totalAnswers } });
+                  navigate(`/result/${res.data.id}`);
                 }
               })
               .catch((error) => {
@@ -155,6 +155,7 @@ function Questions(props) {
         {isSmallScreen ? (
           <div>
             <Carousel
+              fade
               dots={false}
               ref={carouselRef}
               afterChange={handleSlideChange}

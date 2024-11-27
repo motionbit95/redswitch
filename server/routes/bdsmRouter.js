@@ -1092,6 +1092,54 @@ router.post("/save-score-result", async (req, res) => {
   }
 });
 
+// BDSM 점수 조회
+/**
+ * @swagger
+ * /bdsm/scores/{id}:
+ *   get:
+ *     tags:
+ *       - BDSM
+ *     summary: Get BDSM scores
+ *     description: Get BDSM scores from the database.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the BDSM scores to retrieve.
+ *     responses:
+ *       200:
+ *         description: BDSM scores retrieved successfully
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/scores/:id", async (req, res) => {
+  try {
+    const id = String(req.params.id); // ID를 문자열로 변환
+    const ref = db.ref("bdsm_scores");
+    const snapshot = await ref.once("value");
+
+    if (!snapshot.exists()) {
+      return res.status(404).json({ message: "점수 데이터가 없습니다." });
+    }
+
+    const scores = snapshot.val();
+    const result = scores[id];
+    if (!result) {
+      return res.status(404).json({ message: "점수 데이터가 없습니다." });
+    }
+
+    console.log("점수 데이터 조회 완료:", result);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("오류 발생:", error);
+    res
+      .status(500)
+      .json({ message: "점수를 조회하는 동안 오류가 발생했습니다." });
+  }
+});
+
 /**
  * @swagger
  * /bdsm/statistics:

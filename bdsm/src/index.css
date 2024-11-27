@@ -99,3 +99,12 @@ code {
   font-weight: normal;
   font-style: normal;
 }
+
+/* 전역 스타일 또는 해당 컴포넌트의 CSS 파일에 추가 */
+.ant-progress-outer {
+  border-radius: 0 !important;
+}
+
+.ant-progress-inner {
+  border-radius: 0 !important;
+}

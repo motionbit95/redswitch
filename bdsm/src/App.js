@@ -174,7 +174,7 @@ const App = () => {
               element={<View theme={theme} setPage={setPage} />}
             />
             <Route
-              path="/result"
+              path="/result/*"
               element={<TestResult theme={theme} setPage={setPage} />}
             />
           </Routes>
