@@ -1,0 +1,101 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  min-width: 360px;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.center {
+  text-align: center;
+}
+
+/* Container styles */
+.container-small {
+  padding: 16px;
+  text-align: center;
+}
+
+.container-medium {
+  padding: 36px;
+}
+
+.container-large {
+  padding: 48px;
+}
+
+/* Text size styles */
+.text-small {
+  font-size: 14px;
+  text-wrap: nowrap;
+}
+
+.text-medium {
+  font-size: 18px;
+  text-wrap: nowrap;
+}
+
+.text-large {
+  font-size: 24px;
+  text-wrap: nowrap;
+}
+
+/* Title size styles */
+.title-small {
+  font-size: 24px !important;
+  text-wrap: nowrap;
+  font-family: "Paperlogy-8ExtraBold";
+}
+
+.title-medium {
+  font-size: 36px !important;
+  text-wrap: nowrap;
+  font-family: "Paperlogy-8ExtraBold";
+}
+
+.title-large {
+  font-size: 48px !important;
+  text-wrap: nowrap;
+  font-family: "Paperlogy-8ExtraBold";
+}
+
+.text-point {
+  font-family: "ONE-Mobile-POP";
+  font-style: normal;
+  font-size: 36px !important;
+  color: #f5222d !important;
+}
+
+.section-dark {
+  background-color: #333;
+  color: #fff;
+}
+
+.section-light {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+@font-face {
+  font-family: "Paperlogy-8ExtraBold";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2")
+    format("woff2");
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "ONE-Mobile-POP";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/ONE-Mobile-POP.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+}

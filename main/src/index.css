@@ -1,0 +1,34 @@
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: Interop, sans-serif;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.ant-card-body {
+  padding: 0px;
+}
+
+.ant-card-meta-title {
+  margin-bottom: 0px !important;
+}
+
+.ant-card-meta-description {
+  margin-bottom: 0px !important;
+}
+
+@font-face {
+  font-family: "Interop";
+  src: url("https://raw.githubusercontent.com/payw-org/Interop/main/web/fonts/Interop-Regular.woff2")
+      format("woff2"),
+    url("https://raw.githubusercontent.com/payw-org/Interop/main/web/fonts/Interop-Regular.woff")
+      format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
