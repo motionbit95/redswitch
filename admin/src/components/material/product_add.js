@@ -56,7 +56,7 @@ const Addproduct = ({ selectedProvider, isSelected }) => {
     <>
       <Button
         type="primary"
-        disabled={!isSelected}
+        disabled={!selectedProvider}
         onClick={() => setIsModalOpen(true)}
       >
         상품 추가
@@ -83,7 +83,7 @@ const Addproduct = ({ selectedProvider, isSelected }) => {
         ]}
       >
         <Form form={form} layout="vertical" onFinish={handleAddProduct}>
-          <Form.Item label="거래처명">
+          <Form.Item label="가맹점명">
             <Input value={selectedProvider?.provider_name} disabled />
           </Form.Item>
 
@@ -110,12 +110,17 @@ const Addproduct = ({ selectedProvider, isSelected }) => {
               >
                 <Select>
                   {categories
-                    .map((item) => item.product_category)
-                    .map((item) => (
-                      <Select.Option key={item} value={item}>
-                        {item}
-                      </Select.Option>
-                    ))}
+                    // .map((item) => item.product_category)
+                    .map(
+                      ({ product_category, product_category_code }, index) => (
+                        <Select.Option
+                          key={index}
+                          value={product_category_code}
+                        >
+                          {product_category}
+                        </Select.Option>
+                      )
+                    )}
                 </Select>
               </Form.Item>
             </Col>

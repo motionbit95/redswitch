@@ -34,7 +34,7 @@ const ProviderModal = ({
 
   return (
     <Modal
-      title={isEditMode ? "거래처 수정" : "거래처 추가"}
+      title={isEditMode ? "가맹점 수정" : "가맹점 추가"}
       visible={visible}
       onCancel={() => {
         onCancel();
@@ -53,8 +53,8 @@ const ProviderModal = ({
           <Col span={12}>
             <Form.Item
               name="provider_name"
-              label="거래처명"
-              rules={[{ required: true, message: "거래처명을 입력해주세요" }]}
+              label="가맹점명"
+              rules={[{ required: true, message: "가맹점명을 입력해주세요" }]}
             >
               <Input />
             </Form.Item>
@@ -62,9 +62,9 @@ const ProviderModal = ({
           <Col span={12}>
             <Form.Item
               name="provider_code"
-              label="거래처 코드"
+              label="가맹점 코드"
               rules={[
-                { required: true, message: "거래처 코드을 입력해주세요" },
+                { required: true, message: "가맹점 코드을 입력해주세요" },
               ]}
             >
               <Input />
@@ -95,8 +95,8 @@ const ProviderModal = ({
 
         <Form.Item
           name="provider_address"
-          label="거래처 주소"
-          rules={[{ required: true, message: "거래처 주소를 입력해주세요" }]}
+          label="가맹점 주소"
+          rules={[{ required: true, message: "가맹점 주소를 입력해주세요" }]}
         >
           <Row gutter={8} style={{ width: "100%" }}>
             <Col span={18}>
@@ -121,9 +121,9 @@ const ProviderModal = ({
           <Col span={12}>
             <Form.Item
               name="provider_contact"
-              label="거래처 전화번호"
+              label="가맹점 전화번호"
               rules={[
-                { required: true, message: "거래처 전화번호를 입력해주세요" },
+                { required: true, message: "가맹점 전화번호를 입력해주세요" },
               ]}
             >
               <Input />
@@ -232,7 +232,7 @@ const Provider = () => {
       const response = await AxiosGet("/providers"); // Replace with your endpoint
       setProviders(response.data);
     } catch (error) {
-      message.error("거래처 데이터를 가져오는 데 실패했습니다.");
+      message.error("가맹점 데이터를 가져오는 데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -243,9 +243,9 @@ const Provider = () => {
     try {
       await AxiosDelete(`/providers/${id}`);
       setProviders(providers.filter((provider) => provider.id !== id));
-      message.success("거래처 삭제 성공");
+      message.success("가맹점 삭제 성공");
     } catch (error) {
-      message.error("거래처 삭제 실패");
+      message.error("가맹점 삭제 실패");
     }
   };
 
@@ -297,7 +297,7 @@ const Provider = () => {
               : provider
           )
         );
-        message.success("거래처 수정 성공");
+        message.success("가맹점 수정 성공");
         fetchProviders();
       } else {
         const response = await AxiosPost("/providers", providerData, {
@@ -308,13 +308,13 @@ const Provider = () => {
           ...prevProviders,
           response.data.provider,
         ]);
-        message.success("거래처 생성 성공");
+        message.success("가맹점 생성 성공");
         fetchProviders();
       }
 
       setIsModalVisible(false);
     } catch (error) {
-      message.error("거래처 처리 실패");
+      message.error("가맹점 처리 실패");
     }
   };
 
@@ -370,7 +370,7 @@ const Provider = () => {
         <Space>
           <a onClick={() => handleEdit(record)}>수정</a>
           <Popconfirm
-            title="거래처를 삭제하시겠습니까?"
+            title="가맹점를 삭제하시겠습니까?"
             onConfirm={() => handleDelete(record.id)}
           >
             <a>삭제</a>
@@ -387,7 +387,7 @@ const Provider = () => {
         style={{ marginBottom: 16 }}
         onClick={handleAddProvider}
       >
-        거래처 추가
+        가맹점 추가
       </Button>
 
       <Table

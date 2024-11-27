@@ -153,9 +153,33 @@ class Material {
   // Create a new material
   async create() {
     try {
-      const newMaterialRef = await materialsRef.push(this.toJSON());
-      this.pk = newMaterialRef.key;
-      await newMaterialRef.update({ pk: this.pk });
+      // Firebase에서 마지막 키를 가져오기
+      const materialsSnapshot = await materialsRef
+        .orderByKey()
+        .limitToLast(1)
+        .once("value");
+
+      const lastMaterial = materialsSnapshot.val();
+
+      // 마지막 인덱스 계산
+      let newIndex = "00001"; // 기본값
+      if (lastMaterial) {
+        const lastKey = Object.keys(lastMaterial)[0]; // 마지막 키 가져오기
+        const lastIndex = parseInt(lastKey, 10); // 숫자로 변환
+        if (!isNaN(lastIndex)) {
+          newIndex = (lastIndex + 1).toString().padStart(5, "0"); // 5자리 포매팅
+        }
+      }
+
+      console.log("생성된 상품 인덱스:", newIndex);
+
+      // product_code 생성
+      this.product_code = `${this.provider_code}${this.product_category_code}${newIndex}`;
+
+      // 새로운 데이터 저장 (숫자 키 사용)
+      await materialsRef.child(newIndex).set(this.toJSON());
+      this.pk = newIndex; // pk로 키 값을 저장
+
       return this;
     } catch (error) {
       console.error("Error creating material:", error);
@@ -200,10 +224,13 @@ class Material {
   static async search(provider_id) {
     console.log("provider_id: ", provider_id);
     try {
-      const snapshot = await materialsRef.once("value");
+      const snapshot = await materialsRef
+        .orderByChild("created_at")
+        .once("value");
       if (!snapshot.exists()) {
         return [];
       }
+
       const materials = [];
       snapshot.forEach((child) => {
         const material = child.val();
@@ -211,7 +238,7 @@ class Material {
           materials.push({ pk: child.key, ...material });
         }
       });
-      return materials;
+      return materials.reverse(); // 역순으로 내보냄 (최신이 제일 위)
     } catch (error) {
       console.error("Error fetching materials:", error);
       throw new Error("Failed to fetch materials");
@@ -251,6 +278,7 @@ class Material {
 
   // Delete a material by PK
   static async deleteByPk(pk) {
+    console.log("pk: ", pk);
     try {
       const snapshot = await materialsRef.child(pk).once("value");
       if (!snapshot.exists()) {

@@ -26,7 +26,21 @@ const Material = () => {
   });
   const [materialList, setMaterialList] = useState([]);
   const [isSelected, setIsSelected] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState(null);
+  const [selectedProvider, setSelectedProvider] = useState(
+    localStorage.getItem("selectedProvider")
+      ? JSON.parse(localStorage.getItem("selectedProvider"))
+      : null
+  );
+
+  useEffect(() => {
+    if (selectedProvider) {
+      localStorage.setItem(
+        "selectedProvider",
+        JSON.stringify(selectedProvider)
+      );
+      handleSearchMaterials();
+    }
+  }, [selectedProvider]);
 
   const handleSearchMaterials = async () => {
     console.log(">>>>>>", selectedProvider.provider_name);
@@ -91,7 +105,7 @@ const Material = () => {
         <Space>
           <a onClick={() => handleEdit(record)}>수정</a>
           <Popconfirm
-            title="상품을  삭제하시겠습니까?"
+            title="상품을 삭제하시겠습니까?"
             onConfirm={() => handleDelete(record.pk)}
           >
             <a>삭제</a>
@@ -110,7 +124,7 @@ const Material = () => {
             setisSelectedProvider={setIsSelected}
             onComplete={handleSearchMaterials}
           />
-          {isSelected && (
+          {selectedProvider && (
             <>
               <div>{selectedProvider?.provider_name}</div>
               {/* <Button type="primary" onClick={handleSearchMaterials}>
@@ -134,7 +148,7 @@ const Material = () => {
         dataSource={materialList}
         rowKey="id"
         loading={loading}
-        pagination={{ pageSize: 10 }}
+        pagination={{ defaultPageSize: 10, showSizeChanger: true }}
       />
     </Space>
   );

@@ -36,7 +36,7 @@ const Searchprovider = ({
       const response = await AxiosGet("/providers"); // Replace with your endpoint
       setProviders(response.data.map((item) => ({ key: item.id, ...item })));
     } catch (error) {
-      message.error("거래처 데이터를 가져오는 데 실패함.");
+      message.error("가맹점 데이터를 가져오는 데 실패함.");
     } finally {
       setLoading(false);
       console.log(providers);
@@ -45,13 +45,13 @@ const Searchprovider = ({
 
   const handleOK = () => {
     if (!selectedRowKeys.length) {
-      message.warning("거래처를 선택해주세요.");
+      message.warning("가맹점를 선택해주세요.");
       return;
     }
 
     const provider = providers.find((item) => item.key === selectedRowKeys[0]);
     if (!provider) {
-      message.error("잘못된 거래처가 선택되었습니다.");
+      message.error("잘못된 가맹점가 선택되었습니다.");
       return;
     }
 
@@ -63,12 +63,12 @@ const Searchprovider = ({
 
   const columns = [
     {
-      title: "거래처명",
+      title: "가맹점명",
       dataIndex: "provider_name",
       key: "provider_name",
     },
     {
-      title: "거래처코드",
+      title: "가맹점코드",
       dataIndex: "provider_code",
       key: "provider_code",
     },
@@ -100,10 +100,10 @@ const Searchprovider = ({
 
   return (
     <>
-      <Button onClick={() => setIsModalOpen(true)}>거래처 선택</Button>
+      <Button onClick={() => setIsModalOpen(true)}>가맹점 선택</Button>
 
       <Modal
-        title="거래처 검색"
+        title="가맹점 검색"
         centered
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}

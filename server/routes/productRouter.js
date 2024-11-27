@@ -369,9 +369,6 @@ router.delete("/categories/:pk", async (req, res) => {
  *               - provider_code
  *               - product_category_code
  *             properties:
- *               product_code:
- *                 type: string
- *                 description: 상품 코드
  *               product_name:
  *                 type: string
  *                 description: 제품명
@@ -380,19 +377,19 @@ router.delete("/categories/:pk", async (req, res) => {
  *                 description: 원가
  *               provider_name:
  *                 type: string
- *                 description: 거래처명
+ *                 description: 가맹점명
  *               original_image:
  *                 type: string
  *                 description: 제품 이미지
- *               provider_code:
- *                 type: string
- *                 description: 거래처 PK
  *               product_category_code:
  *                 type: string
  *                 description: 카테고리 PK
  *               provider_id:
  *                 type: string
- *                 description: 거래처 고유 ID
+ *                 description: 가맹점 고유 ID
+ *               provider_code:
+ *                 type: string
+ *                 description: 가맹점 코드
  *     responses:
  *       201:
  *         description: 물자 생성 성공
@@ -407,17 +404,17 @@ router.post("/materials", async (req, res) => {
       product_name,
       product_sale,
       provider_name,
-      provider_code,
       product_category_code,
       provider_id,
+      provider_code,
     } = req.body;
 
     if (
       !product_name ||
       !product_sale ||
       !provider_name ||
-      !provider_code ||
       !product_category_code ||
+      !provider_code ||
       !provider_id
     ) {
       return res.status(400).json({ message: "필수 필드가 누락되었습니다." });
@@ -498,13 +495,13 @@ router.get("/materials/:pk", async (req, res) => {
  *                   description: 원가
  *                 provider_name:
  *                   type: string
- *                   description: 거래처명
+ *                   description: 가맹점명
  *                 original_image:
  *                   type: string
  *                   description: 제품 이미지
  *                 provider_code:
  *                   type: string
- *                   description: 거래처 PK
+ *                   description: 가맹점 PK
  *                 product_category_code:
  *                   type: string
  *                   description: 카테고리 PK
@@ -531,19 +528,19 @@ router.get("/materials", async (req, res) => {
  * @swagger
  * /products/materials/search/{provider_id}:
  *   get:
- *     summary: 거래처별 물자 목록을 조회합니다.
- *     description: 거래처별 물자 목록을 조회하여 반환합니다.
+ *     summary: 가맹점별 물자 목록을 조회합니다.
+ *     description: 가맹점별 물자 목록을 조회하여 반환합니다.
  *     tags: [Materials]
  *     parameters:
  *       - in: path
  *         name: provider_id
  *         required: true
- *         description: 거래처 고유 ID
+ *         description: 가맹점 고유 ID
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: 거래처별 물자 목록 조회 성공
+ *         description: 가맹점별 물자 목록 조회 성공
  *         content:
  *           application/json:
  *             type: array
@@ -564,13 +561,13 @@ router.get("/materials", async (req, res) => {
  *                   description: 원가
  *                 provider_name:
  *                   type: string
- *                   description: 거래처명
+ *                   description: 가맹점명
  *                 original_image:
  *                   type: string
  *                   description: 제품 이미지
  *                 provider_code:
  *                   type: string
- *                   description: 거래처 PK
+ *                   description: 가맹점 PK
  *                 product_category_code:
  *                   type: string
  *                   description: 카테고리 PK
@@ -581,7 +578,7 @@ router.get("/materials", async (req, res) => {
  *         description: 서버 오류
  */
 router.get("/materials/search/:provider_id", async (req, res) => {
-  // 거래처 기준 함수로 수정
+  // 가맹점 기준 함수로 수정
   const { provider_id } = req.params;
   try {
     const materials = await Material.search(provider_id);
@@ -627,13 +624,13 @@ router.get("/materials/search/:provider_id", async (req, res) => {
  *                 description: 원가
  *               provider_name:
  *                 type: string
- *                 description: 거래처명
+ *                 description: 가맹점명
  *               original_image:
  *                 type: string
  *                 description: 제품 이미지
  *               provider_code:
  *                 type: string
- *                 description: 거래처 PK
+ *                 description: 가맹점 PK
  *               product_category_code:
  *                 type: string
  *                 description: 카테고리 PK
@@ -712,7 +709,7 @@ router.delete("/materials/:pk", async (req, res) => {
  *             properties:
  *               provider_id:
  *                 type: string
- *                 description: 거래처 ID
+ *                 description: 가맹점 ID
  *     responses:
  *       201:
  *         description: 발주 이력 생성 성공
@@ -827,7 +824,7 @@ router.get("/ordering_history", async (req, res) => {
  *             properties:
  *               provider_id:
  *                 type: string
- *                 description: 거래처 ID
+ *                 description: 가맹점 ID
  *               arrive:
  *                 type: number
  *                 description: 발주 도착 여부
@@ -1234,7 +1231,7 @@ router.delete("/ordering_product/:pk", async (req, res) => {
  *                 description: 지점 ID
  *               provider_id:
  *                 type: string
- *                 description: 거래처 ID
+ *                 description: 가맹점 ID
  *     responses:
  *       201:
  *         description: 재고 생성 성공

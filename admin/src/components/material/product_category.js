@@ -65,9 +65,9 @@ const ProductCategory = () => {
     try {
       await AxiosDelete(`/products/categories/${pk}`);
       setCategories(categories.filter((categories) => categories.pk !== pk));
-      message.success("거래처 삭제 성공");
+      message.success("가맹점 삭제 성공");
     } catch (error) {
-      message.error("거래처 삭제 실패");
+      message.error("가맹점 삭제 실패");
     }
   };
 
