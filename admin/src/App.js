@@ -191,6 +191,11 @@ const App = () => {
       <Layout style={{ minHeight: "100vh", minWidth: "1200px" }}>
         <Header
           style={{
+            position: "fixed", // 고정된 헤더
+            top: 0,
+            left: 0,
+            zIndex: 100, // 다른 요소들보다 위에
+            width: "100%",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -224,7 +229,13 @@ const App = () => {
           <Sider
             width={200}
             style={{
+              position: "fixed", // Sider 고정
+              top: 64, // Header가 64px이므로 그 아래에 위치
+              left: 0,
+              height: "100vh", // 화면 전체 높이에 맞게
               background: colorBgContainer,
+              overflow: "auto", // 내용이 넘칠 때 스크롤 처리
+              zIndex: 99, // Sider가 Header 아래에 오도록 설정
             }}
           >
             <Menu
@@ -240,7 +251,9 @@ const App = () => {
           </Sider>
           <Layout
             style={{
+              marginLeft: 200, // Sider의 너비 만큼 여백을 두어야 내용이 겹치지 않음
               padding: "0 24px 24px",
+              marginTop: 64, // 헤더 크기만큼 여백을 두어야 내용이 헤더와 겹치지 않음
             }}
           >
             <Breadcrumb
