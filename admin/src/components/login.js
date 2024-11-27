@@ -10,6 +10,7 @@ import {
   Modal,
   theme,
   message,
+  Typography,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { AxiosPost } from "../api";
@@ -50,20 +51,13 @@ const LoginForm = ({ setIsLoggedIn }) => {
       </Button>
       <Modal
         title={
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              fontSize: 44,
-              fontFamily: "revert",
-              padding: "0 0 20px 0",
-            }}
+          <Typography.Title
+            level={2}
+            style={{ textAlign: "center", fontWeight: "bold" }}
           >
-            Login
-          </div>
+            레드스위치 관리자포탈
+          </Typography.Title>
         }
-        width={440}
         open={modalOpen}
         centered
         maskClosable={false}
@@ -74,48 +68,59 @@ const LoginForm = ({ setIsLoggedIn }) => {
           form={form}
           name="login"
           style={{
-            minWidth: 300,
-            minHeight: 270,
-            alignContent: "center",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "80%",
+            margin: "40px auto",
           }}
           onFinish={onFinish}
         >
-          <Form.Item
-            name="user_id"
-            rules={[
-              {
-                required: true,
-                message: "Please input your User ID!",
-              },
-            ]}
-          >
-            <Input prefix={<UserOutlined />} placeholder="ID" />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            rules={[
-              {
-                required: true,
-                message: "Please input your Password!",
-              },
-            ]}
-          >
-            <Input
-              prefix={<LockOutlined />}
-              type="password"
-              placeholder="Password"
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <Row gutter={8} justify={"center"}>
-              <Col span={12}>
-                <Button block type="primary" htmlType="submit">
-                  Login
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="user_id"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your User ID!",
+                  },
+                ]}
+              >
+                <Input
+                  prefix={<UserOutlined />}
+                  placeholder="아이디"
+                  size="large"
+                />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="password"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your Password!",
+                  },
+                ]}
+              >
+                <Input
+                  size="large"
+                  prefix={<LockOutlined />}
+                  type="password"
+                  placeholder="비밀번호"
+                />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item>
+                <Button block type="primary" htmlType="submit" size="large">
+                  로그인
                 </Button>
-              </Col>
-            </Row>
-          </Form.Item>
+              </Form.Item>
+            </Col>
+          </Row>
         </Form>
       </Modal>
     </>
