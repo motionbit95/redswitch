@@ -74,6 +74,7 @@ app.use("/branches", require("./routes/branchRouter"));
 app.use("/products", require("./routes/productRouter"));
 app.use("/payments", require("./routes/paymentRouter"));
 app.use("/bdsm", require("./routes/bdsmRouter"));
+app.use("/advertisements", require("./routes/advertisementRouter"));
 
 /**
  * @swagger

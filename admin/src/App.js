@@ -30,11 +30,11 @@ import BDSMStatistics from "./pages/bdsm/bdsm_statistics";
 import Material from "./pages/product/material";
 import Salse from "./pages/sales/salse";
 import Settlement from "./pages/sales/settlement";
+import SalesProduct from "./pages/salesproduct";
+import BDSMAdvertise from "./pages/bdsm/bdsm_advertise";
 
 const { Header, Content, Sider } = Layout;
 
-// 각 페이지 컴포넌트
-const BDSMAdvertise = () => <div>광고 관리 페이지</div>;
 const App = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -134,34 +134,15 @@ const App = () => {
     {
       key: "branch",
       icon: React.createElement(ShopOutlined),
-      label: "업장관리",
+      label: "지점관리",
       children: [
         {
           key: "/branch/branch",
-          label: <Link to="/branch/branch">업장관리</Link>,
-        },
-      ],
-    },
-    {
-      key: "bdsm",
-      icon: React.createElement(DotChartOutlined),
-      label: "BDSM",
-      children: [
-        {
-          key: "/bdsm/questions",
-          label: <Link to="/bdsm/questions">문항관리</Link>,
+          label: <Link to="/branch/branch">지점관리</Link>,
         },
         {
-          key: "/bdsm/results",
-          label: <Link to="/bdsm/results">성향관리</Link>,
-        },
-        {
-          key: "/bdsm/advertise",
-          label: <Link to="/bdsm/advertise">광고관리</Link>,
-        },
-        {
-          key: "/bdsm/trend",
-          label: <Link to="/bdsm/trend">통계관리</Link>,
+          key: "/branch/product",
+          label: <Link to="/branch/product">판매상품관리</Link>,
         },
       ],
     },
@@ -177,6 +158,29 @@ const App = () => {
         {
           key: "/admin/hompage",
           label: <Link to="/admin/hompage">홈페이지관리</Link>,
+        },
+        {
+          key: "bdsm",
+          icon: React.createElement(DotChartOutlined),
+          label: "BDSM",
+          children: [
+            {
+              key: "/bdsm/questions",
+              label: <Link to="/bdsm/questions">문항관리</Link>,
+            },
+            {
+              key: "/bdsm/results",
+              label: <Link to="/bdsm/results">성향관리</Link>,
+            },
+            {
+              key: "/bdsm/advertise",
+              label: <Link to="/bdsm/advertise">광고관리</Link>,
+            },
+            {
+              key: "/bdsm/trend",
+              label: <Link to="/bdsm/trend">통계관리</Link>,
+            },
+          ],
         },
       ],
     },
@@ -259,6 +263,7 @@ const App = () => {
                 <Route path="/admin/account" element={<Account />} />
 
                 <Route path="/branch/branch" element={<Branch />} />
+                <Route path="/branch/product" element={<SalesProduct />} />
 
                 <Route path="/provider/provider" element={<Provider />} />
                 <Route path="/provider/post" element={<FranchisePost />} />
