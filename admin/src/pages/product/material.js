@@ -31,9 +31,10 @@ const Material = () => {
   const handleSearchMaterials = async () => {
     console.log(">>>>>>", selectedProvider.provider_name);
     try {
-      const response = await AxiosGet("/products/materials");
+      const response = await AxiosGet(
+        `/products/materials/search/${selectedProvider.id}`
+      );
       setMaterialList(response.data);
-      // response.data.map((item) => ({ key: item.provider_name, ...item }))
       console.log(
         "회사 물자 리스트",
         response.data.map((item) => ({ key: item.provider_name, ...item }))
@@ -50,6 +51,13 @@ const Material = () => {
 
   const handleDelete = async (material) => {
     console.log(material);
+    try {
+      await AxiosDelete(`/products/materials/${material}`);
+      handleSearchMaterials();
+      message.success("상품 삭제 성공");
+    } catch (error) {
+      message.error("상품 삭제 실패");
+    }
   };
 
   const columns = [
@@ -100,13 +108,14 @@ const Material = () => {
           <Searchprovider
             setSelectedProvider={setSelectedProvider}
             setisSelectedProvider={setIsSelected}
+            onComplete={handleSearchMaterials}
           />
           {isSelected && (
             <>
               <div>{selectedProvider?.provider_name}</div>
-              <Button type="primary" onClick={handleSearchMaterials}>
+              {/* <Button type="primary" onClick={handleSearchMaterials}>
                 검색
-              </Button>
+              </Button> */}
             </>
           )}
         </Space>

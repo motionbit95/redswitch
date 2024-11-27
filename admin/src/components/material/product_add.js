@@ -16,7 +16,6 @@ const Addproduct = ({ selectedProvider, isSelected }) => {
   }, [selectedProvider]);
 
   const handleAddProduct = async (values) => {
-    // console.log("Success:", values, selectedProvider);
     try {
       const response = await AxiosPost("/products/materials", {
         ...values,

@@ -19,6 +19,7 @@ const Searchprovider = ({
   selectedProvider,
   setSelectedProvider,
   setisSelectedProvider,
+  onComplete,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -57,6 +58,7 @@ const Searchprovider = ({
     setSelectedProvider(provider);
     setisSelectedProvider(true);
     setIsModalOpen(false);
+    onComplete();
   };
 
   const columns = [

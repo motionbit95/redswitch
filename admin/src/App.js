@@ -7,6 +7,9 @@ import {
   DollarOutlined,
   InboxOutlined,
   TruckOutlined,
+  ShopOutlined,
+  TeamOutlined,
+  SolutionOutlined,
 } from "@ant-design/icons";
 import { Breadcrumb, Layout, Menu, theme, Button, Space } from "antd";
 import { Footer } from "antd/es/layout/layout";
@@ -17,7 +20,7 @@ import Provider from "./pages/provider/provider";
 import Branch from "./pages/admin/branch";
 import Main from "./pages/admin/main";
 import Post from "./pages/post/post";
-import FranchisePost from "./pages/post/franchise_post";
+import FranchisePost from "./pages/provider/franchise_post";
 import LoginForm from "./components/login";
 import Product from "./pages/product/product";
 import Inventory from "./pages/product/inventory";
@@ -86,7 +89,7 @@ const App = () => {
       children: [
         {
           key: "/product/material",
-          label: <Link to="/product/material">상품추가</Link>,
+          label: <Link to="/product/material">상품등록</Link>,
         },
         {
           key: "/product/product",
@@ -111,20 +114,31 @@ const App = () => {
           key: "/post/post",
           label: <Link to="/post/post">게시판</Link>,
         },
-        {
-          key: "/post/franchise",
-          label: <Link to="/post/franchise">가맹점 게시판</Link>,
-        },
       ],
     },
     {
       key: "provider",
-      icon: React.createElement(ReadOutlined),
+      icon: React.createElement(TeamOutlined),
       label: "가맹점관리",
       children: [
         {
           key: "/provider/provider",
           label: <Link to="/provider/provider">가맹점관리</Link>,
+        },
+        {
+          key: "/provider/post",
+          label: <Link to="/provider/post">가맹점신청</Link>,
+        },
+      ],
+    },
+    {
+      key: "branch",
+      icon: React.createElement(ShopOutlined),
+      label: "업장관리",
+      children: [
+        {
+          key: "/branch/branch",
+          label: <Link to="/branch/branch">업장관리</Link>,
         },
       ],
     },
@@ -153,7 +167,7 @@ const App = () => {
     },
     {
       key: "admin",
-      icon: React.createElement(UserOutlined),
+      icon: React.createElement(SolutionOutlined),
       label: "관리자 설정",
       children: [
         {
@@ -161,8 +175,8 @@ const App = () => {
           label: <Link to="/admin/account">계정관리</Link>,
         },
         {
-          key: "/admin/branch",
-          label: <Link to="/admin/branch">지점관리</Link>,
+          key: "/admin/hompage",
+          label: <Link to="/admin/hompage">홈페이지관리</Link>,
         },
       ],
     },
@@ -243,9 +257,11 @@ const App = () => {
               <Routes>
                 <Route path="/admin" element={<Main />} />
                 <Route path="/admin/account" element={<Account />} />
-                <Route path="/admin/branch" element={<Branch />} />
+
+                <Route path="/branch/branch" element={<Branch />} />
 
                 <Route path="/provider/provider" element={<Provider />} />
+                <Route path="/provider/post" element={<FranchisePost />} />
 
                 <Route path="/bdsm/questions" element={<BDSMQuestions />} />
                 <Route path="/bdsm/results" element={<BDSMResults />} />
@@ -263,7 +279,6 @@ const App = () => {
                 <Route path="/order/order" element={<Order />} />
 
                 <Route path="/post/post" element={<Post />} />
-                <Route path="/post/franchise" element={<FranchisePost />} />
 
                 <Route path="/sales/sales" element={<Salse />} />
                 <Route path="/sales/settlement" element={<Settlement />} />
