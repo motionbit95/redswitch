@@ -603,12 +603,11 @@ const NoticeDetailModal = ({
     >
       {currentNotice && (
         <div style={{ padding: "20px" }}>
-          <Title level={2} style={{ fontWeight: "bold", marginBottom: "10px" }}>
+          <Title level={3} style={{ fontWeight: "bold", marginBottom: "10px" }}>
             {currentNotice.title}
           </Title>
           <Typography.Text
             style={{
-              fontSize: "16px",
               color: "#888",
               marginBottom: "20px",
               display: "block",
@@ -623,7 +622,7 @@ const NoticeDetailModal = ({
             </span>
           </Typography.Text>
           <div style={{ marginBottom: "20px" }}>
-            <Title level={4} style={{ fontWeight: "bold" }}>
+            <Title level={5} style={{ fontWeight: "bold" }}>
               내용
             </Title>
             <div
@@ -635,15 +634,13 @@ const NoticeDetailModal = ({
                 minHeight: "150px",
                 whiteSpace: "pre-wrap",
                 wordWrap: "break-word",
-                fontSize: "16px",
-                lineHeight: "1.6",
               }}
               dangerouslySetInnerHTML={{ __html: currentNotice.content }}
             />
           </div>
 
           <div style={{ marginTop: "20px" }}>
-            <Title level={4}>댓글</Title>
+            <Title level={5}>댓글</Title>
             <div>
               {currentNotice.comments?.map((comment) => (
                 <div
