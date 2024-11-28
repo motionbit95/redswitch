@@ -201,7 +201,7 @@ const Material = () => {
           )}
         </Space>
         <Space>
-          <ProductCategory />
+          <ProductCategory materialList={materialList} />
           <Addproduct
             isSelected={isSelected}
             selectedProvider={selectedProvider}

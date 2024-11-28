@@ -13,7 +13,7 @@ import React, { useEffect, useState } from "react";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import dayjs from "dayjs";
 
-const ProductCategory = () => {
+const ProductCategory = ({ materialList }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false); // 추가 or 수정 모드
@@ -99,11 +99,26 @@ const ProductCategory = () => {
     form.resetFields();
   };
 
-  const handleDelete = async (pk) => {
+  const handleDelete = async (category) => {
+    const searchMaterialCode = materialList.map(
+      (material) => material.product_category_code
+    );
+    console.log(
+      "Delete",
+      searchMaterialCode,
+      category.pk,
+      category.product_category_code
+    );
     try {
-      await AxiosDelete(`/products/categories/${pk}`);
-      setCategories(categories.filter((categories) => categories.pk !== pk));
-      message.success("카테고리 삭제 성공");
+      if (searchMaterialCode.includes(category.product_category_code)) {
+        message.error("해당 카테고리의 상품이 존재합니다.");
+      } else {
+        await AxiosDelete(`/products/categories/${category.pk}`);
+        setCategories(
+          categories.filter((categories) => categories.pk !== category.pk)
+        );
+        message.success("카테고리 삭제 성공");
+      }
     } catch (error) {
       message.error("카테고리 삭제 실패");
     }
@@ -138,7 +153,7 @@ const ProductCategory = () => {
           <a onClick={() => handleEdit(record)}>수정</a>
           <Popconfirm
             title="카테고리를 삭제하시겠습니까?"
-            onConfirm={() => handleDelete(record.pk)}
+            onConfirm={() => handleDelete(record)}
           >
             <a>삭제</a>
           </Popconfirm>
