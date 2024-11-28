@@ -74,14 +74,25 @@ const Material = () => {
     }
   };
 
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
+
+  // Update pagination state on change
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+  };
+
   const columns = [
     {
-      title: "생성일",
-      dataIndex: "created_at",
-      key: "created_at",
-
-      render: (text, record) => new Date(record.created_at).toLocaleString(),
+      title: "No.",
+      render: (text, record, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
+      fixed: "left",
+      width: 50,
     },
+
     {
       title: "상품명",
       dataIndex: "product_name",
@@ -91,6 +102,11 @@ const Material = () => {
       title: "상품코드",
       dataIndex: "product_code",
       key: "product_code",
+    },
+    {
+      title: "카테고리",
+      dataIndex: "product_category_code",
+      key: "product_category_code",
     },
     {
       title: "원가",
@@ -148,7 +164,12 @@ const Material = () => {
         dataSource={materialList}
         rowKey="id"
         loading={loading}
-        pagination={{ defaultPageSize: 10, showSizeChanger: true }}
+        onChange={handleTableChange}
+        pagination={{
+          ...pagination,
+          defaultPageSize: 10,
+          showSizeChanger: true,
+        }}
       />
     </Space>
   );

@@ -10,11 +10,13 @@ import {
   message,
 } from "antd";
 import React, { useEffect, useState } from "react";
-import { AxiosDelete, AxiosGet, AxiosPost } from "../../api";
+import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
+import dayjs from "dayjs";
 
 const ProductCategory = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // 추가 or 수정 모드
   const [form] = Form.useForm();
 
   const [categories, setCategories] = useState([]);
@@ -22,52 +24,88 @@ const ProductCategory = () => {
 
   useEffect(() => {
     fetchCategories();
-    console.log(categories);
   }, []);
 
   const fetchCategories = async () => {
     try {
-      const response = await AxiosGet("/products/categories"); // Replace with your endpoint
+      const response = await AxiosGet("/products/categories");
       setCategories(response.data);
     } catch (error) {
-      message.error("실패");
+      message.error("카테고리 불러오기 실패");
     } finally {
       setLoading(false);
-      console.log(categories);
+    }
+  };
+
+  const onFinish = async (values) => {
+    if (isEditing) {
+      // 수정 모드
+      onUpdateFinish(values);
+    } else {
+      // 추가 모드
+      onAddFinish(values);
     }
   };
 
   const onAddFinish = async (values) => {
-    console.log("Success:", values);
     try {
       const response = await AxiosPost("/products/categories", values);
       if (response.status === 201) {
         message.success("카테고리 추가 성공");
-        setIsModalOpen(false);
         fetchCategories();
       } else {
         message.error("카테고리 추가 실패");
-        setIsModalOpen(false);
       }
     } catch (error) {
       message.error("상품 카테고리와 코드가 필요합니다.");
+    } finally {
+      closeModal();
+    }
+  };
+
+  const onUpdateFinish = async (values) => {
+    try {
+      const response = await AxiosPut(
+        `/products/categories/${values.pk}`,
+        values
+      );
+      if (response.status === 200) {
+        message.success("카테고리 수정 성공");
+        fetchCategories();
+      } else {
+        message.error("카테고리 수정 실패");
+      }
+    } catch (error) {
+      message.error("카테고리 수정 중 오류가 발생했습니다.");
+    } finally {
+      closeModal();
     }
   };
 
   const handleEdit = (category) => {
-    console.log(category);
-    form.setFieldsValue(category); // Set the form fields to current category values
+    setIsEditing(true);
+    form.setFieldsValue(category);
     setIsModalOpen(true);
   };
 
+  const handleAdd = () => {
+    setIsEditing(false);
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    form.resetFields();
+  };
+
   const handleDelete = async (pk) => {
-    console.log(pk);
     try {
       await AxiosDelete(`/products/categories/${pk}`);
       setCategories(categories.filter((categories) => categories.pk !== pk));
-      message.success("가맹점 삭제 성공");
+      message.success("카테고리 삭제 성공");
     } catch (error) {
-      message.error("가맹점 삭제 실패");
+      message.error("카테고리 삭제 실패");
     }
   };
 
@@ -76,10 +114,7 @@ const ProductCategory = () => {
       title: "카테고리",
       dataIndex: "product_category",
       key: "product_category",
-
-      sorter: (a, b) => {
-        return a.product_category.localeCompare(b.product_category);
-      },
+      sorter: (a, b) => a.product_category.localeCompare(b.product_category),
     },
     {
       title: "상품 카테고리 코드",
@@ -90,22 +125,14 @@ const ProductCategory = () => {
       title: "생성일",
       dataIndex: "created_at",
       key: "created_at",
-
       render: (text) => {
-        const date = new Date(text);
-        return date.toLocaleString();
+        return dayjs(text).format("YYYY-MM-DD HH:mm:ss");
       },
-
-      sorter: (a, b) => {
-        const dateA = new Date(a.created_at);
-        const dateB = new Date(b.created_at);
-        return dateA - dateB;
-      },
+      sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
     },
     {
       title: "동작",
       key: "actions",
-
       render: (text, record) => (
         <Space>
           <a onClick={() => handleEdit(record)}>수정</a>
@@ -130,11 +157,7 @@ const ProductCategory = () => {
         onClose={() => setIsOpen(false)}
         extra={
           <Space>
-            <Button
-              key="submit"
-              type="primary"
-              onClick={() => setIsModalOpen(true)}
-            >
+            <Button key="submit" type="primary" onClick={handleAdd}>
               추가
             </Button>
             <Button key="back" onClick={() => setIsOpen(false)}>
@@ -145,45 +168,42 @@ const ProductCategory = () => {
       >
         <Table
           size="small"
-          rowKey="categories"
+          rowKey="pk"
           dataSource={categories}
           loading={loading}
           columns={columns}
           pagination={{ pageSize: 10 }}
         />
       </Drawer>
+
       <Modal
         width={320}
         open={isModalOpen}
         zIndex={1100}
-        onCancel={() => {
-          setIsModalOpen(false);
-          form.resetFields();
-        }}
-        title="카테고리 추가"
+        onCancel={closeModal}
+        title={isEditing ? "카테고리 수정" : "카테고리 추가"}
         centered
         footer={[
-          <Button
-            key="back"
-            onClick={() => {
-              form.resetFields();
-              setIsModalOpen(false);
-            }}
-          >
+          <Button key="back" onClick={closeModal}>
             취소
           </Button>,
           <Button key="submit" type="primary" onClick={() => form.submit()}>
-            추가
+            {isEditing ? "수정" : "추가"}
           </Button>,
         ]}
       >
-        <Form form={form} onFinish={onAddFinish} layout="vertical">
+        <Form form={form} onFinish={onFinish} layout="vertical">
           <Form.Item name="product_category" label="카테고리명">
             <Input />
           </Form.Item>
           <Form.Item name="product_category_code" label="카테고리 코드">
             <Input />
           </Form.Item>
+          {isEditing && (
+            <Form.Item name="pk" hidden>
+              <Input />
+            </Form.Item>
+          )}
         </Form>
       </Modal>
     </>

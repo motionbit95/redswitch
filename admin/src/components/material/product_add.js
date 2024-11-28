@@ -11,9 +11,8 @@ const Addproduct = ({ selectedProvider, isSelected }) => {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    console.log("여기========", selectedProvider);
     fetchCategories();
-  }, [selectedProvider]);
+  }, [categories]);
 
   const handleAddProduct = async (values) => {
     try {

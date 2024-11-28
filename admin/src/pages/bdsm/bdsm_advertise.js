@@ -27,6 +27,7 @@ const BDSMAdvertisement = () => {
 
   useEffect(() => {
     handleSearchAdvertisements();
+    console.log("광고 리스트 조회", advertisementList);
   }, []);
 
   const handleSearchAdvertisements = async () => {
@@ -98,20 +99,20 @@ const BDSMAdvertisement = () => {
 
   const columns = [
     {
-      title: "광고명",
+      title: "광고사",
       dataIndex: "banner_advertiser",
       key: "banner_advertiser",
     },
     {
-      title: "광고 코드",
-      dataIndex: "pk",
-      key: "pk",
+      title: "사이트 주소",
+      dataIndex: "banner_site",
+      key: "banner_site",
     },
     {
       title: "생성일",
       dataIndex: "created_at",
       key: "created_at",
-      render: (text) => new Date(text).toLocaleString(),
+      render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
     },
     {
       title: "동작",
