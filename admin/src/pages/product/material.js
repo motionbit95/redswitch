@@ -208,7 +208,7 @@ const Material = () => {
             categories={categories}
             onComplete={() => {
               if (selectedProvider) {
-                handleSearchMaterials(); // 선택된 가맹점이 있는 경우만 데이터를 다시 불러옴
+                handleSearchMaterials(); // 선택된 거래처이 있는 경우만 데이터를 다시 불러옴
               }
             }}
           />

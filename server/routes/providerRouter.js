@@ -62,7 +62,7 @@ router.delete("/:id", async (req, res) => {
  * @swagger
  * tags:
  *   name: Providers
- *   description: 가맹점 CRUD API
+ *   description: 거래처 CRUD API
  */
 
 /**
@@ -70,8 +70,8 @@ router.delete("/:id", async (req, res) => {
  * paths:
  *   /providers:
  *     post:
- *       summary: 가맹점 생성
- *       description: 새로운 가맹점를 생성합니다.
+ *       summary: 거래처 생성
+ *       description: 새로운 거래처를 생성합니다.
  *       tags: [Providers]
  *       requestBody:
  *         required: true
@@ -94,23 +94,23 @@ router.delete("/:id", async (req, res) => {
  *               properties:
  *                 provider_name:
  *                   type: string
- *                   description: 가맹점 이름
+ *                   description: 거래처 이름
  *                   example: ABC Company
  *                 provider_address:
  *                   type: string
- *                   description: 가맹점 주소
+ *                   description: 거래처 주소
  *                   example: 서울특별시 강남구 테헤란로 123
  *                 provider_sido:
  *                   type: number
- *                   description: 가맹점 주소 시/도 코드
+ *                   description: 거래처 주소 시/도 코드
  *                   example: 11
  *                 provider_sigungu:
  *                   type: number
- *                   description: 가맹점 주소 시/군/구 코드
+ *                   description: 거래처 주소 시/군/구 코드
  *                   example: 110
  *                 provider_contact:
  *                   type: string
- *                   description: 가맹점 전화번호
+ *                   description: 거래처 전화번호
  *                   example: 02-1234-5678
  *                 provider_brn:
  *                   type: string
@@ -150,7 +150,7 @@ router.delete("/:id", async (req, res) => {
  *                   example: 계좌이체
  *       responses:
  *         201:
- *           description: 가맹점 생성 성공
+ *           description: 거래처 생성 성공
  *           content:
  *             application/json:
  *               schema:
@@ -183,12 +183,12 @@ router.delete("/:id", async (req, res) => {
  *         500:
  *           description: 서버 오류
  *     get:
- *       summary: 모든 가맹점 조회
- *       description: 저장된 모든 가맹점 데이터를 조회합니다.
+ *       summary: 모든 거래처 조회
+ *       description: 저장된 모든 거래처 데이터를 조회합니다.
  *       tags: [Providers]
  *       responses:
  *         200:
- *           description: 가맹점 목록 조회 성공
+ *           description: 거래처 목록 조회 성공
  *           content:
  *             application/json:
  *               schema:
@@ -224,8 +224,8 @@ router.delete("/:id", async (req, res) => {
  *           description: 서버 오류
  *   /providers/{id}:
  *     get:
- *       summary: 특정 가맹점 조회
- *       description: ID를 사용하여 특정 가맹점 데이터를 조회합니다.
+ *       summary: 특정 거래처 조회
+ *       description: ID를 사용하여 특정 거래처 데이터를 조회합니다.
  *       tags: [Providers]
  *       parameters:
  *         - in: path
@@ -233,10 +233,10 @@ router.delete("/:id", async (req, res) => {
  *           required: true
  *           schema:
  *             type: string
- *           description: 가맹점 ID
+ *           description: 거래처 ID
  *       responses:
  *         200:
- *           description: 가맹점 데이터 조회 성공
+ *           description: 거래처 데이터 조회 성공
  *           content:
  *             application/json:
  *               schema:
@@ -267,12 +267,12 @@ router.delete("/:id", async (req, res) => {
  *                   payment_type:
  *                     type: string
  *         404:
- *           description: 가맹점를 찾을 수 없음
+ *           description: 거래처를 찾을 수 없음
  *         500:
  *           description: 서버 오류
  *     put:
- *       summary: 가맹점 수정
- *       description: ID를 사용하여 가맹점 데이터를 수정합니다.
+ *       summary: 거래처 수정
+ *       description: ID를 사용하여 거래처 데이터를 수정합니다.
  *       tags: [Providers]
  *       parameters:
  *         - in: path
@@ -280,7 +280,7 @@ router.delete("/:id", async (req, res) => {
  *           required: true
  *           schema:
  *             type: string
- *           description: 가맹점 ID
+ *           description: 거래처 ID
  *       requestBody:
  *         required: true
  *         content:
@@ -302,23 +302,23 @@ router.delete("/:id", async (req, res) => {
  *               properties:
  *                 provider_name:
  *                   type: string
- *                   description: 가맹점 이름
+ *                   description: 거래처 이름
  *                   example: ABC Company
  *                 provider_address:
  *                   type: string
- *                   description: 가맹점 주소
+ *                   description: 거래처 주소
  *                   example: 서울특별시 강남구 테헤란로 123
  *                 provider_sido:
  *                   type: number
- *                   description: 가맹점 주소 시/도 코드
+ *                   description: 거래처 주소 시/도 코드
  *                   example: 11
  *                 provider_sigungu:
  *                   type: number
- *                   description: 가맹점 주소 시/군/구 코드
+ *                   description: 거래처 주소 시/군/구 코드
  *                   example: 110
  *                 provider_contact:
  *                   type: string
- *                   description: 가맹점 전화번호
+ *                   description: 거래처 전화번호
  *                   example: 02-1234-5678
  *                 provider_brn:
  *                   type: string
@@ -358,7 +358,7 @@ router.delete("/:id", async (req, res) => {
  *                   example: 계좌이체
  *       responses:
  *         200:
- *           description: 가맹점 수정 성공
+ *           description: 거래처 수정 성공
  *           content:
  *             application/json:
  *               schema:
@@ -391,8 +391,8 @@ router.delete("/:id", async (req, res) => {
  *         500:
  *           description: 서버 오류
  *     delete:
- *       summary: 가맹점 삭제
- *       description: ID를 사용하여 가맹점 데이터를 삭제합니다.
+ *       summary: 거래처 삭제
+ *       description: ID를 사용하여 거래처 데이터를 삭제합니다.
  *       tags: [Providers]
  *       parameters:
  *         - in: path
@@ -400,12 +400,12 @@ router.delete("/:id", async (req, res) => {
  *           required: true
  *           schema:
  *             type: string
- *           description: 가맹점 ID
+ *           description: 거래처 ID
  *       responses:
  *         200:
- *           description: 가맹점 삭제 성공
+ *           description: 거래처 삭제 성공
  *         404:
- *           description: 가맹점를 찾을 수 없음
+ *           description: 거래처를 찾을 수 없음
  *         500:
  *           description: 서버 오류
  */

@@ -69,7 +69,7 @@ const Addproduct = ({
         ]}
       >
         <Form form={form} layout="vertical" onFinish={handleAddProduct}>
-          <Form.Item label="가맹점명">
+          <Form.Item label="거래처명">
             <Input value={selectedProvider?.provider_name} disabled />
           </Form.Item>
 

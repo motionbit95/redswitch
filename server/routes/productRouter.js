@@ -377,7 +377,7 @@ router.delete("/categories/:pk", async (req, res) => {
  *                 description: 원가
  *               provider_name:
  *                 type: string
- *                 description: 가맹점명
+ *                 description: 거래처명
  *               original_image:
  *                 type: string
  *                 description: 제품 이미지
@@ -386,10 +386,10 @@ router.delete("/categories/:pk", async (req, res) => {
  *                 description: 카테고리 PK
  *               provider_id:
  *                 type: string
- *                 description: 가맹점 고유 ID
+ *                 description: 거래처 고유 ID
  *               provider_code:
  *                 type: string
- *                 description: 가맹점 코드
+ *                 description: 거래처 코드
  *     responses:
  *       201:
  *         description: 물자 생성 성공
@@ -495,13 +495,13 @@ router.get("/materials/:pk", async (req, res) => {
  *                   description: 원가
  *                 provider_name:
  *                   type: string
- *                   description: 가맹점명
+ *                   description: 거래처명
  *                 original_image:
  *                   type: string
  *                   description: 제품 이미지
  *                 provider_code:
  *                   type: string
- *                   description: 가맹점 PK
+ *                   description: 거래처 PK
  *                 product_category_code:
  *                   type: string
  *                   description: 카테고리 PK
@@ -528,19 +528,19 @@ router.get("/materials", async (req, res) => {
  * @swagger
  * /products/materials/search/{provider_id}:
  *   get:
- *     summary: 가맹점별 물자 목록을 조회합니다.
- *     description: 가맹점별 물자 목록을 조회하여 반환합니다.
+ *     summary: 거래처별 물자 목록을 조회합니다.
+ *     description: 거래처별 물자 목록을 조회하여 반환합니다.
  *     tags: [Materials]
  *     parameters:
  *       - in: path
  *         name: provider_id
  *         required: true
- *         description: 가맹점 고유 ID
+ *         description: 거래처 고유 ID
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: 가맹점별 물자 목록 조회 성공
+ *         description: 거래처별 물자 목록 조회 성공
  *         content:
  *           application/json:
  *             type: array
@@ -561,13 +561,13 @@ router.get("/materials", async (req, res) => {
  *                   description: 원가
  *                 provider_name:
  *                   type: string
- *                   description: 가맹점명
+ *                   description: 거래처명
  *                 original_image:
  *                   type: string
  *                   description: 제품 이미지
  *                 provider_code:
  *                   type: string
- *                   description: 가맹점 PK
+ *                   description: 거래처 PK
  *                 product_category_code:
  *                   type: string
  *                   description: 카테고리 PK
@@ -578,7 +578,7 @@ router.get("/materials", async (req, res) => {
  *         description: 서버 오류
  */
 router.get("/materials/search/:provider_id", async (req, res) => {
-  // 가맹점 기준 함수로 수정
+  // 거래처 기준 함수로 수정
   const { provider_id } = req.params;
   try {
     const materials = await Material.search(provider_id);
@@ -624,13 +624,13 @@ router.get("/materials/search/:provider_id", async (req, res) => {
  *                 description: 원가
  *               provider_name:
  *                 type: string
- *                 description: 가맹점명
+ *                 description: 거래처명
  *               original_image:
  *                 type: string
  *                 description: 제품 이미지
  *               provider_code:
  *                 type: string
- *                 description: 가맹점 PK
+ *                 description: 거래처 PK
  *               product_category_code:
  *                 type: string
  *                 description: 카테고리 PK
@@ -709,7 +709,7 @@ router.delete("/materials/:pk", async (req, res) => {
  *             properties:
  *               provider_id:
  *                 type: string
- *                 description: 가맹점 ID
+ *                 description: 거래처 ID
  *     responses:
  *       201:
  *         description: 발주 이력 생성 성공
@@ -824,7 +824,7 @@ router.get("/ordering_history", async (req, res) => {
  *             properties:
  *               provider_id:
  *                 type: string
- *                 description: 가맹점 ID
+ *                 description: 거래처 ID
  *               arrive:
  *                 type: number
  *                 description: 발주 도착 여부
@@ -1231,7 +1231,7 @@ router.delete("/ordering_product/:pk", async (req, res) => {
  *                 description: 지점 ID
  *               provider_id:
  *                 type: string
- *                 description: 가맹점 ID
+ *                 description: 거래처 ID
  *     responses:
  *       201:
  *         description: 재고 생성 성공

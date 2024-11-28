@@ -289,7 +289,7 @@ const NoticeBoard = () => {
         onClick={() => showModal()}
         style={{ marginBottom: 16 }}
       >
-        게시판 추가
+        공지사항 추가
       </Button>
       <Table
         columns={columns}

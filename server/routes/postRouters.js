@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Post = require("../model/Post");
+const { Franchise, Post } = require("../model/Post");
 
 const cors = require("cors");
 router.use(cors());
@@ -11,6 +11,209 @@ router.use(cors());
  *   name: Posts
  *   description: 게시글 관리 API
  */
+
+//가맹점 신청
+/**
+ * @swagger
+ * tags:
+ *   name: Franchise
+ *   description: 가맹점 신청 관리 API
+ */
+
+/**
+ * @swagger
+ * /posts/franchises:
+ *   post:
+ *     tags: [Franchise]
+ *     summary: 가맹점 신청 생성
+ *     description: 새로운 가맹점 신청을 생성합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: true
+ *             properties:
+ *               franchise_name:
+ *                 type: string
+ *                 description: 거래처명
+ *               franchise_room_cnt:
+ *                 type: number
+ *                 description: 객실수
+ *               franchise_address:
+ *                 type: string
+ *                 description: 거래처 주소
+ *               franchise_manager:
+ *                 type: string
+ *                 description: 담당자
+ *               franchise_manager_phone:
+ *                 type: string
+ *                 description: 전화번호
+ *               franchise_manager_email:
+ *                 type: string
+ *                 description: 이메일
+ *               flag:
+ *                 type: string
+ *                 description: 상태 - 상담요청, 상담완료, 계약완료, 설치완료
+ *               sales_manager:
+ *                 type: string
+ *                 description: 영업 담당자
+ *               memo:
+ *                 type: string
+ *                 description: 비고
+ *               created_at:
+ *                 type: string
+ *                 description: 생성일
+ *                 format: date-time
+ *               updated_at:
+ *                 type: string
+ *                 description: 수정일
+ *                 format: date-time
+ *     responses:
+ *       201:
+ *         description: 가맹점 신청 생성 성공
+ *       500:
+ *         description: 서버 오류
+ */
+
+router.post("/franchises", async (req, res) => {
+  try {
+    const newFranchise = new Franchise(req.body);
+    const createdFranchise = await newFranchise.create();
+    res.status(201).json(createdFranchise);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /posts/franchises:
+ *   get:
+ *     tags: [Franchise]
+ *     summary: 모든 가맹점 신청 조회
+ *     description: 모든 가맹점 신청 정보를 반환합니다.
+ *     responses:
+ *       200:
+ *         description: 가맹점 신청 리스트 조회 성공
+ */
+router.get("/franchises", async (req, res) => {
+  try {
+    const franchises = await Franchise.getAll();
+    console.log(franchises);
+    res.status(200).json(franchises);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /posts/franchises/{id}:
+ *   get:
+ *     tags: [Franchise]
+ *     summary: 특정 가맹점 신청 조회
+ *     description: 가맹점 신청 ID를 기반으로 특정 가맹점 신청 정보를 조회합니다.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: 가맹점 신청 ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 가맹점 신청 조회 성공
+ *       404:
+ *         description: 가맹점 신청을 찾을 수 없음
+ */
+router.get("/franchises/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const franchise = await Franchise.getById(id);
+    res.status(200).json(franchise);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /posts/franchises/{id}:
+ *   put:
+ *     tags: [Franchise]
+ *     summary: 가맹점 신청 수정
+ *     description: 가맹점 신청 정보를 수정합니다.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: 가맹점 신청 ID
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               flag:
+ *                 type: string
+ *                 description: 상태 - 상담요청, 상담완료, 계약완료, 설치완료
+ *               sales_manager:
+ *                 type: string
+ *                 description: 영업 담당자
+ *               memo:
+ *                 type: string
+ *                 description: 비고
+ *     responses:
+ *       200:
+ *         description: 가맹점 신청 수정 성공
+ *         content:
+ */
+router.put("/franchises/:id", async (req, res) => {
+  const { id } = req.params;
+  const updatedFields = req.body; // 변경된 데이터만 포함
+
+  try {
+    const franchiseToUpdate = new Franchise({ id }); // ID로 기존 인스턴스 생성
+    const updatedFranchise = await franchiseToUpdate.update(updatedFields); // 변경된 데이터만 업데이트
+    console.log("update!", updatedFranchise);
+    res.status(200).json(updatedFranchise);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /posts/franchises/{id}:
+ *   delete:
+ *     tags: [Franchise]
+ *     summary: 가맹점 신청 삭제
+ *     description: 가맹점 신청을 삭제합니다.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: 가맹점 신청 ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 가맹점 신청 삭제 성공
+ */
+router.delete("/franchises/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await Franchise.delete(id);
+    res.status(200).json({ message: "Franchise deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 /**
  * @swagger

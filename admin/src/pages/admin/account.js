@@ -171,7 +171,7 @@ const Account = () => {
         ) : text === "3" ? (
           <Tag color="green">지점관리자</Tag>
         ) : (
-          <Tag color="orange">가맹점</Tag>
+          <Tag color="orange">거래처</Tag>
         );
       },
     },
@@ -260,7 +260,7 @@ const Account = () => {
               <Select.Option value="1">본사관리자</Select.Option>
               <Select.Option value="2">지사관리자</Select.Option>
               <Select.Option value="3">지점관리자</Select.Option>
-              {/* <Select.Option value="4">가맹점</Select.Option> */}
+              {/* <Select.Option value="4">거래처</Select.Option> */}
             </Select>
           </Form.Item>
           <Row gutter={16}>
@@ -330,7 +330,7 @@ const Account = () => {
             />
           </Form.Item>
 
-          <Form.Item name="provider_id" label="가맹점 선택">
+          <Form.Item name="provider_id" label="거래처 선택">
             {selectedProvider.map((provider, index) => (
               <Tag
                 key={provider.provider_name}
@@ -381,7 +381,7 @@ const Account = () => {
               <Select.Option value="1">본사관리자</Select.Option>
               <Select.Option value="2">지사관리자</Select.Option>
               <Select.Option value="3">지점관리자</Select.Option>
-              {/* <Select.Option value="4">가맹점</Select.Option> */}
+              {/* <Select.Option value="4">거래처</Select.Option> */}
             </Select>
           </Form.Item>
           <Row gutter={16}>
@@ -451,7 +451,7 @@ const Account = () => {
             />
           </Form.Item>
 
-          <Form.Item name="provider_id" label="가맹점 선택">
+          <Form.Item name="provider_id" label="거래처 선택">
             {selectedProvider.map((provider, index) => (
               <Tag
                 key={provider.provider_name}

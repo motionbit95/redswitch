@@ -18,7 +18,7 @@ const SelectProvider = ({ selectedProvider, setSelectedProvider }) => {
       const response = await AxiosGet("/providers"); // Replace with your endpoint
       setProviders(response.data.map((item) => ({ key: item.id, ...item })));
     } catch (error) {
-      message.error("가맹점 데이터 가져오기 실패");
+      message.error("거래처 데이터 가져오기 실패");
     } finally {
       setLoading(false);
     }
@@ -27,7 +27,7 @@ const SelectProvider = ({ selectedProvider, setSelectedProvider }) => {
   const handleOK = () => {
     try {
       if (selectedProviders.length === 0) {
-        message.error("가맹점를 선택해주세요.");
+        message.error("거래처를 선택해주세요.");
         return;
       }
       // 선택된 지점 배열을 부모 컴포넌트로 전달
@@ -44,7 +44,7 @@ const SelectProvider = ({ selectedProvider, setSelectedProvider }) => {
 
   const columns = [
     {
-      title: "가맹점명",
+      title: "거래처명",
       dataIndex: "provider_name",
       key: "provider_name",
     },
@@ -81,10 +81,10 @@ const SelectProvider = ({ selectedProvider, setSelectedProvider }) => {
 
   return (
     <>
-      <Button onClick={() => setIsModalOpen(true)}>가맹점 선택</Button>
+      <Button onClick={() => setIsModalOpen(true)}>거래처 선택</Button>
 
       <Modal
-        title="가맹점 검색"
+        title="거래처 검색"
         centered
         visible={isModalOpen}
         onCancel={() => {

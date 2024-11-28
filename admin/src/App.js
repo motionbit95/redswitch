@@ -112,22 +112,22 @@ const App = () => {
       children: [
         {
           key: "/post/notification",
-          label: <Link to="/post/notification">게시판</Link>,
+          label: <Link to="/post/notification">공지사항</Link>,
+        },
+        {
+          key: "/provider/post",
+          label: <Link to="/provider/post">가맹점 신청</Link>,
         },
       ],
     },
     {
       key: "provider",
       icon: React.createElement(TeamOutlined),
-      label: "가맹점관리",
+      label: "거래처관리",
       children: [
         {
           key: "/provider/provider",
-          label: <Link to="/provider/provider">가맹점관리</Link>,
-        },
-        {
-          key: "/provider/post",
-          label: <Link to="/provider/post">가맹점신청</Link>,
+          label: <Link to="/provider/provider">거래처관리</Link>,
         },
       ],
     },

@@ -1,29 +1,66 @@
-import { Form, Input, Modal, Popconfirm, Space, Table, Tag } from "antd";
-import React, { useState } from "react";
+import {
+  Button,
+  Descriptions,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
+import React, { useEffect, useState } from "react";
+import { SearchOutlined } from "@ant-design/icons";
+import TextArea from "antd/es/input/TextArea";
+import useSearchFilter from "../../hook/useSearchFilter";
+import { AxiosGet, AxiosPut } from "../../api";
+
+const { Option } = Select;
 
 const FranchisePost = () => {
-  // const [flag, setFlag] = useState("0");
-  const dummyData = [
-    {
-      key: "1",
-      franchise_name: "가맹점1",
-      franchise_room_cnt: "10",
-      franchise_address: "서울시",
-      franchise_manager: "이상원",
-      franchise_manager_phone: "010-1234-5678",
-      franchise_manager_email: "7oFyI@example.com",
-      flag: "2",
-      name: "임시",
-    },
-  ];
-
   const [form] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentPost, setCurrentPost] = useState(null); // For post
+  const [franchise_post, setFranchisePost] = useState([]);
+
+  const { getColumnSearchProps } = useSearchFilter(); // 훅 사용
+
+  useEffect(() => {
+    AxiosGet("/posts/franchises")
+      .then((res) => {
+        console.log(res.data);
+        setFranchisePost(res.data);
+      })
+      .then((err) => {
+        console.log(err);
+      });
+  }, []);
 
   const handleOk = (values) => {
-    console.log("받음!", values);
+    console.log("데이터 > ", values);
+    AxiosPut(`/posts/franchises/${currentPost.id}`, values)
+      .then((res) => {
+        console.log(res.data);
+        setFranchisePost(
+          franchise_post.map((post) => {
+            if (post.id === currentPost.id) {
+              return { ...currentPost, ...values };
+            }
+            return post;
+          })
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    form.resetFields(); // Reset form fields
+
+    setIsModalOpen(false);
   };
   const handleDelete = (record) => {
     console.log("Delete", record);
@@ -44,44 +81,71 @@ const FranchisePost = () => {
       width: 50,
     },
     {
-      title: "가맹점 명",
+      title: "가맹점명",
       dataIndex: "franchise_name",
       key: "franchise_name",
+      ...getColumnSearchProps("franchise_name"),
     },
     {
       title: "객실 수",
       dataIndex: "franchise_room_cnt",
       key: "franchise_room_cnt",
+      sorter: (a, b) => a.franchise_room_cnt - b.franchise_room_cnt,
+      showSorterTooltip: false, // 정렬 툴팁을 숨깁니다
     },
     {
       title: "가맹점 주소",
       dataIndex: "franchise_address",
       key: "franchise_address",
-    },
-    {
-      title: "담당자",
-      dataIndex: "franchise_manager",
-      key: "franchise_manager",
-    },
-    {
-      title: "전화번호",
-      dataIndex: "franchise_manager_phone",
-      key: "franchise_manager_phone",
+      ...getColumnSearchProps("franchise_address"),
     },
     {
       title: "이메일",
       dataIndex: "franchise_manager_email",
       key: "franchise_manager_email",
+      ...getColumnSearchProps("franchise_manager_email"),
+    },
+    {
+      title: "담당자",
+      dataIndex: "franchise_manager",
+      key: "franchise_manager",
+      ...getColumnSearchProps("franchise_manager"),
+    },
+    {
+      title: "담당자연락처",
+      dataIndex: "franchise_manager_phone",
+      key: "franchise_manager_phone",
+      ...getColumnSearchProps("franchise_manager_phone"),
     },
     {
       title: "영업담당자",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "sales_manager",
+      key: "sales_manager",
+      ...getColumnSearchProps("sales_manager"),
     },
     {
-      title: "Tag",
+      title: "태그",
       dataIndex: "flag",
       key: "flag",
+      filters: [
+        {
+          text: "상담요청",
+          value: "0",
+        },
+        {
+          text: "상담완료",
+          value: "1",
+        },
+        {
+          text: "계약완료",
+          value: "2",
+        },
+        {
+          text: "설치완료",
+          value: "3",
+        },
+      ],
+      onFilter: (value, record) => record.flag === value,
       render: (_, record) => (
         // <Tag>{record.flag}</Tag>
         <Tag
@@ -106,58 +170,143 @@ const FranchisePost = () => {
       ),
     },
     {
-      title: "동작",
+      title: "자세히보기",
       key: "action",
       render: (_, record) => (
-        <Space>
-          <a onClick={() => handleEdit(record)}>수정</a>
-          <Popconfirm
-            title="해당 게시물을 삭제하시겠습니까?"
-            onConfirm={() => handleDelete(record.pk)}
-          >
-            <a>삭제</a>
-          </Popconfirm>
-        </Space>
+        <Button icon={<SearchOutlined />} onClick={() => handleEdit(record)} />
       ),
     },
   ];
+
   return (
     <>
       <Table
         size="small"
         style={{ marginTop: 48 }}
         columns={columns}
-        dataSource={dummyData}
+        dataSource={franchise_post}
         loading={loading}
       />
-      <Modal
-        title={[]}
-        visible={isModalOpen}
-        onOk={handleOk}
-        centered
-        onCancel={() => setIsModalOpen(false)}
-      >
-        <Form form={form} layout="vertical" initialValues={currentPost}>
-          <Form.Item name="franchise_name" label="가맹점명">
-            <Input />
-          </Form.Item>
-          <Form.Item name="franchise_room_cnt" label="객실수">
-            <Input />
-          </Form.Item>
-          <Form.Item name="franchise_address" label="가맹점주소">
-            <Input />
-          </Form.Item>
-          <Form.Item name="franchise_manager" label="담당자">
-            <Input />
-          </Form.Item>
-          <Form.Item name="franchise_manager_phone" label="전화번호">
-            <Input />
-          </Form.Item>
-          <Form.Item name="franchise_manager_email" label="이메일">
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <PostDetailModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        currentPost={currentPost}
+        handleOk={handleOk}
+      />
+    </>
+  );
+};
+
+const PostDetailModal = ({
+  isModalOpen,
+  setIsModalOpen,
+  currentPost,
+  handleOk,
+}) => {
+  const [form] = Form.useForm();
+  const [memo, setMemo] = useState("");
+
+  const [salesAccounts, setSalesAccounts] = useState([]);
+
+  // flag 값을 위한 선택 옵션
+  const flagOptions = [
+    { label: "상담요청", value: "0" },
+    { label: "상담완료", value: "1" },
+    { label: "계약완료", value: "2" },
+    { label: "설치완료", value: "3" },
+  ];
+
+  useEffect(() => {
+    AxiosGet("/accounts")
+      .then((res) => {
+        console.log(res.data);
+        let salesAccount = res.data.filter(
+          (account) => account.permission === "2"
+        );
+        setSalesAccounts(salesAccount);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  return (
+    <>
+      {currentPost && (
+        <Modal
+          title="상세 정보"
+          visible={isModalOpen}
+          onOk={() => handleOk(form.getFieldsValue())}
+          centered
+          onCancel={() => setIsModalOpen(false)}
+          width={800}
+          okText="저장"
+          cancelText="닫기"
+        >
+          <Form form={form} layout="vertical" initialValues={currentPost}>
+            <Descriptions bordered column={3}>
+              <Descriptions.Item label="가맹점명" span={2}>
+                {currentPost.franchise_name}
+              </Descriptions.Item>
+              {/* 태그를 Select로 변경 */}
+              <Descriptions.Item label="태그">
+                <Form.Item name="flag" style={{ marginBottom: 0 }}>
+                  <Select defaultValue={currentPost.flag}>
+                    {flagOptions.map((option) => (
+                      <Option key={option.value} value={option.value}>
+                        {option.label}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Descriptions.Item>
+              <Descriptions.Item label="객실수">
+                {currentPost.franchise_room_cnt}
+              </Descriptions.Item>
+              <Descriptions.Item label="가맹점 주소" span={2}>
+                {currentPost.franchise_address}
+              </Descriptions.Item>
+              <Descriptions.Item label="담당자">
+                {currentPost.franchise_manager}
+              </Descriptions.Item>
+              <Descriptions.Item label="전화번호">
+                {currentPost.franchise_manager_phone}
+              </Descriptions.Item>
+              <Descriptions.Item label="이메일">
+                {currentPost.franchise_manager_email}
+              </Descriptions.Item>
+              <Descriptions.Item label="영업담당자" span={3}>
+                <Space>
+                  <Form.Item name="sales_manager" style={{ marginBottom: 0 }}>
+                    <Select
+                      defaultValue={currentPost.sales_manager}
+                      style={{ width: "120px" }}
+                    >
+                      {salesAccounts.map(({ id, user_name }) => (
+                        <Option key={id} value={user_name}>
+                          {user_name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                  <Typography.Text type="secondary">
+                    지사관리자 중 선택가능합니다.
+                  </Typography.Text>
+                </Space>
+              </Descriptions.Item>
+            </Descriptions>
+
+            <Form.Item label="비고" name="memo" style={{ marginTop: "20px" }}>
+              <TextArea
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                rows={4}
+                placeholder="메모를 자유롭게 남기세요"
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
+      )}
     </>
   );
 };
