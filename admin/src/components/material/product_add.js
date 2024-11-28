@@ -3,16 +3,14 @@ import React, { useEffect, useState } from "react";
 import FileUpload from "../button";
 import { AxiosGet, AxiosPost } from "../../api";
 
-const Addproduct = ({ selectedProvider, isSelected }) => {
+const Addproduct = ({
+  selectedProvider,
+  isSelected,
+  categories,
+  onComplete,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-
-  const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    fetchCategories();
-  }, [categories]);
 
   const handleAddProduct = async (values) => {
     try {
@@ -30,24 +28,13 @@ const Addproduct = ({ selectedProvider, isSelected }) => {
         console.log(response.data);
         setIsModalOpen(false);
         form.resetFields();
+        onComplete();
       } else {
         message.error("상품 추가 실패");
         setIsModalOpen(false);
       }
     } catch (error) {
       message.error("상품 추가 실패");
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await AxiosGet("/products/categories"); // Replace with your endpoint
-      setCategories(response.data);
-    } catch (error) {
-      message.error("실패");
-    } finally {
-      setLoading(false);
-      // console.log(categories);
     }
   };
 
@@ -125,7 +112,10 @@ const Addproduct = ({ selectedProvider, isSelected }) => {
             </Col>
             <Col span={12}>
               <Form.Item name="original_image" label="상품이미지">
-                <FileUpload />
+                <FileUpload
+                  url={form.getFieldValue("original_image")}
+                  setUrl={(url) => form.setFieldsValue({ original_image: url })}
+                />
               </Form.Item>
             </Col>
           </Row>

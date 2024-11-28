@@ -4,6 +4,7 @@ import {
   DatePicker,
   Form,
   Input,
+  Modal,
   Popconfirm,
   Row,
   Select,
@@ -16,7 +17,8 @@ import React, { useEffect, useState } from "react";
 import Searchprovider from "../../components/searchprovider";
 import Addproduct from "../../components/material/product_add";
 import ProductCategory from "../../components/material/product_category";
-import { AxiosDelete, AxiosGet } from "../../api";
+import { AxiosDelete, AxiosGet, AxiosPut } from "../../api";
+import FileUpload from "../../components/button";
 
 const Material = () => {
   const [loading, setLoading] = useState(false);
@@ -31,6 +33,11 @@ const Material = () => {
       ? JSON.parse(localStorage.getItem("selectedProvider"))
       : null
   );
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [currentMaterial, setCurrentMaterial] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [filteredInfo, setFilteredInfo] = useState({});
+  const [sortedInfo, setSortedInfo] = useState({});
 
   useEffect(() => {
     if (selectedProvider) {
@@ -42,6 +49,10 @@ const Material = () => {
     }
   }, [selectedProvider]);
 
+  useEffect(() => {
+    fetchCategories();
+  }, [categories]);
+
   const handleSearchMaterials = async () => {
     console.log(">>>>>>", selectedProvider.provider_name);
     try {
@@ -49,18 +60,21 @@ const Material = () => {
         `/products/materials/search/${selectedProvider.id}`
       );
       setMaterialList(response.data);
-      console.log(
-        "회사 물자 리스트",
-        response.data.map((item) => ({ key: item.provider_name, ...item }))
-      );
     } catch (error) {
       message.error("실패");
     }
   };
 
-  // Edit material - Open modal
-  const handleEdit = (material) => {
-    console.log(material);
+  const fetchCategories = async () => {
+    try {
+      const response = await AxiosGet("/products/categories"); // Replace with your endpoint
+      setCategories(response.data);
+    } catch (error) {
+      message.error("실패");
+    } finally {
+      setLoading(false);
+      // console.log(categories);
+    }
   };
 
   const handleDelete = async (material) => {
@@ -74,6 +88,33 @@ const Material = () => {
     }
   };
 
+  // Edit material - Open modal
+  const handleEdit = (material) => {
+    console.log(material);
+    setCurrentMaterial(material);
+    setEditModalOpen(true);
+  };
+
+  const onUpdateProductFinish = async (values) => {
+    console.log(values);
+    // try {
+    //   const response = await AxiosPut(
+    //     `/products/materials/${values.pk}`,
+    //     values
+    //   );
+    //   if (response.status === 200) {
+    //     message.success("상품 수정 성공");
+    //     handleSearchMaterials();
+    //   } else {
+    //     message.error("상품 수정 실패");
+    //   }
+    // } catch (error) {
+    //   message.error("상품 수정 중 오류가 발생했습니다.");
+    // } finally {
+    //   setEditModalOpen(false);
+    // }
+  };
+
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -82,6 +123,12 @@ const Material = () => {
   // Update pagination state on change
   const handleTableChange = (pagination) => {
     setPagination(pagination);
+  };
+
+  const handleChange = (pagination, filters, sorter) => {
+    console.log("Various parameters", pagination, filters, sorter);
+    setFilteredInfo(filters);
+    setSortedInfo(sorter);
   };
 
   const columns = [
@@ -107,6 +154,13 @@ const Material = () => {
       title: "카테고리",
       dataIndex: "product_category_code",
       key: "product_category_code",
+
+      render: (text) => {
+        const category = categories.find(
+          (category) => category.product_category_code === text
+        );
+        return category ? category.product_category : "Unknown";
+      },
     },
     {
       title: "원가",
@@ -143,9 +197,6 @@ const Material = () => {
           {selectedProvider && (
             <>
               <div>{selectedProvider?.provider_name}</div>
-              {/* <Button type="primary" onClick={handleSearchMaterials}>
-                검색
-              </Button> */}
             </>
           )}
         </Space>
@@ -154,6 +205,12 @@ const Material = () => {
           <Addproduct
             isSelected={isSelected}
             selectedProvider={selectedProvider}
+            categories={categories}
+            onComplete={() => {
+              if (selectedProvider) {
+                handleSearchMaterials(); // 선택된 가맹점이 있는 경우만 데이터를 다시 불러옴
+              }
+            }}
           />
         </Space>
       </Space>
@@ -164,13 +221,87 @@ const Material = () => {
         dataSource={materialList}
         rowKey="id"
         loading={loading}
-        onChange={handleTableChange}
+        onChange={(pagination, filters, sorter) => {
+          handleTableChange(pagination);
+          handleChange(pagination, filters, sorter);
+        }}
         pagination={{
           ...pagination,
           defaultPageSize: 10,
           showSizeChanger: true,
         }}
       />
+      <Modal
+        title="상품 수정"
+        open={editModalOpen}
+        onCancel={() => setEditModalOpen(false)}
+        footer={[
+          <Button key="back" onClick={() => setEditModalOpen(false)}>
+            취소
+          </Button>,
+          <Button
+            type="primary"
+            loading={loading}
+            onClick={() => form.submit()}
+          >
+            수정
+          </Button>,
+        ]}
+      >
+        <Form
+          form={form}
+          onFinish={onUpdateProductFinish}
+          initialValues={currentMaterial}
+          layout="vertical"
+          style={{ width: "100%" }}
+        >
+          <Form.Item
+            label="상품명"
+            name="product_name"
+            rules={[{ required: true, message: "상품명을 입력해주세요" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="상품코드"
+            name="product_code"
+            rules={[{ required: true, message: "상품코드을 입력해주세요" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="원가"
+            name="product_sale"
+            rules={[{ required: true, message: "원가을 입력해주세요" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="product_category_code"
+                label="카테고리"
+                rules={[{ required: true }]}
+              >
+                <Select>
+                  {categories.map(
+                    ({ product_category, product_category_code }, index) => (
+                      <Select.Option key={index} value={product_category_code}>
+                        {product_category}
+                      </Select.Option>
+                    )
+                  )}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="original_image" label="상품이미지">
+                <FileUpload />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </Modal>
     </Space>
   );
 };
