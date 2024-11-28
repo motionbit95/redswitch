@@ -105,7 +105,7 @@ const Searchprovider = ({
       <Modal
         title="가맹점 검색"
         centered
-        open={isModalOpen}
+        visible={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={[
           <Button key="back" onClick={() => setIsModalOpen(false)}>

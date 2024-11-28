@@ -167,7 +167,7 @@ const ProductCategory = ({ materialList }) => {
       <Button onClick={() => setIsOpen(true)}>카테고리 설정</Button>
 
       <Drawer
-        open={isOpen}
+        visible={isOpen}
         size="large"
         onClose={() => setIsOpen(false)}
         extra={
@@ -193,7 +193,7 @@ const ProductCategory = ({ materialList }) => {
 
       <Modal
         width={320}
-        open={isModalOpen}
+        visible={isModalOpen}
         zIndex={1100}
         onCancel={closeModal}
         title={isEditing ? "카테고리 수정" : "카테고리 추가"}

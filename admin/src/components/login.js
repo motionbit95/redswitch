@@ -58,7 +58,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
             레드스위치 관리자포탈
           </Typography.Title>
         }
-        open={modalOpen}
+        visible={modalOpen}
         centered
         maskClosable={false}
         footer={null}

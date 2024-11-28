@@ -31,6 +31,7 @@ import Material from "./pages/product/material";
 import Salse from "./pages/sales/salse";
 import Settlement from "./pages/sales/settlement";
 import BDSMAdvertise from "./pages/bdsm/bdsm_advertise";
+import NoticeBoard from "./pages/post/post";
 
 const { Header, Content, Sider } = Layout;
 
@@ -110,8 +111,8 @@ const App = () => {
       label: "게시판",
       children: [
         {
-          key: "/post/post",
-          label: <Link to="/post/post">게시판</Link>,
+          key: "/post/notification",
+          label: <Link to="/post/notification">게시판</Link>,
         },
       ],
     },
@@ -156,7 +157,7 @@ const App = () => {
         },
         {
           key: "bdsm",
-          icon: React.createElement(DotChartOutlined),
+          // icon: React.createElement(DotChartOutlined),
           label: "BDSM",
           children: [
             {
@@ -290,7 +291,7 @@ const App = () => {
 
                 <Route path="/order/order" element={<Order />} />
 
-                <Route path="/post/post" element={<Post />} />
+                <Route path="/post/notification" element={<NoticeBoard />} />
 
                 <Route path="/sales/sales" element={<Salse />} />
                 <Route path="/sales/settlement" element={<Settlement />} />

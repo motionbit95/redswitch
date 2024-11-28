@@ -233,7 +233,7 @@ const Material = () => {
       />
       <Modal
         title="상품 수정"
-        open={editModalOpen}
+        visible={editModalOpen}
         onCancel={() => setEditModalOpen(false)}
         footer={[
           <Button key="back" onClick={() => setEditModalOpen(false)}>

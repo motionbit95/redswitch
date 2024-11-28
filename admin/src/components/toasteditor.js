@@ -18,7 +18,7 @@ const ToastEditor = ({ onChange, ...props }) => {
       previewStyle="vertical"
       height="400px"
       initialEditType="wysiwyg"
-      initalValue={props.initialValue || " "}
+      initialValue={props.initialValue || " "}
       useCommandShortcut={true}
       onChange={handleChange}
       hideModeSwitch={true}

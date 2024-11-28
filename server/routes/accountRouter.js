@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const Account = require("../model/account");
+const Account = require("../model/Account");
 const router = express.Router();
 const cors = require("cors");
 

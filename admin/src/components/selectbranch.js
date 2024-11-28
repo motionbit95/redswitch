@@ -86,7 +86,7 @@ const SelectBranch = ({ selectedBranch, setSelectedBranch }) => {
       <Modal
         title="지점 검색"
         centered
-        open={isModalOpen}
+        visible={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);
           setSelectedRowKeys([]);

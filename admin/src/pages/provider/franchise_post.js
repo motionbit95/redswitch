@@ -132,7 +132,7 @@ const FranchisePost = () => {
       />
       <Modal
         title={[]}
-        open={isModalOpen}
+        visible={isModalOpen}
         onOk={handleOk}
         centered
         onCancel={() => setIsModalOpen(false)}

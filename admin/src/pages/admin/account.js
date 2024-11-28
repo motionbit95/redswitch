@@ -237,8 +237,7 @@ const Account = () => {
       {/* Edit Modal */}
       <Modal
         title="계정 수정"
-        open={isEditModalVisible}
-        // visible={isEditModalVisible}
+        visible={isEditModalVisible}
         onCancel={() => {
           setIsEditModalVisible(false);
           form.resetFields();
