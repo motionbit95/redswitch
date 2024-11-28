@@ -30,7 +30,6 @@ import BDSMStatistics from "./pages/bdsm/bdsm_statistics";
 import Material from "./pages/product/material";
 import Salse from "./pages/sales/salse";
 import Settlement from "./pages/sales/settlement";
-import SalesProduct from "./pages/salesproduct";
 import BDSMAdvertise from "./pages/bdsm/bdsm_advertise";
 
 const { Header, Content, Sider } = Layout;
@@ -89,11 +88,11 @@ const App = () => {
       children: [
         {
           key: "/product/material",
-          label: <Link to="/product/material">상품등록</Link>,
+          label: <Link to="/product/material">물자등록</Link>,
         },
         {
           key: "/product/product",
-          label: <Link to="/product/product">상품관리</Link>,
+          label: <Link to="/product/product">판매상품관리</Link>,
         },
         {
           key: "/product/inventory",
@@ -139,10 +138,6 @@ const App = () => {
         {
           key: "/branch/branch",
           label: <Link to="/branch/branch">지점관리</Link>,
-        },
-        {
-          key: "/branch/product",
-          label: <Link to="/branch/product">판매상품관리</Link>,
         },
       ],
     },
@@ -276,7 +271,6 @@ const App = () => {
                 <Route path="/admin/account" element={<Account />} />
 
                 <Route path="/branch/branch" element={<Branch />} />
-                <Route path="/branch/product" element={<SalesProduct />} />
 
                 <Route path="/provider/provider" element={<Provider />} />
                 <Route path="/provider/post" element={<FranchisePost />} />
