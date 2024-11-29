@@ -18,7 +18,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
-import SelectBranch from "../../components/selectbranch";
+import SelectBranch from "../../components/searchbranch";
 
 const ProductCRUD = () => {
   const [products, setProducts] = useState([]);

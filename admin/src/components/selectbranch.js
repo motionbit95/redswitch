@@ -1,148 +1,131 @@
-import { Button, Popover, Table, Form, Input, message, Space } from "antd";
+import { Button, Form, Modal, Table, message } from "antd";
 import React, { useEffect, useState } from "react";
 import { AxiosGet } from "../api";
-import useSearchFilter from "../hook/useSearchFilter";
 
-const SearchBranch = ({ selectedBranch, setSelectedBranch }) => {
+const SelectBranch = ({ selectedProvider, setSelectedProvider }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
-  const [branches, setBranches] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [popoverVisible, setPopoverVisible] = useState(false);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  const { getColumnSearchProps } = useSearchFilter();
+  const [providers, setProviders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchBranches();
+    fetchProviders();
   }, []);
 
-  const fetchBranches = async (search = "") => {
+  const fetchProviders = async () => {
     try {
-      const response = await AxiosGet("/branches"); // Replace with your endpoint
-      setBranches(
-        response.data
-          .map((item) => item)
-          .filter((item) => item.branch_name.includes(search))
-          .map((item) => ({ key: item.id, ...item }))
-      );
+      const response = await AxiosGet("/providers"); // Replace with your endpoint
+      setProviders(response.data.map((item) => ({ key: item.id, ...item })));
     } catch (error) {
-      message.error("지점 데이터를 가져오는 데 실패했습니다.");
+      message.error("거래처 데이터 가져오기 실패");
     } finally {
       setLoading(false);
     }
   };
 
   const handleOK = () => {
-    if (!selectedRowKeys.length) {
-      message.warning("지점를 선택해주세요.");
-      return;
-    }
+    try {
+      if (selectedProviders.length === 0) {
+        message.error("거래처를 선택해주세요.");
+        return;
+      }
+      // 선택된 지점 배열을 부모 컴포넌트로 전달
+      setSelectedProvider(selectedProviders);
 
-    const branch = branches.find((item) => item.key === selectedRowKeys[0]);
-    if (!branch) {
-      message.error("잘못된 지점가 선택되었습니다.");
-      return;
+      // 모달 닫기 및 선택 초기화
+      setIsModalOpen(false);
+      setSelectedRowKeys([]);
+    } catch (error) {
+      console.error("Error in handleOK:", error.message);
+      message.error(error.message || "선택 처리 중 오류가 발생했습니다.");
     }
-
-    setSelectedBranch(branch);
-    setPopoverVisible(false);
   };
 
   const columns = [
     {
-      title: "지점명",
-      dataIndex: "branch_name",
+      title: "거래처명",
+      dataIndex: "provider_name",
       key: "provider_name",
     },
     {
-      title: "시/도",
-      dataIndex: "branch_sido",
-      key: "branch_sido",
-      ...getColumnSearchProps("branch_sido"),
-    },
-    {
-      title: "시/군/구",
-      dataIndex: "branch_sigungu",
-      key: "branch_sigungu",
-      ...getColumnSearchProps("branch_sigungu"),
-    },
-    {
       title: "담당자",
-      dataIndex: "branch_manager_name",
-      key: "branch_manager_name",
-      ...getColumnSearchProps("branch_manager_name"),
+      dataIndex: "provider_manager_name",
+      key: "provider_manager_name",
     },
     {
       title: "담당자 전화번호",
-      dataIndex: "branch_manager_phone",
-      key: "branch_manager_phone",
+      dataIndex: "provider_manager_phone",
+      key: "provider_manager_phone",
     },
   ];
 
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 선택된 Row의 키값 배열
+  const [selectedProviders, setSelectedProviders] = useState([]); // 선택된 데이터 배열
+
   const onSelectChange = (newSelectedRowKeys) => {
+    // 선택된 키값 배열 저장
     setSelectedRowKeys(newSelectedRowKeys);
+    // 선택된 데이터 배열 저장
+    const selectedData = providers.filter((item) =>
+      newSelectedRowKeys.includes(item.key)
+    );
+    setSelectedProviders(selectedData);
   };
 
   const rowSelection = {
-    type: "radio",
+    type: "checkbox",
     selectedRowKeys,
     onChange: onSelectChange,
   };
 
-  const searchProviders = (value) => {
-    fetchBranches(value.search);
-  };
-
-  const content = (
-    <div style={{ width: 700 }}>
-      <Form
-        form={form}
-        layout="inline"
-        style={{ marginBottom: 16 }}
-        onFinish={searchProviders}
-      >
-        <Form.Item name="search" label="검색">
-          <Input
-            placeholder="지점명을 검색하세요"
-            allowClear
-            style={{ width: 200 }}
-          />
-        </Form.Item>
-        <Button type="primary" onClick={() => form.submit()}>
-          검색
-        </Button>
-      </Form>
-      <Table
-        size="small"
-        rowSelection={rowSelection}
-        columns={columns}
-        dataSource={branches}
-        loading={loading}
-        pagination={{ pageSize: 5 }}
-      />
-      <Space style={{ marginTop: 16 }}>
-        <Button onClick={() => setPopoverVisible(false)}>닫기</Button>
-        <Button type="primary" onClick={handleOK}>
-          선택
-        </Button>
-      </Space>
-    </div>
-  );
-
   return (
-    <div style={{ textAlign: "left" }}>
-      <Popover
-        content={content}
-        title="지점를 선택해주세요."
-        trigger="click"
-        visible={popoverVisible}
-        onVisibleChange={setPopoverVisible}
-        placement="bottomLeft" // 버튼 아래 왼쪽 정렬
+    <>
+      <Button onClick={() => setIsModalOpen(true)}>거래처 선택</Button>
+
+      <Modal
+        title="거래처 검색"
+        centered
+        visible={isModalOpen}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setSelectedRowKeys([]);
+        }}
+        footer={[
+          <Button
+            key="back"
+            onClick={() => {
+              setIsModalOpen(false);
+              setSelectedRowKeys([]);
+            }}
+          >
+            닫기
+          </Button>,
+          <Button key="submit" type="primary" onClick={handleOK}>
+            저장
+          </Button>,
+        ]}
       >
-        <Button>{selectedBranch?.branch_name || "지점 선택"}</Button>
-      </Popover>
-    </div>
+        {/* <SearchForm /> */}
+        <Table
+          size="small"
+          rowSelection={rowSelection}
+          columns={columns}
+          dataSource={providers}
+          loading={loading}
+          pagination={{ pageSize: 10 }}
+        />
+      </Modal>
+    </>
   );
 };
+const SearchForm = () => {
+  const [form] = Form.useForm();
 
-export default SearchBranch;
+  const onFinish = (values) => {
+    console.log("Success:", values);
+  };
+  return <div>검색 폼</div>;
+};
+
+export default SelectBranch;

@@ -15,8 +15,8 @@ import {
   Cascader,
 } from "antd";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
-import SelectBranch from "../../components/selectbranch";
 import SelectProvider from "../../components/selectprovider";
+import SelectBranch from "../../components/selectbranch";
 
 const Account = () => {
   const [accounts, setAccounts] = useState([]);
