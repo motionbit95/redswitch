@@ -38,6 +38,9 @@ const Material = () => {
   const [categories, setCategories] = useState([]);
   const [filteredInfo, setFilteredInfo] = useState({});
   const [sortedInfo, setSortedInfo] = useState({});
+  const usedCodes = [
+    ...new Set(materialList.map((item) => item.product_category_code)),
+  ];
 
   useEffect(() => {
     if (selectedProvider) {
@@ -97,22 +100,22 @@ const Material = () => {
 
   const onUpdateProductFinish = async (values) => {
     console.log(values);
-    // try {
-    //   const response = await AxiosPut(
-    //     `/products/materials/${values.pk}`,
-    //     values
-    //   );
-    //   if (response.status === 200) {
-    //     message.success("상품 수정 성공");
-    //     handleSearchMaterials();
-    //   } else {
-    //     message.error("상품 수정 실패");
-    //   }
-    // } catch (error) {
-    //   message.error("상품 수정 중 오류가 발생했습니다.");
-    // } finally {
-    //   setEditModalOpen(false);
-    // }
+    try {
+      const response = await AxiosPut(
+        `/products/materials/${values.pk}`,
+        values
+      );
+      if (response.status === 200) {
+        message.success("상품 수정 성공");
+        handleSearchMaterials();
+      } else {
+        message.error("상품 수정 실패");
+      }
+    } catch (error) {
+      message.error("상품 수정 중 오류가 발생했습니다.");
+    } finally {
+      setEditModalOpen(false);
+    }
   };
 
   const [pagination, setPagination] = useState({
@@ -201,7 +204,7 @@ const Material = () => {
           )}
         </Space>
         <Space>
-          <ProductCategory materialList={materialList} />
+          <ProductCategory usedCodes={usedCodes} />
           <Addproduct
             isSelected={isSelected}
             selectedProvider={selectedProvider}

@@ -17,11 +17,8 @@ const Addproduct = ({
       const response = await AxiosPost("/products/materials", {
         ...values,
         provider_id: selectedProvider.id,
-        product_name: values.product_name,
-        product_sale: values.product_sale,
         provider_name: selectedProvider.provider_name,
         provider_code: selectedProvider.provider_code,
-        product_category_code: values.product_category_code,
       });
       if (response.status === 201) {
         message.success("상품 추가 성공");
