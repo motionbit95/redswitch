@@ -271,22 +271,6 @@ function Branch(props) {
 
       console.log(branchData);
 
-      try {
-        if (
-          values.contract_image &&
-          values.contract_image.fileList.length > 0
-        ) {
-          const file = values.contract_image.fileList[0].originFileObj;
-
-          const fileUploadResponse = await uploadFile(file);
-          const fileUrl = fileUploadResponse.data.url;
-
-          branchData.contract_image = fileUrl;
-        }
-      } catch (error) {
-        branchData.contract_image = currentBranch?.contract_image;
-      }
-
       if (currentBranch) {
         console.log(branchData);
         await AxiosPut(`/branches/${currentBranch.id}`, branchData, {
@@ -317,18 +301,6 @@ function Branch(props) {
       console.log(error);
       message.error("지점 처리 실패");
     }
-  };
-
-  // Helper function to upload the file and get URL
-  const uploadFile = async (file) => {
-    const fileData = new FormData();
-    fileData.append("file", file);
-
-    console.log(fileData);
-
-    return await AxiosPost("/upload", fileData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
   };
 
   const columns = [

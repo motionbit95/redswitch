@@ -297,7 +297,10 @@ const Material = () => {
             </Col>
             <Col span={12}>
               <Form.Item name="original_image" label="상품이미지">
-                <FileUpload />
+                <FileUpload
+                  url={form.getFieldValue("original_image")}
+                  setUrl={(url) => form.setFieldsValue({ original_image: url })}
+                />
               </Form.Item>
             </Col>
           </Row>

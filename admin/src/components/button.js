@@ -48,7 +48,6 @@ const FileUpload = (props) => {
         );
         console.log("파일 업로드 성공:", response.data);
         setUrl(response.data.url);
-        console.log(response.data.url);
         setFileList([
           {
             uid: "-1",
