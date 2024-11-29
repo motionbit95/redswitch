@@ -3,6 +3,7 @@ import {
   Col,
   DatePicker,
   Form,
+  Image,
   Input,
   Modal,
   Popconfirm,
@@ -143,6 +144,33 @@ const Material = () => {
         (pagination.current - 1) * pagination.pageSize + index + 1,
       fixed: "left",
       width: 50,
+    },
+    {
+      title: "상품 이미지",
+      dataIndex: "original_image",
+      key: "original_image",
+
+      render: (text) => {
+        return (
+          <>
+            {text ? (
+              <Image
+                src={text}
+                alt="product"
+                style={{ width: "40px", height: "40px" }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  backgroundColor: "#f1f1f1",
+                }}
+              ></div>
+            )}
+          </>
+        );
+      },
     },
     {
       title: "상품명",

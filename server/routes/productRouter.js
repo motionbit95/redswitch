@@ -1492,25 +1492,58 @@ router.post("/", async (req, res) => {
       branch_id,
       product_name,
       product_price,
-      product_image,
+      material_id,
     } = req.body;
 
     if (
+      !material_id ||
       !product_code ||
       !branch_id ||
       !product_name ||
-      !product_price ||
-      !product_image
+      !product_price
     ) {
       return res.status(400).json({ message: "필수 필드가 누락되었습니다." });
     }
 
     const product = new Product(req.body);
     const createdProduct = await product.create();
+    console.log("createdProduct: ", createdProduct);
     res.status(201).json(createdProduct);
   } catch (error) {
     console.error("상품 생성 오류:", error);
     res.status(500).json({ message: "상품 생성 실패", error: error.message });
+  }
+});
+
+// Get all products
+/**
+ * @swagger
+ * /products/search/{branch_id}:
+ *   get:
+ *     summary: 모든 상품 정보를 조회합니다.
+ *     description: 주어진 branch_id로 모든 상품 정보를 조회합니다.
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: branch_id
+ *         required: true
+ *         description: 지점 고유 ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 상품 리스트 조회 성공
+ *       500:
+ *         description: 서버 오류
+ */
+router.get("/search/:branch_id", async (req, res) => {
+  try {
+    const { branch_id } = req.params;
+    const products = await Product.searchByBranchId(branch_id);
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("상품 조회 오류:", error);
+    res.status(500).json({ message: "상품 조회 실패", error: error.message });
   }
 });
 

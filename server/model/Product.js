@@ -9,6 +9,30 @@ const orderingHistoryRef = database.ref("ordering_history"); // 'ordering_histor
 const orderingProductRef = database.ref("ordering_product"); // 'ordering_product' 경로 참조
 const inventoryRef = database.ref("inventory"); // 'inventory' 경로 참조
 
+async function generateUniqueIndex(ref) {
+  const snapshot = await ref.orderByKey().limitToLast(1).once("value");
+  const lastItem = snapshot.val();
+  console.log("lastItem: ", lastItem);
+
+  let newIndex = "00001"; // 기본값
+  if (lastItem) {
+    const lastKey = Object.keys(lastItem)[0]; // 마지막 키 가져오기
+    console.log("lastKey:", lastKey);
+    const lastIndex = parseInt(lastKey, 10); // 숫자로 변환
+
+    if (!isNaN(lastIndex)) {
+      // 키가 숫자라면 인덱스 생성
+      newIndex = (lastIndex + 1).toString().padStart(5, "0");
+    } else {
+      console.warn("Invalid key format:", lastKey);
+    }
+  } else {
+    console.log("No existing data found. Using default index.");
+  }
+
+  return newIndex;
+}
+
 class Category {
   constructor(data) {
     this.pk = data.pk || null; // 데이터베이스에서 자동 생성됨
@@ -150,35 +174,20 @@ class Material {
     };
   }
 
-  // Create a new material
+  // main class의 create 메서드
   async create() {
     try {
-      // Firebase에서 마지막 키를 가져오기
-      const materialsSnapshot = await materialsRef
-        .orderByKey()
-        .limitToLast(1)
-        .once("value");
-
-      const lastMaterial = materialsSnapshot.val();
-
-      // 마지막 인덱스 계산
-      let newIndex = "00001"; // 기본값
-      if (lastMaterial) {
-        const lastKey = Object.keys(lastMaterial)[0]; // 마지막 키 가져오기
-        const lastIndex = parseInt(lastKey, 10); // 숫자로 변환
-        if (!isNaN(lastIndex)) {
-          newIndex = (lastIndex + 1).toString().padStart(5, "0"); // 5자리 포매팅
-        }
-      }
+      // 고유 인덱스 생성
+      const newIndex = await generateUniqueIndex(materialsRef);
 
       console.log("생성된 상품 인덱스:", newIndex);
 
       // product_code 생성
       this.product_code = `${this.provider_code}${this.product_category_code}${newIndex}`;
 
-      // 새로운 데이터 저장 (숫자 키 사용)
+      // 새로운 데이터 저장
       await materialsRef.child(newIndex).set(this.toJSON());
-      this.pk = newIndex; // pk로 키 값을 저장
+      this.pk = newIndex;
 
       return this;
     } catch (error) {
@@ -296,31 +305,38 @@ class Material {
 class Product {
   constructor(data) {
     this.PK = data.PK || null; // 데이터베이스에서 자동 생성됨
+    this.material_id = data.material_id;
     this.product_code = data.product_code;
     this.branch_id = data.branch_id;
     this.product_name = data.product_name;
     this.product_price = data.product_price || 0;
-    this.product_image = data.product_image;
+    this.product_detail = data.product_detail; // 상품 상세
     this.blurred_image = data.blurred_image || null;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || null;
+    this.related_products = data.related_products || [];
+    this.additional_fee = data.additional_fee || 0;
   }
 
   toJSON() {
     return {
+      material_id: this.material_id,
       product_code: this.product_code,
       branch_id: this.branch_id,
       product_name: this.product_name,
       product_price: this.product_price,
-      product_image: this.product_image,
+      product_detail: this.product_detail,
       blurred_image: this.blurred_image,
       created_at: this.created_at,
       updated_at: this.updated_at,
+      related_products: this.related_products,
+      additional_fee: this.additional_fee,
     };
   }
 
   // Create a new product
   async create() {
+    console.log("this.toJSON(): ", this.toJSON());
     try {
       const newProductRef = await productsRef.push(this.toJSON());
       this.PK = newProductRef.key;
@@ -403,6 +419,27 @@ class Product {
     } catch (error) {
       console.error("Error deleting product:", error);
       throw new Error("Failed to delete product");
+    }
+  }
+
+  // search products by branch_id
+  static async searchByBranchId(branch_id) {
+    try {
+      const snapshot = await productsRef
+        .orderByChild("branch_id")
+        .equalTo(branch_id)
+        .once("value");
+      if (!snapshot.exists()) {
+        return [];
+      }
+      const products = [];
+      snapshot.forEach((child) => {
+        products.push({ PK: child.key, ...child.val() });
+      });
+      return products;
+    } catch (error) {
+      console.error("Error searching products by branch_id:", error);
+      throw new Error("Failed to search products by branch_id");
     }
   }
 }
