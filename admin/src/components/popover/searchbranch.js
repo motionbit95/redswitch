@@ -1,9 +1,13 @@
 import { Button, Popover, Table, Form, Input, message, Space } from "antd";
 import React, { useEffect, useState } from "react";
-import { AxiosGet } from "../api";
-import useSearchFilter from "../hook/useSearchFilter";
+import { AxiosGet } from "../../api";
+import useSearchFilter from "../../hook/useSearchFilter";
 
-const SearchBranch = ({ selectedBranch, setSelectedBranch }) => {
+const SearchBranch = ({
+  selectedBranch,
+  setSelectedBranch,
+  multiple = false,
+}) => {
   const [form] = Form.useForm();
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,18 +38,25 @@ const SearchBranch = ({ selectedBranch, setSelectedBranch }) => {
 
   const handleOK = () => {
     if (!selectedRowKeys.length) {
-      message.warning("지점를 선택해주세요.");
+      message.warning("지점을 선택해주세요.");
       return;
     }
 
-    const branch = branches.find((item) => item.key === selectedRowKeys[0]);
-    if (!branch) {
-      message.error("잘못된 지점가 선택되었습니다.");
+    // selectedRowKeys에 있는 key 값들로 branches에서 해당하는 항목을 찾기
+    const selectedBranches = branches.filter((branch) =>
+      selectedRowKeys.includes(branch.key)
+    );
+
+    // 만약 selectedBranches가 비어있다면 잘못된 지점이 선택된 경우
+    if (selectedBranches.length === 0) {
+      message.error("잘못된 지점이 선택되었습니다.");
       return;
     }
 
-    setSelectedBranch(branch);
-    setPopoverVisible(false);
+    // console.log(selectedBranches); // selectedBranches는 선택된 지점들의 배열입니다.
+    setSelectedBranch(selectedBranches); // 상태를 업데이트할 때 전체 배열로 설정
+
+    setPopoverVisible(false); // 팝오버 닫기
   };
 
   const columns = [
@@ -84,7 +95,7 @@ const SearchBranch = ({ selectedBranch, setSelectedBranch }) => {
   };
 
   const rowSelection = {
-    type: "radio",
+    type: multiple ? "checkbox" : "radio",
     selectedRowKeys,
     onChange: onSelectChange,
   };

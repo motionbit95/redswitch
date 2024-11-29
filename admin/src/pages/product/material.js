@@ -15,7 +15,7 @@ import {
   theme,
 } from "antd";
 import React, { useEffect, useState } from "react";
-import Searchprovider from "../../components/searchprovider";
+import Searchprovider from "../../components/popover/searchprovider";
 import Addproduct from "../../components/material/product_add";
 import ProductCategory from "../../components/material/product_category";
 import { AxiosDelete, AxiosGet, AxiosPut } from "../../api";
@@ -195,14 +195,11 @@ const Material = () => {
         <Space>
           <Searchprovider
             selectedProvider={selectedProvider}
-            setSelectedProvider={setSelectedProvider}
-            setisSelectedProvider={setIsSelected}
+            setSelectedProvider={(providers) => {
+              setSelectedProvider(providers[0]);
+            }}
+            multiple={false}
           />
-          {/* {selectedProvider && (
-            <>
-              <Button>{selectedProvider?.provider_name}</Button>
-            </>
-          )} */}
         </Space>
         <Space>
           <ProductCategory usedCodes={usedCodes} />

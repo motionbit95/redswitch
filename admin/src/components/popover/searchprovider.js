@@ -1,12 +1,12 @@
 import { Button, Popover, Table, Form, Input, message, Space } from "antd";
 import React, { useEffect, useState } from "react";
-import { AxiosGet } from "../api";
-import useSearchFilter from "../hook/useSearchFilter";
+import { AxiosGet } from "../../api";
+import useSearchFilter from "../../hook/useSearchFilter";
 
 const SearchProvider = ({
   selectedProvider,
   setSelectedProvider,
-  setisSelectedProvider,
+  multiple = false,
 }) => {
   const [form] = Form.useForm();
   const [providers, setProviders] = useState([]);
@@ -42,15 +42,21 @@ const SearchProvider = ({
       return;
     }
 
-    const provider = providers.find((item) => item.key === selectedRowKeys[0]);
-    if (!provider) {
+    // selectedRowKeys에 있는 key 값들로 providers에서 해당하는 항목을 찾기
+    const selectedProviders = providers.filter((provider) =>
+      selectedRowKeys.includes(provider.key)
+    );
+
+    // 만약 selectedProviders가 비어있다면 잘못된 거래처가 선택된 경우
+    if (selectedProviders.length === 0) {
       message.error("잘못된 거래처가 선택되었습니다.");
       return;
     }
 
-    setSelectedProvider(provider);
-    setisSelectedProvider(true);
-    setPopoverVisible(false);
+    // 선택된 거래처들을 상태에 저장
+    setSelectedProvider(selectedProviders); // 상태를 전체 배열로 설정
+
+    setPopoverVisible(false); // 팝오버 닫기
   };
 
   const columns = [
@@ -95,7 +101,7 @@ const SearchProvider = ({
   };
 
   const rowSelection = {
-    type: "radio",
+    type: multiple ? "checkbox" : "radio",
     selectedRowKeys,
     onChange: onSelectChange,
   };
