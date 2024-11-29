@@ -7,6 +7,7 @@ import {
   Modal,
   Popconfirm,
   Row,
+  Select,
   Space,
   Table,
   Tag,
@@ -52,7 +53,7 @@ const BranchModal = ({
         onFinish={onSubmit}
       >
         <Row gutter={16}>
-          <Col span={20}>
+          <Col span={18}>
             <Form.Item
               name="branch_name"
               label="지점명"
@@ -61,10 +62,12 @@ const BranchModal = ({
               <Input />
             </Form.Item>
           </Col>
-          <Col span={4}>
+          <Col span={6}>
             <Form.Item name="install_flag" label="설치여부">
-              <Input />
-              {/* <Checkbox /> */}
+              <Select>
+                <Select.Option value="0">미설치</Select.Option>
+                <Select.Option value="1">설치완료</Select.Option>
+              </Select>
             </Form.Item>
           </Col>
         </Row>

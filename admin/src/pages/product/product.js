@@ -25,6 +25,11 @@ const ProductCRUD = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [form] = Form.useForm();
+  const [selectedBranch, setSelectedBranch] = useState(
+    localStorage.getItem("selectedBranch")
+      ? JSON.parse(localStorage.getItem("selectedBranch"))
+      : null
+  );
 
   // 상품 목록 불러오기
   const fetchProducts = async () => {
@@ -131,7 +136,10 @@ const ProductCRUD = () => {
           marginBottom: 16,
         }}
       >
-        <SelectBranch setSelectedBranch={(branch) => console.log(branch)} />
+        <SelectBranch
+          selectedBranch={selectedBranch}
+          setSelectedBranch={setSelectedBranch}
+        />
         <Button
           type="primary"
           icon={<PlusOutlined />}
