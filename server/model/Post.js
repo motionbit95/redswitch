@@ -149,7 +149,7 @@ class Franchise {
     this.franchise_manager_phone = data.franchise_manager_phone; // 전화번호
     this.franchise_manager_email = data.franchise_manager_email; // 이메일
     this.flag = data.flag || "0"; // 상태: 상담요청, 상담완료, 계약완료, 설치완료
-    this.sales_manager = data.sales_manager; // 영업담당자
+    this.sales_manager = data.sales_manager || null; // 영업담당자
     this.memo = data.memo || null; // 비고
     this.created_at = data.created_at || new Date().toISOString(); // 생성일
     this.updated_at = data.updated_at || null; // 수정일
