@@ -13,10 +13,15 @@ import {
   Col,
   Tag,
   Cascader,
+  Typography,
+  Tooltip,
 } from "antd";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
-import SelectProvider from "../../components/selectprovider";
-import SelectBranch from "../../components/selectbranch";
+import SearchBranch from "../../components/popover/searchbranch";
+import SearchProvider from "../../components/popover/searchprovider";
+import { InfoCircleOutlined } from "@ant-design/icons";
+
+const { Option } = Select;
 
 const Account = () => {
   const [accounts, setAccounts] = useState([]);
@@ -67,7 +72,7 @@ const Account = () => {
   // Handle form submit for account update
   const handleUpdate = async (values) => {
     const provider_id = selectedProvider.map((provider) => provider.id);
-    const branch_id = selectedBranch.map((branch) => branch.id);
+    const branch_id = selectedBranch?.map((branch) => branch.id);
     console.log(provider_id, branch_id);
     try {
       await AxiosPut(`/accounts/${currentAccount.id}`, {
@@ -99,7 +104,7 @@ const Account = () => {
   const handleAdd = async (values) => {
     console.log(values.provider_id);
     const provider_id = selectedProvider.map((provider) => provider.id);
-    const branch_id = selectedBranch.map((branch) => branch.id);
+    const branch_id = selectedBranch?.map((branch) => branch.id);
     try {
       // 서버로부터 데이터 추가 후 응답 받기
       const response = await AxiosPost("/accounts", {
@@ -224,7 +229,6 @@ const Account = () => {
       >
         계정 추가
       </Button>
-
       <Table
         size="small"
         columns={columns}
@@ -233,23 +237,22 @@ const Account = () => {
         loading={loading}
         pagination={{ pageSize: 10 }}
       />
-
-      {/* Edit Modal */}
       <Modal
-        title="계정 수정"
-        visible={isEditModalVisible}
+        title={isEditModalVisible ? "계정 수정" : "계정 추가"}
+        visible={isAddModalVisible || isEditModalVisible}
+        centered
         onCancel={() => {
+          setIsAddModalVisible(false);
           setIsEditModalVisible(false);
-          form.resetFields();
+          form.resetFields(); // 폼 데이터 초기화
         }}
         footer={null}
-        centered
       >
         <Form
           form={form}
           layout="vertical"
-          initialValues={currentAccount}
-          onFinish={handleUpdate}
+          initialValues={isEditModalVisible ? currentAccount : {}} // 수정 모드일 경우 currentAccount, 추가 모드일 경우 빈 객체
+          onFinish={isEditModalVisible ? handleUpdate : handleAdd} // 처리 함수는 수정/추가에 따라 다름
         >
           <Form.Item
             name="permission"
@@ -260,9 +263,9 @@ const Account = () => {
               <Select.Option value="1">본사관리자</Select.Option>
               <Select.Option value="2">지사관리자</Select.Option>
               <Select.Option value="3">지점관리자</Select.Option>
-              {/* <Select.Option value="4">거래처</Select.Option> */}
             </Select>
           </Form.Item>
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -283,6 +286,7 @@ const Account = () => {
               </Form.Item>
             </Col>
           </Row>
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -303,6 +307,7 @@ const Account = () => {
               </Form.Item>
             </Col>
           </Row>
+
           <Form.Item
             name="user_email"
             label="이메일"
@@ -311,173 +316,62 @@ const Account = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item name="branch_id" label="지점 선택">
-            {selectedBranch.map((branch, index) => (
-              <Tag
-                key={branch.id}
-                color={
-                  index % 3 === 0 ? "red" : index % 3 === 1 ? "blue" : "green"
-                }
-                closable
-                onClose={() => handleCloseBranch(branch.branch_name)}
-              >
-                {branch.branch_name}
-              </Tag>
-            ))}
-            <SelectBranch
-              selectedBranch={selectedBranch}
-              setSelectedBranch={setSelectedBranch}
-            />
-          </Form.Item>
-
-          <Form.Item name="provider_id" label="거래처 선택">
-            {selectedProvider.map((provider, index) => (
-              <Tag
-                key={provider.provider_name}
-                color={
-                  index % 3 === 0 ? "red" : index % 3 === 1 ? "blue" : "green"
-                }
-                closable
-                onClose={() => handleCloseProvider(provider.provider_name)}
-              >
-                {provider.provider_name}
-              </Tag>
-            ))}
-            <SelectProvider
-              selectedProvider={selectedProvider}
-              setSelectedProvider={setSelectedProvider}
-            />
-          </Form.Item>
-
           <Form.Item name="office_position" label="직급">
             <Input />
+          </Form.Item>
+
+          {/* Branch 선택 */}
+          <Form.Item name="branch_id" label="지점 선택">
+            <div style={{ marginTop: 10 }}>
+              {selectedBranch.map((branch, index) => (
+                <Tag
+                  style={{ marginRight: 8, marginBottom: 8 }} // 간격 추가
+                  key={branch.branch_name}
+                  color={
+                    index % 3 === 0 ? "red" : index % 3 === 1 ? "blue" : "green"
+                  }
+                  closable
+                  onClose={() => handleCloseBranch(branch.branch_name)}
+                >
+                  {branch.branch_name}
+                </Tag>
+              ))}
+            </div>
+            <SearchBranch
+              selectedBranch={selectedBranch}
+              setSelectedBranch={setSelectedBranch}
+              multiple={true}
+            />
+          </Form.Item>
+
+          {/* Provider 선택 */}
+          <Form.Item name="provider_id" label="거래처 선택">
+            <div style={{ marginTop: 10 }}>
+              {selectedProvider.map((provider, index) => (
+                <Tag
+                  style={{ marginRight: 8, marginBottom: 8 }} // 간격 추가
+                  key={provider.provider_name}
+                  color={
+                    index % 3 === 0 ? "red" : index % 3 === 1 ? "blue" : "green"
+                  }
+                  closable
+                  onClose={() => handleCloseProvider(provider.provider_name)}
+                >
+                  {provider.provider_name}
+                </Tag>
+              ))}
+            </div>
+            <SearchProvider
+              selectedProvider={selectedProvider}
+              setSelectedProvider={setSelectedProvider}
+              multiple={true}
+            />
           </Form.Item>
 
           <div style={{ display: "flex", justifyContent: "right" }}>
             <Form.Item>
               <Button type="primary" htmlType="submit">
-                수정 완료
-              </Button>
-            </Form.Item>
-          </div>
-        </Form>
-      </Modal>
-
-      {/* Add Modal */}
-      <Modal
-        title="계정 추가"
-        visible={isAddModalVisible}
-        centered
-        onCancel={() => setIsAddModalVisible(false)}
-        footer={null}
-      >
-        <Form form={form} layout="vertical" onFinish={handleAdd}>
-          <Form.Item
-            name="permission"
-            label="권한"
-            rules={[{ required: true, message: "Permission을 선택해주세요" }]}
-          >
-            <Select>
-              <Select.Option value="1">본사관리자</Select.Option>
-              <Select.Option value="2">지사관리자</Select.Option>
-              <Select.Option value="3">지점관리자</Select.Option>
-              {/* <Select.Option value="4">거래처</Select.Option> */}
-            </Select>
-          </Form.Item>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="user_id"
-                label="ID"
-                rules={[{ required: true, message: "ID를 입력해주세요" }]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="user_password"
-                label="패스워드"
-                rules={[{ required: true, message: "패스워드를 입력해주세요" }]}
-              >
-                <Input.Password />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="user_name"
-                label="이름"
-                rules={[{ required: true, message: "이름을 입력해주세요" }]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="user_phone"
-                label="전화번호"
-                rules={[{ required: true, message: "전화번호를 입력해주세요" }]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item
-            name="user_email"
-            label="이메일"
-            rules={[{ required: true, message: "이메일을 입력해주세요" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="branch_id" label="지점 선택">
-            {selectedBranch.map((branch, index) => (
-              <Tag
-                key={branch.branch_name}
-                color={
-                  index % 3 === 0 ? "red" : index % 3 === 1 ? "blue" : "green"
-                }
-                closable
-                onClose={() => handleCloseBranch(branch.branch_name)}
-              >
-                {branch.branch_name}
-              </Tag>
-            ))}
-            <SelectBranch
-              selectedBranch={selectedBranch}
-              setSelectedBranch={setSelectedBranch}
-            />
-          </Form.Item>
-
-          <Form.Item name="provider_id" label="거래처 선택">
-            {selectedProvider.map((provider, index) => (
-              <Tag
-                key={provider.provider_name}
-                color={
-                  index % 3 === 0 ? "red" : index % 3 === 1 ? "blue" : "green"
-                }
-                closable
-                onClose={() => handleCloseProvider(provider.provider_name)}
-              >
-                {provider.provider_name}
-              </Tag>
-            ))}
-            <SelectProvider
-              selectedProvider={selectedProvider}
-              setSelectedProvider={setSelectedProvider}
-            />
-          </Form.Item>
-
-          <Form.Item name="office_position" label="직급">
-            <Input />
-          </Form.Item>
-
-          <div style={{ display: "flex", justifyContent: "right" }}>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                추가 완료
+                {isEditModalVisible ? "수정 완료" : "추가 완료"}
               </Button>
             </Form.Item>
           </div>

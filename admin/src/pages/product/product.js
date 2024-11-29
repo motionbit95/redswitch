@@ -18,7 +18,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
-import SelectBranch from "../../components/searchbranch";
+import SearchBranch from "../../components/popover/searchbranch";
 
 const ProductCRUD = () => {
   const [products, setProducts] = useState([]);
@@ -136,9 +136,10 @@ const ProductCRUD = () => {
           marginBottom: 16,
         }}
       >
-        <SelectBranch
+        <SearchBranch
           selectedBranch={selectedBranch}
-          setSelectedBranch={setSelectedBranch}
+          setSelectedBranch={(branches) => setSelectedBranch(branches[0])}
+          multiple={false}
         />
         <Button
           type="primary"
