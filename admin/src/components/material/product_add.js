@@ -2,6 +2,7 @@ import { Button, Col, Form, Input, Modal, Row, Select, message } from "antd";
 import React, { useEffect, useState } from "react";
 import FileUpload from "../button";
 import { AxiosGet, AxiosPost } from "../../api";
+import { PlusOutlined } from "@ant-design/icons";
 
 const Addproduct = ({
   selectedProvider,
@@ -44,6 +45,7 @@ const Addproduct = ({
         type="primary"
         disabled={!selectedProvider}
         onClick={() => setIsModalOpen(true)}
+        icon={<PlusOutlined />}
       >
         상품 추가
       </Button>
@@ -61,32 +63,42 @@ const Addproduct = ({
               setIsModalOpen(false);
             }}
           >
-            Cancel
+            취소
           </Button>,
           <Button key="submit" type="primary" onClick={() => form.submit()}>
-            Add
+            추가
           </Button>,
         ]}
       >
         <Form form={form} layout="vertical" onFinish={handleAddProduct}>
-          <Form.Item label="거래처명">
-            <Input value={selectedProvider?.provider_name} disabled />
+          <Form.Item
+            label="거래처명"
+            tooltip={"현재 관리중인 거래처명이 표시됩니다."}
+          >
+            <Input value={selectedProvider?.provider_name} readOnly />
           </Form.Item>
 
-          <Form.Item
-            name="product_name"
-            label="상품명"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="product_sale"
-            label="원가"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="product_name"
+                label="상품명"
+                rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="product_sale"
+                label="원가"
+                tooltip={"상품 매입 금액을 입력해주세요."}
+                rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item

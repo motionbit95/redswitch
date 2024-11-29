@@ -1,45 +1,38 @@
-import {
-  Button,
-  Cascader,
-  Col,
-  Form,
-  Input,
-  Modal,
-  Popconfirm,
-  Row,
-  Select,
-  Space,
-  Table,
-  message,
-} from "antd";
+import { Button, Popover, Table, Form, Input, message, Space } from "antd";
 import React, { useEffect, useState } from "react";
 import { AxiosGet } from "../api";
+import useSearchFilter from "../hook/useSearchFilter";
 
-const Searchprovider = ({
+const SearchProvider = ({
   selectedProvider,
   setSelectedProvider,
   setisSelectedProvider,
-  onComplete,
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
-
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [popoverVisible, setPopoverVisible] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+  const { getColumnSearchProps } = useSearchFilter();
 
   useEffect(() => {
     fetchProviders();
   }, []);
 
-  const fetchProviders = async () => {
+  const fetchProviders = async (search = "") => {
     try {
       const response = await AxiosGet("/providers"); // Replace with your endpoint
-      setProviders(response.data.map((item) => ({ key: item.id, ...item })));
+      setProviders(
+        response.data
+          .map((item) => item)
+          .filter((item) => item.provider_name.includes(search))
+          .map((item) => ({ key: item.id, ...item }))
+      );
     } catch (error) {
-      message.error("거래처 데이터를 가져오는 데 실패함.");
+      message.error("거래처 데이터를 가져오는 데 실패했습니다.");
     } finally {
       setLoading(false);
-      console.log(providers);
     }
   };
 
@@ -57,8 +50,7 @@ const Searchprovider = ({
 
     setSelectedProvider(provider);
     setisSelectedProvider(true);
-    setIsModalOpen(false);
-    onComplete();
+    setPopoverVisible(false);
   };
 
   const columns = [
@@ -68,14 +60,28 @@ const Searchprovider = ({
       key: "provider_name",
     },
     {
+      title: "시/도",
+      dataIndex: "provider_sido",
+      key: "provider_sido",
+      ...getColumnSearchProps("provider_sido"),
+    },
+    {
+      title: "시/군/구",
+      dataIndex: "provider_sigungu",
+      key: "provider_sigungu",
+      ...getColumnSearchProps("provider_sigungu"),
+    },
+    {
       title: "거래처코드",
       dataIndex: "provider_code",
       key: "provider_code",
+      ...getColumnSearchProps("provider_code"),
     },
     {
       title: "담당자",
       dataIndex: "provider_manager_name",
       key: "provider_manager_name",
+      ...getColumnSearchProps("provider_manager_name"),
     },
     {
       title: "담당자 전화번호",
@@ -84,11 +90,8 @@ const Searchprovider = ({
     },
   ];
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
   const onSelectChange = (newSelectedRowKeys) => {
     setSelectedRowKeys(newSelectedRowKeys);
-    setSelectedProvider(providers.find((c) => c.key === newSelectedRowKeys[0]));
   };
 
   const rowSelection = {
@@ -96,50 +99,61 @@ const Searchprovider = ({
     selectedRowKeys,
     onChange: onSelectChange,
   };
-  const hasSelected = selectedRowKeys.length > 0;
+
+  const searchProviders = (value) => {
+    fetchProviders(value.search);
+  };
+
+  const content = (
+    <div style={{ width: 700 }}>
+      <Form
+        form={form}
+        layout="inline"
+        style={{ marginBottom: 16 }}
+        onFinish={searchProviders}
+      >
+        <Form.Item name="search" label="검색">
+          <Input
+            placeholder="거래처명을 검색하세요"
+            allowClear
+            style={{ width: 200 }}
+          />
+        </Form.Item>
+        <Button type="primary" onClick={() => form.submit()}>
+          검색
+        </Button>
+      </Form>
+      <Table
+        size="small"
+        rowSelection={rowSelection}
+        columns={columns}
+        dataSource={providers}
+        loading={loading}
+        pagination={{ pageSize: 5 }}
+      />
+      <Space style={{ marginTop: 16 }}>
+        <Button onClick={() => setPopoverVisible(false)}>닫기</Button>
+        <Button type="primary" onClick={handleOK}>
+          선택
+        </Button>
+      </Space>
+    </div>
+  );
 
   return (
-    <>
-      <Button onClick={() => setIsModalOpen(true)}>거래처 선택</Button>
-
-      <Modal
-        title="거래처 검색"
-        centered
-        visible={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        footer={[
-          <Button key="back" onClick={() => setIsModalOpen(false)}>
-            닫기
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={() => handleOK(selectedRowKeys[0])}
-          >
-            선택
-          </Button>,
-        ]}
+    <div style={{ textAlign: "left" }}>
+      <Popover
+        content={content}
+        title="거래처를 선택해주세요."
+        trigger="click"
+        visible={popoverVisible}
+        onVisibleChange={setPopoverVisible}
+        placement="bottomLeft" // 버튼 아래 왼쪽 정렬
       >
-        <SearchForm />
-        <Table
-          size="small"
-          rowSelection={rowSelection}
-          columns={columns}
-          dataSource={providers}
-          loading={loading}
-          pagination={{ pageSize: 10 }}
-        />
-      </Modal>
-    </>
+        <Button>{selectedProvider?.provider_name || "거래처 선택"}</Button>
+      </Popover>
+    </div>
   );
 };
-const SearchForm = () => {
-  const [form] = Form.useForm();
 
-  const onFinish = (values) => {
-    console.log("Success:", values);
-  };
-  return <div>검색 폼</div>;
-};
-
-export default Searchprovider;
+export default SearchProvider;

@@ -3,7 +3,7 @@ import {
   Drawer,
   Form,
   Input,
-  Modal,
+  Popover,
   Popconfirm,
   Space,
   Table,
@@ -15,10 +15,10 @@ import dayjs from "dayjs";
 
 const ProductCategory = ({ materialList }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // 추가 or 수정 모드
+  const [isEditingRowKey, setIsEditingRowKey] = useState(null); // 현재 수정 중인 row의 key
   const [form] = Form.useForm();
 
+  const [isAddPopoverVisible, setAddPopoverVisible] = useState(false); // 추가 팝오버
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,11 +38,9 @@ const ProductCategory = ({ materialList }) => {
   };
 
   const onFinish = async (values) => {
-    if (isEditing) {
-      // 수정 모드
+    if (isEditingRowKey) {
       onUpdateFinish(values);
     } else {
-      // 추가 모드
       onAddFinish(values);
     }
   };
@@ -59,7 +57,7 @@ const ProductCategory = ({ materialList }) => {
     } catch (error) {
       message.error("상품 카테고리와 코드가 필요합니다.");
     } finally {
-      closeModal();
+      closeAddPopover();
     }
   };
 
@@ -78,36 +76,33 @@ const ProductCategory = ({ materialList }) => {
     } catch (error) {
       message.error("카테고리 수정 중 오류가 발생했습니다.");
     } finally {
-      closeModal();
+      closeEditPopover();
     }
   };
 
-  const handleEdit = (category) => {
-    setIsEditing(true);
-    form.setFieldsValue(category);
-    setIsModalOpen(true);
-  };
-
   const handleAdd = () => {
-    setIsEditing(false);
     form.resetFields();
-    setIsModalOpen(true);
+    setAddPopoverVisible(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const handleEdit = (category) => {
+    form.setFieldsValue(category);
+    setIsEditingRowKey(category.pk); // 현재 수정 중인 row의 key 설정
+  };
+
+  const closeAddPopover = () => {
+    setAddPopoverVisible(false);
+    form.resetFields();
+  };
+
+  const closeEditPopover = () => {
+    setIsEditingRowKey(null);
     form.resetFields();
   };
 
   const handleDelete = async (category) => {
     const searchMaterialCode = materialList.map(
       (material) => material.product_category_code
-    );
-    console.log(
-      "Delete",
-      searchMaterialCode,
-      category.pk,
-      category.product_category_code
     );
     try {
       if (searchMaterialCode.includes(category.product_category_code)) {
@@ -150,7 +145,18 @@ const ProductCategory = ({ materialList }) => {
       key: "actions",
       render: (text, record) => (
         <Space>
-          <a onClick={() => handleEdit(record)}>수정</a>
+          <Popover
+            content={editPopoverContent(record)}
+            title="카테고리 수정"
+            trigger="click"
+            visible={isEditingRowKey === record.pk}
+            onVisibleChange={(visible) =>
+              visible ? handleEdit(record) : closeEditPopover()
+            }
+            placement="bottomRight"
+          >
+            <a>수정</a>
+          </Popover>
           <Popconfirm
             title="카테고리를 삭제하시겠습니까?"
             onConfirm={() => handleDelete(record)}
@@ -162,6 +168,67 @@ const ProductCategory = ({ materialList }) => {
     },
   ];
 
+  const addPopoverContent = (
+    <div style={{ width: 300 }}>
+      <Form form={form} onFinish={onFinish} layout="vertical">
+        <Form.Item
+          name="product_category"
+          label="카테고리명"
+          rules={[{ required: true, message: "카테고리명을 입력해주세요." }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="product_category_code"
+          label="카테고리 코드"
+          rules={[{ required: true, message: "카테고리 코드를 입력해주세요." }]}
+        >
+          <Input />
+        </Form.Item>
+        <div style={{ textAlign: "right", marginTop: 8 }}>
+          <Button style={{ marginRight: 8 }} onClick={closeAddPopover}>
+            취소
+          </Button>
+          <Button type="primary" htmlType="submit">
+            추가
+          </Button>
+        </div>
+      </Form>
+    </div>
+  );
+
+  const editPopoverContent = (record) => (
+    <div style={{ width: 300 }}>
+      <Form form={form} onFinish={onFinish} layout="vertical">
+        <Form.Item
+          name="product_category"
+          label="카테고리명"
+          rules={[{ required: true, message: "카테고리명을 입력해주세요." }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="product_category_code"
+          label="카테고리 코드"
+          rules={[{ required: true, message: "카테고리 코드를 입력해주세요." }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item name="pk" hidden>
+          <Input />
+        </Form.Item>
+        <div style={{ textAlign: "right", marginTop: 8 }}>
+          <Button style={{ marginRight: 8 }} onClick={closeEditPopover}>
+            취소
+          </Button>
+          <Button type="primary" htmlType="submit">
+            수정
+          </Button>
+        </div>
+      </Form>
+    </div>
+  );
+
   return (
     <>
       <Button onClick={() => setIsOpen(true)}>카테고리 설정</Button>
@@ -172,9 +239,20 @@ const ProductCategory = ({ materialList }) => {
         onClose={() => setIsOpen(false)}
         extra={
           <Space>
-            <Button key="submit" type="primary" onClick={handleAdd}>
-              추가
-            </Button>
+            <Popover
+              content={addPopoverContent}
+              title="카테고리 추가"
+              trigger="click"
+              visible={isAddPopoverVisible}
+              onVisibleChange={(visible) =>
+                visible ? handleAdd() : closeAddPopover()
+              }
+              placement="bottomLeft"
+            >
+              <Button key="submit" type="primary">
+                추가
+              </Button>
+            </Popover>
             <Button key="back" onClick={() => setIsOpen(false)}>
               닫기
             </Button>
@@ -190,37 +268,6 @@ const ProductCategory = ({ materialList }) => {
           pagination={{ pageSize: 10 }}
         />
       </Drawer>
-
-      <Modal
-        width={320}
-        visible={isModalOpen}
-        zIndex={1100}
-        onCancel={closeModal}
-        title={isEditing ? "카테고리 수정" : "카테고리 추가"}
-        centered
-        footer={[
-          <Button key="back" onClick={closeModal}>
-            취소
-          </Button>,
-          <Button key="submit" type="primary" onClick={() => form.submit()}>
-            {isEditing ? "수정" : "추가"}
-          </Button>,
-        ]}
-      >
-        <Form form={form} onFinish={onFinish} layout="vertical">
-          <Form.Item name="product_category" label="카테고리명">
-            <Input />
-          </Form.Item>
-          <Form.Item name="product_category_code" label="카테고리 코드">
-            <Input />
-          </Form.Item>
-          {isEditing && (
-            <Form.Item name="pk" hidden>
-              <Input />
-            </Form.Item>
-          )}
-        </Form>
-      </Modal>
     </>
   );
 };

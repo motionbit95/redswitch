@@ -10,6 +10,7 @@ import {
   Select,
   Space,
   Table,
+  Tag,
   message,
   theme,
 } from "antd";
@@ -40,6 +41,7 @@ const Material = () => {
   const [sortedInfo, setSortedInfo] = useState({});
 
   useEffect(() => {
+    // 개발시에만 넣음
     if (selectedProvider) {
       localStorage.setItem(
         "selectedProvider",
@@ -54,7 +56,6 @@ const Material = () => {
   }, [categories]);
 
   const handleSearchMaterials = async () => {
-    console.log(">>>>>>", selectedProvider.provider_name);
     try {
       const response = await AxiosGet(
         `/products/materials/search/${selectedProvider.id}`
@@ -190,15 +191,15 @@ const Material = () => {
       <Space style={{ width: "100%", justifyContent: "space-between" }}>
         <Space>
           <Searchprovider
+            selectedProvider={selectedProvider}
             setSelectedProvider={setSelectedProvider}
             setisSelectedProvider={setIsSelected}
-            onComplete={handleSearchMaterials}
           />
-          {selectedProvider && (
+          {/* {selectedProvider && (
             <>
-              <div>{selectedProvider?.provider_name}</div>
+              <Button>{selectedProvider?.provider_name}</Button>
             </>
-          )}
+          )} */}
         </Space>
         <Space>
           <ProductCategory materialList={materialList} />
