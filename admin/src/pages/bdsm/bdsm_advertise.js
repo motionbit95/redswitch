@@ -13,10 +13,14 @@ import {
   Modal,
   DatePicker,
   Upload,
+  Typography,
+  Image,
 } from "antd";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api"; // Axios 호출 함수
-import { UploadOutlined } from "@ant-design/icons";
+import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import dayjs from "dayjs"; // dayjs 임포트
+import FileUpload from "../../components/button";
+import { render } from "@testing-library/react";
 
 const BDSMAdvertisement = () => {
   const [loading, setLoading] = useState(false);
@@ -72,7 +76,7 @@ const BDSMAdvertisement = () => {
 
     try {
       const data = {
-        ...values,
+        ...form.getFieldsValue(),
         pk: selectedAd ? selectedAd.pk : null, // 수정 시 pk 값 추가
         created_at: selectedAd
           ? selectedAd.created_at
@@ -99,7 +103,27 @@ const BDSMAdvertisement = () => {
 
   const columns = [
     {
-      title: "광고사",
+      title: "No.",
+      render: (text, record, index) => index + 1,
+    },
+    {
+      title: "배너 이미지",
+      dataIndex: "banner_image",
+      key: "banner_image",
+      render: (text, record) => (
+        <>
+          {record.banner_image && (
+            <Image
+              src={record.banner_image}
+              alt="banner"
+              style={{ width: "100px", height: "auto" }}
+            />
+          )}
+        </>
+      ),
+    },
+    {
+      title: "광고주",
       dataIndex: "banner_advertiser",
       key: "banner_advertiser",
     },
@@ -109,10 +133,21 @@ const BDSMAdvertisement = () => {
       key: "banner_site",
     },
     {
-      title: "생성일",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
+      title: "광고개시일",
+      dataIndex: "active_datetime",
+      key: "active_datetime",
+      render: (text) => dayjs(text).format("YYYY-MM-DD"),
+    },
+    {
+      title: "잔여일수",
+      dataIndex: "expire_datetime",
+      key: "expire_datetime",
+      render: (text, record) => {
+        const expireDate = dayjs(text);
+        const now = dayjs();
+        const remainingDays = expireDate.diff(now, "days");
+        return remainingDays >= 0 ? `${remainingDays}` : "만료됨";
+      },
     },
     {
       title: "동작",
@@ -133,18 +168,17 @@ const BDSMAdvertisement = () => {
 
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button
-          type="primary"
-          onClick={() => {
-            setSelectedAd(null); // 광고 선택 초기화
-            form.resetFields(); // 폼 초기화
-            setIsModalVisible(true); // 모달 열기
-          }}
-        >
-          광고 생성
-        </Button>
-      </div>
+      <Button
+        type="primary"
+        onClick={() => {
+          setSelectedAd(null); // 광고 선택 초기화
+          form.resetFields(); // 폼 초기화
+          setIsModalVisible(true); // 모달 열기
+        }}
+        icon={<PlusOutlined />}
+      >
+        광고 생성
+      </Button>
 
       {/* 광고 생성/수정 모달 */}
       <Modal
@@ -178,23 +212,50 @@ const BDSMAdvertisement = () => {
             expire_datetime: null,
           }}
         >
+          <Typography.Title level={5}>광고주 정보</Typography.Title>
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item
-                label="광고주명"
+                label="광고주"
                 name="banner_advertiser"
-                rules={[
-                  { required: true, message: "광고주명을 입력해주세요!" },
-                ]}
+                rules={[{ required: true, message: "광고주를 입력해주세요!" }]}
               >
                 <Input />
               </Form.Item>
             </Col>
             <Col span={8}>
+              <Form.Item label="담당자 이름" name="manager_name">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="담당자 전화번호" name="manager_phone">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="사업자등록번호" name="brn">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="사업자등록증 사본" name="business_file">
+                <FileUpload
+                  url={form.getFieldValue("business_file")}
+                  setUrl={(url) => form.setFieldsValue({ business_file: url })}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Typography.Title level={5}>광고 배너 정보</Typography.Title>
+          <Row gutter={16}>
+            <Col span={8}>
               <Form.Item label="광고 이미지" name="banner_image">
-                <Upload beforeUpload={() => false}>
-                  <Button icon={<UploadOutlined />}>이미지 업로드</Button>
-                </Upload>
+                <FileUpload
+                  url={form.getFieldValue("banner_image")}
+                  setUrl={(url) => form.setFieldsValue({ banner_image: url })}
+                />
               </Form.Item>
             </Col>
             <Col span={8}>
@@ -202,6 +263,15 @@ const BDSMAdvertisement = () => {
                 <Input />
               </Form.Item>
             </Col>
+            <Col span={8}>
+              <Form.Item label="광고 단가" name="amount">
+                <Input type="number" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Typography.Title level={5}>광고 노출 설정</Typography.Title>
+          <Row gutter={16}>
             <Col span={8}>
               <Form.Item
                 label="광고 위치"
@@ -214,36 +284,6 @@ const BDSMAdvertisement = () => {
                   <Select.Option value={0}>위쪽</Select.Option>
                   <Select.Option value={1}>아래쪽</Select.Option>
                 </Select>
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label="담당자 전화번호" name="manager_phone">
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label="담당자 이름" name="manager_name">
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label="사업자 등록번호" name="brn">
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label="사업자 등록 파일" name="business_file">
-                <Upload beforeUpload={() => false}>
-                  <Button icon={<UploadOutlined />}>파일 업로드</Button>
-                </Upload>
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item label="광고 금액" name="amount">
-                <Input type="number" />
               </Form.Item>
             </Col>
             <Col span={8}>
