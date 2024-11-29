@@ -19,6 +19,8 @@ class Branch {
     this.branch_ceo_phone = data.branch_ceo_phone || null;
     this.branch_manager_name = data.branch_manager_name || null;
     this.branch_manager_phone = data.branch_manager_phone || null;
+    this.branch_sido = data.branch_sido || null;
+    this.branch_sigungu = data.branch_sigungu || null;
   }
 
   toJSON() {
@@ -37,6 +39,8 @@ class Branch {
       branch_ceo_phone: this.branch_ceo_phone,
       branch_manager_name: this.branch_manager_name,
       branch_manager_phone: this.branch_manager_phone,
+      branch_sido: this.branch_sido,
+      branch_sigungu: this.branch_sigungu,
     };
   }
 

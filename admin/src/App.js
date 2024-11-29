@@ -232,6 +232,9 @@ const App = () => {
               background: colorBgContainer,
               overflow: "auto", // 내용이 넘칠 때 스크롤 처리
               zIndex: 99, // Sider가 Header 아래에 오도록 설정
+              height: "calc(100vh - 64px)", // 64px 만큼의 Header를 제외한 높이 설정
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+              scrollbarWidth: "none", // Firefox에서 스크롤바 숨기기
             }}
           >
             <Menu
