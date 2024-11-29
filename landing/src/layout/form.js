@@ -78,11 +78,14 @@ const CenteredForm = () => {
               <Form.Item
                 name="franchise_manager_phone"
                 rules={[
-                  { required: true, message: "담당자 연락처를 입력해주세요." },
+                  {
+                    required: true,
+                    message: "담당자 전화번호를 입력해주세요.",
+                  },
                 ]}
                 style={{ marginBottom: isMobile ? "8px" : "16px" }}
               >
-                <Input placeholder="담당자 연락처" />
+                <Input placeholder="담당자 전화번호" />
               </Form.Item>
             </Col>
             <Col span={12}>

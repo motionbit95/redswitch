@@ -34,10 +34,10 @@ const { Title } = Typography;
 
 // 현재 로그인 사용자 (더미 데이터)
 const currentUser = {
-  id: "-OCRwtnmaTllsx2c3OWM",
-  user_id: "krystal",
+  id: "-OCRwtnmaTllsx2c3OWM", // -OCRwmUYTeUtxH-auNvx
+  user_id: "krystal", // redswitch
   user_name: "박수정",
-  permission: "2",
+  permission: "2", // 1
 };
 
 const NoticeBoard = () => {

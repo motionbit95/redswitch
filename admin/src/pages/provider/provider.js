@@ -222,6 +222,8 @@ const Provider = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentProvider, setCurrentProvider] = useState(null);
   const [form] = Form.useForm();
+  const [filteredInfo, setFilteredInfo] = useState({});
+  const [sortedInfo, setSortedInfo] = useState({});
 
   // Fetch provider data
   useEffect(() => {
@@ -330,7 +332,28 @@ const Provider = () => {
     });
   };
 
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+  };
+
+  const handleChange = (pagination, filters, sorter) => {
+    console.log("Various parameters", pagination, filters, sorter);
+    setFilteredInfo(filters);
+    setSortedInfo(sorter);
+  };
+
   const columns = [
+    {
+      title: "No.",
+      render: (text, record, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
+      fixed: "left",
+      width: 50,
+    },
     {
       title: "업체명",
       dataIndex: "provider_name",
@@ -396,7 +419,15 @@ const Provider = () => {
         dataSource={providers}
         rowKey="id"
         loading={loading}
-        pagination={{ pageSize: 10 }}
+        onChange={(pagination, filters, sorter) => {
+          handleTableChange(pagination);
+          handleChange(pagination, filters, sorter);
+        }}
+        pagination={{
+          ...pagination,
+          defaultPageSize: 10,
+          showSizeChanger: true,
+        }}
       />
 
       {/* Reused Modal */}

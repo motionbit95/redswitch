@@ -112,7 +112,7 @@ const FranchisePost = () => {
       ...getColumnSearchProps("franchise_manager"),
     },
     {
-      title: "담당자연락처",
+      title: "담당자 전화번호",
       dataIndex: "franchise_manager_phone",
       key: "franchise_manager_phone",
       ...getColumnSearchProps("franchise_manager_phone"),
