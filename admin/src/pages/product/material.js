@@ -108,6 +108,7 @@ const Material = () => {
       );
       if (response.status === 200) {
         message.success("상품 수정 성공");
+        console.log(response.data);
         handleSearchMaterials();
       } else {
         message.error("상품 수정 실패");
@@ -143,7 +144,6 @@ const Material = () => {
       fixed: "left",
       width: 50,
     },
-
     {
       title: "상품명",
       dataIndex: "product_name",

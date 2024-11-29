@@ -14,7 +14,12 @@ const Addproduct = ({
   const [form] = Form.useForm();
 
   const handleAddProduct = async (values) => {
-    console.log(values);
+    console.log(
+      values,
+      selectedProvider.provider_name,
+      selectedProvider.provider_code,
+      selectedProvider.id
+    );
     try {
       const response = await AxiosPost("/products/materials", {
         ...values,

@@ -221,6 +221,8 @@ function Branch(props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentBranch, setCurrentBranch] = useState(null);
   const [form] = Form.useForm();
+  const [filteredInfo, setFilteredInfo] = useState({});
+  const [sortedInfo, setSortedInfo] = useState({});
 
   // Fetch branch data
   useEffect(() => {
@@ -303,26 +305,40 @@ function Branch(props) {
     }
   };
 
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
+
+  // Update pagination state on change
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+  };
+
+  const handleChange = (pagination, filters, sorter) => {
+    console.log("Various parameters", pagination, filters, sorter);
+    setFilteredInfo(filters);
+    setSortedInfo(sorter);
+  };
+
   const columns = [
+    {
+      title: "No.",
+      render: (text, record, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
+      fixed: "left",
+      width: 50,
+    },
     {
       title: "지점명",
       dataIndex: "branch_name",
       key: "branch_name",
     },
-    {
-      title: "객실 수",
-      dataIndex: "branch_room_cnt",
-      key: "branch_room_cnt",
-    },
+
     {
       title: "주소",
       dataIndex: "branch_address",
       key: "branch_address",
-    },
-    {
-      title: "대표자",
-      dataIndex: "branch_ceo_name",
-      key: "branch_ceo_name",
     },
     {
       title: "담당자명",
@@ -335,9 +351,15 @@ function Branch(props) {
       key: "branch_manager_phone",
     },
     {
-      title: "사업자번호",
-      dataIndex: "branch_brn",
-      key: "branch_brn",
+      title: "관리자",
+    },
+    {
+      title: "관리자 전화번호",
+    },
+    {
+      title: "객실 수",
+      dataIndex: "branch_room_cnt",
+      key: "branch_room_cnt",
     },
     {
       title: "설치 여부",
@@ -346,8 +368,8 @@ function Branch(props) {
 
       render: (text) => {
         return (
-          <Tag color={text === 0 ? "red" : "green"}>
-            {text === 0 ? "미설치" : "설치"}
+          <Tag color={text === "0" ? "red" : "green"}>
+            {text === "0" ? "미설치" : "설치"}
           </Tag>
         );
       },
@@ -387,7 +409,15 @@ function Branch(props) {
         dataSource={branchs}
         rowKey="id"
         loading={loading}
-        pagination={{ pageSize: 10 }}
+        onChange={(pagination, filters, sorter) => {
+          handleTableChange(pagination);
+          handleChange(pagination, filters, sorter);
+        }}
+        pagination={{
+          ...pagination,
+          defaultPageSize: 10,
+          showSizeChanger: true,
+        }}
       />
 
       {/* Add Branch Modal */}
