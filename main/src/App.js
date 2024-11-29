@@ -4,7 +4,15 @@ import PaymentTest from "./page/Payment";
 import PaymentResult from "./page/PaymentResult";
 import MainPage from "./page/MainPage";
 import { useEffect, useState } from "react";
-import { ConfigProvider, FloatButton, Row, Space, Typography } from "antd";
+import {
+  ConfigProvider,
+  FloatButton,
+  Row,
+  Space,
+  Typography,
+  Result,
+  Button,
+} from "antd";
 import { Footer } from "./component/Footer";
 
 const darkTheme = {
@@ -152,72 +160,91 @@ function App() {
           minWidth: "300px",
           maxWidth: "800px",
           margin: "0 auto",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          justifyContent: "space-between",
         }}
       >
-        <Row>
-          <FloatButton.Group shape="circle">
-            <FloatButton />
-            <FloatButton.BackTop visibilityHeight={0} />
-          </FloatButton.Group>
+        <div>
+          <Row>
+            <FloatButton.Group shape="circle">
+              <FloatButton />
+              <FloatButton.BackTop visibilityHeight={0} />
+            </FloatButton.Group>
 
-          {/* Main Content Section */}
-          <div
-            style={{
-              width: "100%",
-              padding: "10px 10px 10px 10px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Space
-              direction="horizontal"
+            {/* Main Content Section */}
+            <div
               style={{
+                width: "100%",
+                padding: "10px 10px 10px 10px",
                 display: "flex",
+                flexDirection: "column",
                 justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              <img
-                src={require("./asset/redswitchLogo.png")}
-                alt={"logo"}
+              <Space
+                direction="horizontal"
                 style={{
-                  width: "32px",
-                  height: "32px",
-                  objectFit: "cover",
+                  display: "flex",
+                  justifyContent: "center",
                 }}
-              />
-              <Typography.Text style={{ fontSize: "10px", fontWeight: "bold" }}>
-                REDSWITCH
-              </Typography.Text>
-            </Space>
+              >
+                <img
+                  src={require("./asset/redswitchLogo.png")}
+                  alt={"logo"}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    objectFit: "cover",
+                  }}
+                />
+                <Typography.Text
+                  style={{ fontSize: "10px", fontWeight: "bold" }}
+                >
+                  REDSWITCH
+                </Typography.Text>
+              </Space>
 
-            <Typography.Text
-              style={{
-                fontSize: "14px",
-                fontWeight: "bold",
-                marginBottom: "10px",
-              }}
-            >
-              비대면 어덜트토이 플랫폼
-            </Typography.Text>
-          </div>
-        </Row>
-        <BrowserRouter>
-          <Routes>
-            <Route
-              path="/spot/*"
-              element={<MainPage branch={branch} theme={theme} />}
-            />
-            <Route path="/payment" element={<PaymentTest />} />
-            <Route
-              path="/payment/result"
-              element={<PaymentResult branch={branch} />}
-            />
-          </Routes>
-        </BrowserRouter>
+              <Typography.Text
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  marginBottom: "10px",
+                }}
+              >
+                비대면 어덜트토이 플랫폼
+              </Typography.Text>
+            </div>
+          </Row>
+          <BrowserRouter>
+            <Routes>
+              <Route
+                path="/spot/*"
+                element={<MainPage branch={branch} theme={theme} />}
+              />
+              <Route path="/payment" element={<PaymentTest />} />
+              <Route
+                path="/payment/result"
+                element={<PaymentResult branch={branch} />}
+              />
+              <Route
+                path="/*"
+                element={
+                  <Result
+                    status="404"
+                    title="404"
+                    subTitle="Sorry, the page you visited does not exist."
+                    extra={<Button type="primary">Back Home</Button>}
+                  />
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </div>
+        <Footer theme={theme} />
       </div>
-      <Footer theme={theme} />
     </ConfigProvider>
   );
 }

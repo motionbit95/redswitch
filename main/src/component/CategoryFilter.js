@@ -7,11 +7,11 @@ const CategoryFilter = ({
   selectedItemId,
   setSelectedItemId,
 }) => {
-  const handleCategoryClick = (index) => {
-    setSelectedItemId(index.toString());
+  const handleCategoryClick = (code) => {
+    setSelectedItemId(code);
 
     // 선택된 버튼으로 스크롤
-    document.getElementById(`category-${index}`)?.scrollIntoView({
+    document.getElementById(`category-${code}`)?.scrollIntoView({
       behavior: "smooth",
       inline: "center", // 가운데 정렬
     });
@@ -37,19 +37,21 @@ const CategoryFilter = ({
             }
           `}
       </style>
-      {categories.map((category, index) => (
+      {categories.map(({ product_category, product_category_code }, index) => (
         <Button
           key={index}
-          id={`category-${index}`}
-          danger={index === parseInt(selectedItemId)}
-          type={selectedItemId === index.toString() ? "primary" : "default"} // 선택된 카테고리 강조
-          onClick={() => handleCategoryClick(index)}
+          id={`category-${product_category_code}`}
+          danger={selectedItemId === product_category_code}
+          type={
+            selectedItemId === product_category_code ? "primary" : "default"
+          } // 선택된 카테고리 강조
+          onClick={() => handleCategoryClick(product_category_code)}
           style={{
             margin: "0 5px", // 버튼 간격
             flexShrink: 0, // 줄어들지 않도록 고정
           }}
         >
-          {category}
+          {product_category}
         </Button>
       ))}
     </div>
