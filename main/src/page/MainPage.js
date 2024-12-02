@@ -1,7 +1,7 @@
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Empty,
-  Input,
   Row,
   Space,
   Typography,
@@ -10,11 +10,11 @@ import {
   Checkbox,
   Button,
 } from "antd";
-import React, { useEffect, useState } from "react";
 import { EnvironmentOutlined, WhatsAppOutlined } from "@ant-design/icons";
 import ProductListPage from "./ProductListPage";
 import { useMediaQuery } from "react-responsive";
 import { Footer } from "../component/Footer";
+import { mainPageStyles } from "../styles"; // Import the styles
 
 function MainPage(props) {
   const { branch, theme } = props;
@@ -22,6 +22,7 @@ function MainPage(props) {
   const [isAgree, setIsAgree] = useState(false); // 개인정보 동의 여부
   const [isCertified, setIsCertified] = useState(false); // 인증 여부
   const [isCertModalVisible, setIsCertModalVisible] = useState(false); // 모달 트리거
+  const token = localStorage.getItem("token");
 
   const isLarge = useMediaQuery({ minWidth: 1024 });
 
@@ -32,6 +33,7 @@ function MainPage(props) {
         `${process.env.REACT_APP_SERVER_URL}/branches/${branch}`
       );
       const data = await response.json();
+      console.log(data);
       if (response.status !== 200) {
         const error = new Error(data.message);
         error.response = data;
@@ -43,35 +45,31 @@ function MainPage(props) {
     fetchBranchInfo();
   }, [branch]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+  // useEffect(() => {
+  //   const verifyToken = async () => {
+  //     const response = await fetch(
+  //       `${process.env.REACT_APP_SERVER_URL}/accounts/verify-token`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ token: token }),
+  //       }
+  //     );
+  //     const data = await response.json();
+  //     if (response.status !== 200) {
+  //       const error = new Error(data.message);
+  //       error.response = data;
+  //       setIsCertified(false);
+  //     } else {
+  //       console.log(data);
+  //       setIsCertified(true);
+  //     }
+  //   };
 
-    const verifyToken = async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_SERVER_URL}/accounts/verify-token`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token: token }),
-        }
-      );
-      const data = await response.json();
-      if (response.status !== 200) {
-        const error = new Error(data.message);
-        error.response = data;
-        setIsCertified(false);
-      } else {
-        console.log(data);
-        setIsCertified(true);
-      }
-    };
-
-    if (token) {
-      verifyToken();
-    }
-  }, []);
+  //   verifyToken();
+  // }, [token]);
 
   const onCert = async () => {
     const response = await fetch(
@@ -105,48 +103,38 @@ function MainPage(props) {
               <img
                 src={require("../asset/bdsm_banner.png")}
                 alt={"banner1"}
-                style={{ width: "100%", height: "auto" }}
+                style={mainPageStyles.carouselImage}
               />
               <img
                 src={require("../asset/cert_banner.png")}
                 alt={"banner2"}
-                style={{ width: "100%", height: "auto" }}
+                style={mainPageStyles.carouselImage}
                 onClick={() => setIsCertModalVisible(true)}
               />
             </Carousel>
           ) : (
-            <Space size={"large"} style={{ marginBottom: "10px" }}>
+            <Space size={"large"} style={mainPageStyles.bannerSpace}>
               <img
                 src={require("../asset/bdsm_banner.png")}
                 alt={"banner1"}
-                style={{ width: "100%", height: "auto" }}
+                style={mainPageStyles.carouselImage}
               />
               <img
                 src={require("../asset/cert_banner.png")}
                 alt={"banner2"}
-                style={{ width: "100%", height: "auto" }}
+                style={mainPageStyles.carouselImage}
                 onClick={() => setIsCertModalVisible(true)}
               />
             </Space>
           )}
 
           {/* Branch Info Card */}
-          <Row
-            justify="center"
-            style={{ marginBottom: "10px", padding: "0 10px" }}
-          >
-            <Card
-              style={{
-                width: "100%",
-                // boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <Typography.Text
-                style={{ fontWeight: "bold", fontSize: "x-large" }}
-              >
+          <Row justify="center" style={mainPageStyles.row}>
+            <Card style={mainPageStyles.card}>
+              <Typography.Text style={mainPageStyles.branchTitle}>
                 {branchInfo.branch_name}
               </Typography.Text>
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={mainPageStyles.branchInfoContainer}>
                 <Space>
                   <EnvironmentOutlined />
                   <Typography.Text>{branchInfo.branch_address}</Typography.Text>
@@ -168,7 +156,7 @@ function MainPage(props) {
       ) : (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          style={{ marginTop: "100px" }}
+          style={mainPageStyles.emptyStyle}
         />
       )}
 
@@ -176,44 +164,21 @@ function MainPage(props) {
         visible={isCertModalVisible}
         onCancel={() => setIsCertModalVisible(false)}
         footer={null}
-        title="성인인증"
-        style={{ textAlign: "center" }}
+        title="성인인증"
+        style={mainPageStyles.modalStyle}
       >
-        <div
-          style={{ display: "flex", justifyContent: "center", margin: "10px" }}
-        >
-          <div
-            style={{
-              fontSize: "xx-large",
-              marginRight: "10px",
-              fontWeight: "bold",
-              border: "3px solid #ff4d4f",
-              padding: "10px",
-              width: "50px",
-              height: "50px",
-              borderRadius: "50%",
-            }}
-          >
-            19
-          </div>
+        <div style={mainPageStyles.certificationModal}>
+          <div style={mainPageStyles.ageCircle}>19</div>
         </div>
         <h3>회원님, 본 상품은 성인인증이 필요합니다.</h3>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-start",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            gap: "10px",
-          }}
-        >
-          <div style={{ fontSize: "small", opacity: "0.7", textAlign: "left" }}>
+        <div style={mainPageStyles.modalContent}>
+          <div style={mainPageStyles.modalText}>
             본 상품은 청소년 유해매체물로서 ⌜정보통신망 이용촉진 및 정보보호
             등에 관한 법률⌟ 및 ⌜청소년보호법⌟에 따라 만 19세 미만의 청소년이
             이용할 수 없습니다. 이용을 원하시면 본인인증을 진행해주시기
             바랍니다.
           </div>
-          <div style={{ fontSize: "small", opacity: "0.7", textAlign: "left" }}>
+          <div style={mainPageStyles.modalText}>
             동의 거부 시 서비스 이용이 제한됩니다. 수집된 정보는 성인인증을 위한
             수단으로만 사용되며, 그 외 다른 목적으로 수집되지 않습니다.
           </div>
@@ -225,7 +190,7 @@ function MainPage(props) {
             type="primary"
             danger
             size="large"
-            style={{ width: "100%" }}
+            style={mainPageStyles.certButton}
             onClick={onCert}
           >
             휴대폰 본인 인증

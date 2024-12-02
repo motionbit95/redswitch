@@ -4,17 +4,7 @@ import PaymentTest from "./page/Payment";
 import PaymentResult from "./page/PaymentResult";
 import MainPage from "./page/MainPage";
 import { useEffect, useState } from "react";
-import {
-  ConfigProvider,
-  FloatButton,
-  Row,
-  Space,
-  Typography,
-  Result,
-  Button,
-  Checkbox,
-} from "antd";
-import { Footer } from "./component/Footer";
+import { ConfigProvider, Row, Space, Typography, Result, Button } from "antd";
 import Product from "./page/Product";
 import { TruckOutlined } from "@ant-design/icons";
 import Cart from "./page/Cart";
@@ -139,7 +129,17 @@ const lightTheme = {
 
 function App() {
   const [theme, setTheme] = useState("light");
-  const branch = window.location.pathname.split("/").pop();
+
+  const [branch, setBranch] = useState(
+    window.location.pathname.split("/").pop()
+  );
+
+  useEffect(() => {
+    if (window.location.pathname.includes("spot")) {
+      localStorage.setItem("branch", window.location.pathname.split("/").pop());
+      setBranch(window.location.pathname.split("/").pop());
+    }
+  }, [branch]);
 
   return (
     <ConfigProvider theme={theme === "dark" ? darkTheme : lightTheme}>
@@ -179,6 +179,11 @@ function App() {
                   display: "flex",
                   justifyContent: "center",
                 }}
+                onClick={() => {
+                  window.location.href = `/spot/${localStorage.getItem(
+                    "branch"
+                  )}`;
+                }}
               >
                 <img
                   src={require("./asset/redswitchLogo.png")}
@@ -190,7 +195,7 @@ function App() {
                   }}
                 />
                 <Typography.Text
-                  style={{ fontSize: "10px", fontWeight: "bold" }}
+                  style={{ fontSize: "14px", fontWeight: "bold" }}
                 >
                   REDSWITCH
                 </Typography.Text>
@@ -198,7 +203,7 @@ function App() {
 
               <Typography.Text
                 style={{
-                  fontSize: "14px",
+                  fontSize: "12px",
                   fontWeight: "bold",
                   marginBottom: "10px",
                 }}

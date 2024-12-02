@@ -27,8 +27,12 @@ router.get("/", async (req, res) => {
 
 // 특정 지점 조회
 router.get("/:id", async (req, res) => {
+  console.log("Router invoked"); // 라우터 진입 확인
+  console.log("Received ID:", req.params.id); // ID 확인
+
   try {
     const branch = await Branch.getById(req.params.id);
+    console.log("Branch found:", branch); // 성공적으로 데이터 가져옴
     res.status(200).send(branch);
   } catch (error) {
     console.error("Error fetching branch:", error);

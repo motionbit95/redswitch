@@ -1,76 +1,67 @@
+import React, { useCallback } from "react";
 import { Button } from "antd";
+import { categoryFilterStyles } from "../styles"; // Import styles
 
 // 카테고리 필터 UI
-const CategoryFilter = ({
-  theme,
-  categories,
-  selectedItemId,
-  setSelectedItemId,
-}) => {
-  const handleCategoryClick = (code) => {
-    setSelectedItemId(code);
+const CategoryFilter = React.memo(
+  ({ theme, categories, selectedItemId, setSelectedItemId }) => {
+    // 카테고리 클릭 처리 함수
+    const handleCategoryClick = useCallback(
+      (code) => {
+        setSelectedItemId(code);
 
-    // 선택된 버튼으로 스크롤
-    document.getElementById(`category-${code}`)?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center", // 가운데 정렬
-    });
-  };
+        // 선택된 버튼으로 스크롤
+        document.getElementById(`category-${code}`)?.scrollIntoView({
+          behavior: "smooth",
+          inline: "center", // 가운데 정렬
+        });
+      },
+      [setSelectedItemId]
+    );
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        overflowX: "auto",
-        whiteSpace: "nowrap",
-        padding: "20px 0",
-        background: theme === "dark" ? "#2e2e2e" : "#fcfcfc",
-        scrollbarWidth: "none", // 스크롤 숨기기 (Firefox)
-        msOverflowStyle: "none", // 스크롤 숨기기 (IE/Edge)
-      }}
-    >
-      <style>
-        {`
-            /* Chrome, Safari 숨기기 */
-            div::-webkit-scrollbar {
-              display: none;
-            }
-          `}
-      </style>
-      {/* 전체 카테고리 버튼 */}
-      <Button
-        id="category-all"
-        danger={selectedItemId === "all"}
-        type={selectedItemId === "all" ? "primary" : "default"} // 선택된 카테고리 강조
-        onClick={() => handleCategoryClick("all")}
-        style={{
-          margin: "0 5px", // 버튼 간격
-          flexShrink: 0, // 줄어들지 않도록 고정
-        }}
-      >
-        전체 카테고리
-      </Button>
+    // Get the dynamic styles based on the theme
+    const containerStyle = categoryFilterStyles(theme);
 
-      {/* 각 카테고리 버튼 */}
-      {categories.map(({ product_category, product_category_code }, index) => (
+    return (
+      <div style={containerStyle}>
+        <style>
+          {`
+          /* Chrome, Safari 숨기기 */
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}
+        </style>
+
+        {/* 전체 카테고리 버튼 */}
         <Button
-          key={index}
-          id={`category-${product_category_code}`}
-          danger={selectedItemId === product_category_code}
-          type={
-            selectedItemId === product_category_code ? "primary" : "default"
-          } // 선택된 카테고리 강조
-          onClick={() => handleCategoryClick(product_category_code)}
-          style={{
-            margin: "0 5px", // 버튼 간격
-            flexShrink: 0, // 줄어들지 않도록 고정
-          }}
+          id="category-all"
+          danger={selectedItemId === "all"}
+          type={selectedItemId === "all" ? "primary" : "default"} // 선택된 카테고리 강조
+          onClick={() => handleCategoryClick("all")}
         >
-          {product_category}
+          전체 카테고리
         </Button>
-      ))}
-    </div>
-  );
-};
+
+        {/* 각 카테고리 버튼 */}
+        {categories.map(
+          ({ product_category, product_category_code }, index) => (
+            <Button
+              key={index}
+              id={`category-${product_category_code}`}
+              danger={selectedItemId === product_category_code}
+              type={
+                selectedItemId === product_category_code ? "primary" : "default"
+              } // 선택된 카테고리 강조
+              onClick={() => handleCategoryClick(product_category_code)}
+            >
+              {product_category}
+            </Button>
+          )
+        )}
+      </div>
+    );
+  }
+);
 
 export default CategoryFilter;
