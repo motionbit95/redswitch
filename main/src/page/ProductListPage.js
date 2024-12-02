@@ -1,23 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Typography } from "antd";
+import { Row, Col, Typography, Spin } from "antd";
 import CategoryFilter from "../component/CategoryFilter";
 import ProductCard from "../component/ProductCard";
 
 function ProductListPage(props) {
   const { theme, branch } = props;
-  const [selectedItemId, setSelectedItemId] = useState("01"); // 선택된 카테고리
-
+  const [selectedItemId, setSelectedItemId] = useState("01");
   const [branchProducts, setBranchProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    console.log("branchProducts:", branchProducts);
-  }, [branchProducts]);
-
-  let filteredProducts = branchProducts.filter((product) => {
-    return product.product_category_code === selectedItemId;
-  });
-
+  const [loading, setLoading] = useState(true);
   const [showHeader, setShowHeader] = useState(false);
 
   // 스크롤 이벤트 처리
@@ -26,54 +17,80 @@ function ProductListPage(props) {
     if (contentElement) {
       const contentPosition = contentElement.getBoundingClientRect().top;
       if (contentPosition <= 0) {
-        // content 요소가 화면 상단에 도달했을 때
-        setShowHeader(true); // 헤더 보이게
+        setShowHeader(true);
       } else {
-        setShowHeader(false); // 헤더 숨기기
+        setShowHeader(false);
       }
     }
   };
 
-  // 컴포넌트 마운트 시 스크롤 이벤트 리스너 추가
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // 상품 데이터 가져오기
   useEffect(() => {
     const fetchProducts = async () => {
-      const products = await fetch(
-        `${process.env.REACT_APP_SERVER_URL}/products/search/${branch.id}`
-      );
-      const productsData = await products.json();
+      setLoading(true);
 
-      let newList = [];
+      try {
+        const productsResponse = await fetch(
+          `${process.env.REACT_APP_SERVER_URL}/products/search/${branch.id}`
+        );
+        const productsData = await productsResponse.json();
 
-      productsData.map(async (item) => {
-        let material = await fetch(
-          `${process.env.REACT_APP_SERVER_URL}/products/materials/${item.material_id}`
+        // 각 상품의 material 데이터를 병렬로 요청
+        const materialRequests = productsData.map((item) =>
+          fetch(
+            `${process.env.REACT_APP_SERVER_URL}/products/materials/${item.material_id}`
+          ).then((res) => res.json())
         );
 
-        let materialData = await material.json();
+        const materialsData = await Promise.all(materialRequests);
 
-        newList.push({ ...item, ...materialData });
+        // 상품 데이터와 material 데이터를 병합
+        const newList = productsData.map((product, index) => ({
+          ...product,
+          ...materialsData[index],
+        }));
 
         setBranchProducts(newList);
-      });
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchProducts();
-  }, []);
 
+    if (branch?.id) {
+      fetchProducts();
+    }
+  }, [branch.id]);
+
+  // 카테고리 데이터 가져오기
   useEffect(() => {
     const fetchCategory = async () => {
-      const categories = await fetch(
-        `${process.env.REACT_APP_SERVER_URL}/products/categories`
-      );
-      const categoriesData = await categories.json();
-      setCategories(categoriesData);
+      try {
+        const categoriesResponse = await fetch(
+          `${process.env.REACT_APP_SERVER_URL}/products/categories`
+        );
+        const categoriesData = await categoriesResponse.json();
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
     };
     fetchCategory();
   }, []);
+
+  // 필터링된 상품 데이터 계산
+  const filteredProducts =
+    selectedItemId === "all"
+      ? branchProducts // 전체 카테고리 선택 시 모든 상품을 표시
+      : branchProducts.filter(
+          (product) => product.product_category_code === selectedItemId
+        );
 
   return (
     <div>
@@ -86,26 +103,14 @@ function ProductListPage(props) {
             width: "100%",
             zIndex: 1000,
             backgroundColor: theme === "dark" ? "#2e2e2e" : "#fcfcfc",
-            // boxShadow:
-            //   theme === "dark"
-            //     ? "0 4px 6px rgba(255, 255, 255, 0.1)"
-            //     : "0 4px 6px rgba(0, 0, 0, 0.1)",
-            // transition: "box-shadow 0.3s ease",
           }}
         >
-          {/* 헤더 */}
           <Typography.Title
             level={3}
-            style={{
-              margin: 0,
-              lineHeight: "20px",
-              padding: "20px",
-            }}
+            style={{ margin: 0, lineHeight: "20px", padding: "20px" }}
           >
             {branch?.branch_name}
           </Typography.Title>
-
-          {/* 필터 */}
           <CategoryFilter
             theme={theme}
             categories={categories}
@@ -114,6 +119,7 @@ function ProductListPage(props) {
           />
         </div>
       )}
+
       <div id={"content"} style={{ padding: "0 10px" }}>
         <CategoryFilter
           theme={theme}
@@ -121,15 +127,32 @@ function ProductListPage(props) {
           selectedItemId={selectedItemId}
           setSelectedItemId={setSelectedItemId}
         />
-        {/* 상품 리스트 */}
-        <Row gutter={[16, 16]} justify="flex-start">
-          {filteredProducts.map((product, index) => (
-            <Col key={index} xs={12} sm={12} md={8} lg={6}>
-              {/* 2열로 설정 */}
-              <ProductCard product={product} theme={theme} />
-            </Col>
-          ))}
-        </Row>
+
+        {loading ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "20px",
+            }}
+          >
+            <Spin size="large" />
+          </div>
+        ) : (
+          <Row gutter={[16, 16]} justify="flex-start">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product, index) => (
+                <Col key={index} xs={12} sm={12} md={8} lg={6}>
+                  <ProductCard product={product} theme={theme} />
+                </Col>
+              ))
+            ) : (
+              <div style={{ width: "100%", textAlign: "center" }}>
+                <Typography.Text>상품이 없습니다.</Typography.Text>
+              </div>
+            )}
+          </Row>
+        )}
       </div>
     </div>
   );

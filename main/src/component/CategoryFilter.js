@@ -1,4 +1,4 @@
-import { Button, Space } from "antd";
+import { Button } from "antd";
 
 // 카테고리 필터 UI
 const CategoryFilter = ({
@@ -37,6 +37,21 @@ const CategoryFilter = ({
             }
           `}
       </style>
+      {/* 전체 카테고리 버튼 */}
+      <Button
+        id="category-all"
+        danger={selectedItemId === "all"}
+        type={selectedItemId === "all" ? "primary" : "default"} // 선택된 카테고리 강조
+        onClick={() => handleCategoryClick("all")}
+        style={{
+          margin: "0 5px", // 버튼 간격
+          flexShrink: 0, // 줄어들지 않도록 고정
+        }}
+      >
+        전체 카테고리
+      </Button>
+
+      {/* 각 카테고리 버튼 */}
       {categories.map(({ product_category, product_category_code }, index) => (
         <Button
           key={index}

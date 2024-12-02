@@ -51,7 +51,7 @@ function Product(props) {
   }, [product_pk]);
 
   return (
-    <div style={{ marginBottom: "54px" }}>
+    <div style={{ marginBottom: isLarge ? "0px" : "54px" }}>
       <div style={{ padding: "20px", margin: "0 auto" }}>
         {productData && (
           <div

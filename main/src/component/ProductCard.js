@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Space, Typography, Image, Skeleton } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,16 @@ function ProductCard({ product, ...props }) {
   const [imageError, setImageError] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // 0.5초 지연 후 로딩 상태 변경
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 500); // 0.5초
+
+    return () => clearTimeout(timeout); // 컴포넌트가 언마운트될 때 타이머 정리
+  }, []);
+
   return (
     <div
       style={{
@@ -19,7 +29,6 @@ function ProductCard({ product, ...props }) {
         flexDirection: "column", // 이미지와 텍스트를 세로로 배치
         justifyContent: "flex-start", // 세로 정렬
         overflow: "hidden",
-        // marginBottom: "20px",
         cursor: "pointer",
       }}
       onClick={() => navigate(`/product/${product.PK}`)}
@@ -36,6 +45,7 @@ function ProductCard({ product, ...props }) {
           backgroundColor: theme === "dark" ? "#333" : "#f1f1f1",
         }}
       >
+        {/* Skeleton loader is shown if the image is loading or an error has occurred */}
         {loading || imageError ? (
           <Skeleton.Image
             style={{
@@ -45,6 +55,8 @@ function ProductCard({ product, ...props }) {
             }}
           />
         ) : null}
+
+        {/* Actual image */}
         <Image
           src={product.original_image}
           alt={product.name}
@@ -52,15 +64,18 @@ function ProductCard({ product, ...props }) {
           style={{
             width: "100%",
             height: "100%",
+            aspectRatio: "1/1",
             objectFit: "cover",
-            display: loading || imageError ? "none" : "block", // 스켈레톤과 중복 표시 방지
+            display: loading || imageError ? "none" : "block", // Hide image until loaded
           }}
-          onLoad={() => setLoading(false)} // 로딩 완료 시
+          onLoad={() => setLoading(false)} // Image loaded successfully
           onError={() => {
             setImageError(true);
-            setLoading(false); // 에러 시 로딩 종료
+            setLoading(false); // Error occurred, stop loading
           }}
         />
+
+        {/* Error fallback if image fails to load */}
         {imageError && (
           <div
             style={{
@@ -79,6 +94,7 @@ function ProductCard({ product, ...props }) {
           </div>
         )}
       </div>
+
       {/* 텍스트 영역 */}
       <div style={{ padding: "10px" }}>
         <Typography.Title level={5} style={{ margin: 0 }}>

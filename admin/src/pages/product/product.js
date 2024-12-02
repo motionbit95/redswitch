@@ -29,6 +29,7 @@ import SearchProduct from "../../components/popover/searchproduct";
 import ToastEditor from "../../components/toasteditor";
 import FileUpload from "../../components/button";
 import Material from "./material";
+import useSearchFilter from "../../hook/useSearchFilter";
 
 const ProductCRUD = () => {
   const [products, setProducts] = useState([]);
@@ -46,6 +47,8 @@ const ProductCRUD = () => {
 
   const [useBlurImage, setUseBlurImage] = useState(true);
   const [blurred_image, setBlurredImage] = useState(null);
+
+  const { getColumnSearchProps } = useSearchFilter();
 
   // 상품 목록 불러오기
   const fetchProducts = async () => {
@@ -155,19 +158,22 @@ const ProductCRUD = () => {
       render: (text, record, index) => index + 1,
     },
     {
-      title: "상품 코드",
+      title: "상품코드",
       dataIndex: "product_code",
       key: "product_code",
+      ...getColumnSearchProps("product_code"),
     },
     {
-      title: "소비자 노출 상픔명",
+      title: "소비자 노출 상품명",
       dataIndex: "product_name",
       key: "product_name",
+      ...getColumnSearchProps("product_name"),
     },
     {
       title: "소비자 판매 가격",
       dataIndex: "product_price",
       key: "product_price",
+      sorter: (a, b) => a.product_price - b.product_price,
     },
     {
       title: "해당 지점 추가 수수료",
@@ -179,7 +185,7 @@ const ProductCRUD = () => {
       dataIndex: "related_products",
       key: "related_products",
       render: (text, record) => {
-        return record.related_products?.length;
+        return record.related_products?.length || 0;
       },
     },
     {
@@ -251,7 +257,13 @@ const ProductCRUD = () => {
           상품 추가
         </Button>
       </Row>
-      <Table size="small" columns={columns} dataSource={products} rowKey="PK" />
+      <Table
+        size="small"
+        columns={columns}
+        dataSource={products}
+        rowKey="PK"
+        pagination={{ showSizeChanger: true }}
+      />
 
       {/* 상품 추가/수정 모달 */}
       <Modal
@@ -334,7 +346,7 @@ const ProductCRUD = () => {
             <Col span={24}>
               <Form.Item
                 tooltip={"소비자 페이지에 노출되는 상품명입니다."}
-                label="소비자 노출 상픔명"
+                label="소비자 노출 상품명"
                 name="product_name"
                 rules={[{ required: true, message: "상품명을 입력해주세요" }]}
               >
