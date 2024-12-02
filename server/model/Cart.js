@@ -1,6 +1,6 @@
 const admin = require("firebase-admin");
 const database = admin.database();
-const cartRef = database.ref("carts"); // 'branches' 경로 참조
+const cartRef = database.ref("carts");
 
 class Cart {
   constructor(data) {
@@ -27,6 +27,48 @@ class Cart {
     };
   }
 
+  // Get a cart item by its primary key (pk)
+  static async getByPk(pk) {
+    try {
+      const snapshot = await cartRef.child(pk).once("value");
+      if (!snapshot.exists()) {
+        throw new Error("Cart item not found");
+      }
+      return { pk: snapshot.key, ...snapshot.val() }; // Return the cart item data
+    } catch (error) {
+      console.error("Error fetching cart item:", error);
+      throw new Error("Failed to fetch cart item");
+    }
+  }
+
+  // Create or Update a cart item
+  static async createOrUpdate(cartData) {
+    try {
+      // 이미 장바구니에 해당 상품이 있는지 확인
+      const existingCartItems = await Cart.getAllByToken(cartData.token);
+      const existingItem = existingCartItems.find(
+        (item) => item.product_pk === cartData.product_pk
+      );
+
+      if (existingItem) {
+        // 해당 상품이 이미 장바구니에 있으면 수량만 업데이트
+        existingItem.count += cartData.count; // 기존 수량에 새로운 수량을 더함
+
+        // 업데이트된 장바구니 항목을 저장
+        const updatedCart = new Cart(existingItem);
+        await updatedCart.update(); // update 메서드 호출
+        return updatedCart;
+      } else {
+        // 장바구니에 해당 상품이 없으면 새 항목 생성
+        const newCartItem = new Cart(cartData);
+        return await newCartItem.create();
+      }
+    } catch (error) {
+      console.error("Error creating or updating cart item:", error);
+      throw new Error("Failed to create or update cart item");
+    }
+  }
+
   // Create a new cart item
   async create() {
     try {
@@ -40,18 +82,18 @@ class Cart {
     }
   }
 
-  // Get a cart item by PK
-  static async getByPk(pk) {
+  // Update a cart item
+  async update() {
     try {
-      const snapshot = await cartRef.child(pk).once("value");
-      if (!snapshot.exists()) {
-        throw new Error("Cart item not found");
+      if (!this.pk) {
+        throw new Error("Cart PK is required for update");
       }
-      const cartData = snapshot.val();
-      return new Cart(cartData); // Cart 인스턴스 생성
+      const cartData = this.toJSON(); // Convert data to JSON
+      await cartRef.child(this.pk).update(cartData); // Update the database with the new cart data
+      return this;
     } catch (error) {
-      console.error("Error fetching cart item:", error);
-      throw new Error("Failed to fetch cart item");
+      console.error("Error updating cart:", error);
+      throw new Error("Failed to update cart item");
     }
   }
 

@@ -16,6 +16,8 @@ import {
 } from "antd";
 import { Footer } from "./component/Footer";
 import Product from "./page/Product";
+import { TruckOutlined } from "@ant-design/icons";
+import Cart from "./page/Cart";
 
 const darkTheme = {
   components: {
@@ -48,15 +50,6 @@ const darkTheme = {
       colorBgElevated: "#3a3a3a",
       optionSelectedColor: "#ffffff",
       optionSelectedBg: "#4a4a4a",
-    },
-    Checkbox: {
-      colorBgContainer: "#1f1f1f", // 체크박스 배경색
-      colorText: "#e6e6e6", // 체크박스 텍스트 색상
-      colorBorder: "#595959", // 기본 테두리 색상
-      colorPrimary: "#ff7875", // 기본 체크 상태 색상
-      colorChecked: "#ff7875", // 체크된 상태 색상
-      colorHover: "#ff9a8d", // 호버 시 색상
-      controlOutline: "transparent", // 포커스 아웃라인 제거
     },
     Radio: {
       colorBgContainer: "#1f1f1f",
@@ -117,15 +110,6 @@ const lightTheme = {
       optionSelectedColor: "#000000",
       optionSelectedBg: "#f0f0f0",
     },
-    Checkbox: {
-      colorBgContainer: "#ffffff",
-      colorText: "#000000",
-      colorBorder: "#d9d9d9",
-      colorPrimary: "#ff7875", // 기본 체크 상태 색상
-      colorChecked: "#ff7875", // 체크된 상태 색상
-      colorHover: "#ff9a8d", // 호버 시 색상
-      controlOutline: "transparent", // 포커스 아웃라인 제거
-    },
     Radio: {
       colorBgContainer: "#ffffff",
       colorText: "#000000",
@@ -178,11 +162,6 @@ function App() {
       >
         <div>
           <Row>
-            <FloatButton.Group shape="circle" style={{ marginBottom: "54px" }}>
-              <FloatButton />
-              <FloatButton.BackTop visibilityHeight={0} />
-            </FloatButton.Group>
-
             {/* Main Content Section */}
             <div
               style={{
@@ -226,6 +205,24 @@ function App() {
               >
                 비대면 어덜트토이 플랫폼
               </Typography.Text>
+              {window.location.pathname === "/cart" ? (
+                <Typography.Title
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  장바구니
+                </Typography.Title>
+              ) : (
+                <Button
+                  style={{ position: "absolute", right: "10px" }}
+                  icon={<TruckOutlined />}
+                  size="large"
+                  href="/cart"
+                  shape="circle"
+                />
+              )}
             </div>
           </Row>
           <BrowserRouter>
@@ -242,6 +239,10 @@ function App() {
               <Route
                 path="/payment/result"
                 element={<PaymentResult branch={branch} />}
+              />
+              <Route
+                path="/cart"
+                element={<Cart token={localStorage.getItem("token")} />}
               />
               <Route
                 path="/*"

@@ -19,8 +19,30 @@ function Product(props) {
     setQuantity(quantity + 1);
   };
 
-  const handleAddToCart = () => {
-    message.success(`장바구니에 ${quantity}개가 추가되었습니다.`);
+  const handleAddToCart = async () => {
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/carts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token: localStorage.getItem("token"),
+        product_pk: product_pk,
+        count: quantity,
+        branch_pk: branch,
+        amount: quantity * parseInt(productData.product_price),
+      }),
+    });
+    const data = await response.json();
+    console.log(response);
+    if (response.status !== 201) {
+      const error = new Error(data.message);
+      error.response = data;
+      message.error(data.message);
+    } else {
+      console.log(data);
+      message.success("장바구니에 상품을 담았습니다.");
+    }
   };
 
   const handleBuyNow = () => {

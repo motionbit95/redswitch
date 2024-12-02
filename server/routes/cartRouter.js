@@ -61,12 +61,15 @@ router.use(cors());
 router.post("/", async (req, res) => {
   try {
     const cartData = req.body; // 요청 본문에서 데이터 가져오기
-    const newCartItem = new Cart(cartData);
-    const createdCartItem = await newCartItem.create();
-    res.status(201).json(createdCartItem); // 생성된 항목 반환
+
+    // 장바구니 항목 생성 또는 업데이트
+    const updatedCartItem = await Cart.createOrUpdate(cartData);
+
+    // 성공적으로 생성 또는 업데이트된 장바구니 항목 반환
+    res.status(201).json(updatedCartItem);
   } catch (error) {
-    console.error("Error creating cart item:", error);
-    res.status(500).json({ error: "Failed to create cart item" });
+    console.error("Error creating or updating cart item:", error);
+    res.status(500).json({ error: "Failed to create or update cart item" });
   }
 });
 
@@ -180,9 +183,19 @@ router.put("/:pk", async (req, res) => {
   try {
     const { pk } = req.params;
     const cartData = req.body;
-    const existingCartItem = await Cart.getByPk(pk);
 
-    Object.assign(existingCartItem, cartData); // 기존 데이터를 요청 본문의 데이터로 병합
+    console.log(cartData);
+
+    // Fetch the existing cart item
+    const existingCartItemData = await Cart.getByPk(pk);
+
+    // Create an instance of the Cart class with the existing data
+    const existingCartItem = new Cart(existingCartItemData);
+
+    // Merge the new cart data with the existing cart item
+    Object.assign(existingCartItem, cartData);
+
+    // Update the cart item
     const updatedCartItem = await existingCartItem.update();
 
     res.status(200).json(updatedCartItem);
