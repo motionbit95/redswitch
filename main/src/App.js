@@ -14,6 +14,7 @@ import {
   Button,
 } from "antd";
 import { Footer } from "./component/Footer";
+import Product from "./page/Product";
 
 const darkTheme = {
   components: {
@@ -168,7 +169,7 @@ function App() {
       >
         <div>
           <Row>
-            <FloatButton.Group shape="circle">
+            <FloatButton.Group shape="circle" style={{ marginBottom: "54px" }}>
               <FloatButton />
               <FloatButton.BackTop visibilityHeight={0} />
             </FloatButton.Group>
@@ -224,6 +225,10 @@ function App() {
                 path="/spot/*"
                 element={<MainPage branch={branch} theme={theme} />}
               />
+              <Route
+                path="/product/*"
+                element={<Product branch={branch} theme={theme} />}
+              />
               <Route path="/payment" element={<PaymentTest />} />
               <Route
                 path="/payment/result"
@@ -243,7 +248,6 @@ function App() {
             </Routes>
           </BrowserRouter>
         </div>
-        <Footer theme={theme} />
       </div>
     </ConfigProvider>
   );

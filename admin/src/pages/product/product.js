@@ -179,7 +179,7 @@ const ProductCRUD = () => {
       dataIndex: "related_products",
       key: "related_products",
       render: (text, record) => {
-        return record.related_products.length;
+        return record.related_products?.length;
       },
     },
     {

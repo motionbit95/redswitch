@@ -14,11 +14,12 @@ import { EnvironmentOutlined, WhatsAppOutlined } from "@ant-design/icons";
 import TabPane from "antd/es/tabs/TabPane";
 import ProductListPage from "./ProductListPage";
 import { useMediaQuery } from "react-responsive";
+import { Footer } from "../component/Footer";
 
 const { Search } = Input;
 
 function MainPage(props) {
-  const { branch } = props;
+  const { branch, theme } = props;
   const [branchInfo, setBranchInfo] = useState(null);
   const [selectedItemId, setSelectedItemId] = useState(null);
 
@@ -123,6 +124,7 @@ function MainPage(props) {
           style={{ marginTop: "100px" }}
         />
       )}
+      <Footer theme={theme} />
     </div>
   );
 }
