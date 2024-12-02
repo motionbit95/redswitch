@@ -75,6 +75,8 @@ router.put("/:id", async (req, res) => {
     const { id } = req.params;
     const updatedData = req.body;
 
+    console.log(updatedData);
+
     // 비밀번호는 해싱 필요
     if (updatedData.user_password) {
       updatedData.user_password = await bcrypt.hash(

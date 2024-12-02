@@ -66,19 +66,47 @@ const Account = () => {
   const handleEdit = (account) => {
     setCurrentAccount(account);
     form.setFieldsValue(account); // Set the form fields to current account values
+    setSelectedBranch([]); // 초기화
+    setSelectedProvider([]); // 초기화
+
+    /* 등록된 지점 데이터 검색 */
+    let branches = [];
+    account.branch_id?.forEach((branch) => {
+      AxiosGet(`/branches/${branch}`)
+        .then((response) => {
+          branches.push(response.data);
+          setSelectedBranch(branches);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
+
+    /* 등록된 거래처 데이터 검색 */
+    let providers = [];
+    account.provider_id?.forEach((provider) => {
+      AxiosGet(`/providers/${provider}`)
+        .then((response) => {
+          providers.push(response.data);
+          setSelectedProvider(providers);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
     setIsEditModalVisible(true);
   };
 
   // Handle form submit for account update
   const handleUpdate = async (values) => {
-    const provider_id = selectedProvider.map((provider) => provider.id);
+    const provider_id = selectedProvider?.map((provider) => provider.id);
     const branch_id = selectedBranch?.map((branch) => branch.id);
-    console.log(provider_id, branch_id);
+
     try {
       await AxiosPut(`/accounts/${currentAccount.id}`, {
+        ...values,
         provider_id: provider_id,
         branch_id: branch_id,
-        ...values,
       }); // Replace with your endpoint
       setAccounts(
         accounts.map((account) =>
