@@ -130,7 +130,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { user_id: user[userKey].user_id, user_name: user[userKey].user_name },
       JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "2h" }
     );
 
     res.status(200).send({
@@ -140,6 +140,126 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("로그인 오류:", error);
     res.status(500).send({ error: "로그인 실패" });
+  }
+});
+
+// 익명 로그인 엔드포인트
+/**
+ * @swagger
+ * /accounts/anonymous-login:
+ *   post:
+ *     tags:
+ *       - Account
+ *     summary: 익명 로그인
+ *     description: 익명 로그인을 위한 토큰 생성
+ *     responses:
+ *       200:
+ *         description: 로그인 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: 로그인 토큰
+ *       500:
+ *         description: 서버 오류
+ */
+router.post("/anonymous-login", (req, res) => {
+  try {
+    // 사용자 고유 식별자 생성 (UUID 또는 임의 값)
+    const userId = `anon_${Date.now()}`; // 예: anon_123456789
+
+    // JWT 토큰 생성
+    const token = jwt.sign({ userId }, JWT_SECRET, {
+      expiresIn: "2h",
+    });
+
+    // 토큰 반환
+    res.status(200).json({ token });
+  } catch (error) {
+    console.error("Error during anonymous login:", error);
+    res.status(500).json({ error: "Failed to create anonymous token" });
+  }
+});
+
+/**
+ * @swagger
+ * /accounts/verify-token:
+ *   post:
+ *     summary: Token 유효성 검증
+ *     description: 클라이언트가 보낸 JWT 토큰을 검증하여 유효한지 확인합니다.
+ *     tags:
+ *       - Account
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: "검증할 JWT 토큰"
+ *                 example: "your_jwt_token_here"
+ *     responses:
+ *       200:
+ *         description: Token이 유효함
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token verification successful"
+ *                 decodedToken:
+ *                   type: object
+ *                   description: "디코딩된 토큰 정보"
+ *       401:
+ *         description: Token이 유효하지 않거나 만료됨
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid or expired token"
+ *       400:
+ *         description: Token이 제공되지 않음
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Unauthorized, token missing"
+ */
+router.post("/verify-token", async (req, res) => {
+  try {
+    // req.body에서 token 추출
+    const token = req.body.token;
+
+    console.log(token); // 디버깅용 로그
+
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized, token missing" });
+    }
+
+    // JWT 토큰을 검증하고 디코딩
+    const decodedToken = jwt.verify(token, JWT_SECRET);
+
+    // 토큰 검증이 성공하면
+    res
+      .status(200)
+      .json({ message: "Token verification successful", decodedToken });
+  } catch (error) {
+    console.error("Error during token verification:", error);
+    // JWT 검증 실패 시
+    res.status(401).json({ error: "Invalid or expired token" });
   }
 });
 

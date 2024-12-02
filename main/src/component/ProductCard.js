@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Space, Typography, Image, Skeleton } from "antd";
+import { Space, Typography, Image, Skeleton, message } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
 function ProductCard({ product, ...props }) {
-  const { theme } = props;
+  const { theme, isCertified } = props;
   const [loading, setLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
@@ -19,6 +19,8 @@ function ProductCard({ product, ...props }) {
     return () => clearTimeout(timeout); // 컴포넌트가 언마운트될 때 타이머 정리
   }, []);
 
+  console.log(product);
+
   return (
     <div
       style={{
@@ -31,7 +33,13 @@ function ProductCard({ product, ...props }) {
         overflow: "hidden",
         cursor: "pointer",
       }}
-      onClick={() => navigate(`/product/${product.PK}`)}
+      onClick={() => {
+        if (isCertified) {
+          navigate(`/product/${product.PK}`);
+        } else {
+          message.warning("성인인증을 진행해주세요!");
+        }
+      }}
     >
       {/* 이미지 */}
       <div
@@ -42,7 +50,7 @@ function ProductCard({ product, ...props }) {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: theme === "dark" ? "#333" : "#f1f1f1",
+          //   backgroundColor: theme === "dark" ? "#333" : "#f1f1f1",
         }}
       >
         {/* Skeleton loader is shown if the image is loading or an error has occurred */}
@@ -58,14 +66,20 @@ function ProductCard({ product, ...props }) {
 
         {/* Actual image */}
         <Image
-          src={product.original_image}
+          src={
+            isCertified
+              ? product.original_image
+              : product.blurred_image
+              ? product.blurred_image
+              : product.original_image
+          }
           alt={product.name}
           preview={false}
           style={{
             width: "100%",
             height: "100%",
             aspectRatio: "1/1",
-            objectFit: "cover",
+            objectFit: "scale-down",
             display: loading || imageError ? "none" : "block", // Hide image until loaded
           }}
           onLoad={() => setLoading(false)} // Image loaded successfully

@@ -4,7 +4,7 @@ import CategoryFilter from "../component/CategoryFilter";
 import ProductCard from "../component/ProductCard";
 
 function ProductListPage(props) {
-  const { theme, branch } = props;
+  const { theme, branch, isCertified } = props;
   const [selectedItemId, setSelectedItemId] = useState("01");
   const [branchProducts, setBranchProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -143,7 +143,11 @@ function ProductListPage(props) {
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product, index) => (
                 <Col key={index} xs={12} sm={12} md={8} lg={6}>
-                  <ProductCard product={product} theme={theme} />
+                  <ProductCard
+                    product={product}
+                    theme={theme}
+                    isCertified={isCertified}
+                  />
                 </Col>
               ))
             ) : (

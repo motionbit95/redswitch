@@ -12,6 +12,7 @@ import {
   Typography,
   Result,
   Button,
+  Checkbox,
 } from "antd";
 import { Footer } from "./component/Footer";
 import Product from "./page/Product";
@@ -49,9 +50,13 @@ const darkTheme = {
       optionSelectedBg: "#4a4a4a",
     },
     Checkbox: {
-      colorBgContainer: "#1f1f1f",
-      colorText: "#e6e6e6",
-      colorBorder: "#595959",
+      colorBgContainer: "#1f1f1f", // 체크박스 배경색
+      colorText: "#e6e6e6", // 체크박스 텍스트 색상
+      colorBorder: "#595959", // 기본 테두리 색상
+      colorPrimary: "#ff7875", // 기본 체크 상태 색상
+      colorChecked: "#ff7875", // 체크된 상태 색상
+      colorHover: "#ff9a8d", // 호버 시 색상
+      controlOutline: "transparent", // 포커스 아웃라인 제거
     },
     Radio: {
       colorBgContainer: "#1f1f1f",
@@ -116,6 +121,10 @@ const lightTheme = {
       colorBgContainer: "#ffffff",
       colorText: "#000000",
       colorBorder: "#d9d9d9",
+      colorPrimary: "#ff7875", // 기본 체크 상태 색상
+      colorChecked: "#ff7875", // 체크된 상태 색상
+      colorHover: "#ff9a8d", // 호버 시 색상
+      controlOutline: "transparent", // 포커스 아웃라인 제거
     },
     Radio: {
       colorBgContainer: "#ffffff",
