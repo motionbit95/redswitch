@@ -1,10 +1,21 @@
-import React from "react";
-import { Form, Input, Button, InputNumber, Row, Col, message } from "antd";
+import React, { useState } from "react";
+import {
+  Form,
+  Input,
+  Button,
+  InputNumber,
+  Row,
+  Col,
+  message,
+  Modal,
+} from "antd";
 import { useMediaQuery } from "react-responsive";
+import { UpOutlined, LeftOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-const CenteredForm = () => {
-  const isMobile = useMediaQuery({ query: "(max-width: 600px)" });
+const CenteredForm = (props) => {
+  const { size } = props;
+  const [open, setOpen] = useState(false);
 
   const onFinish = async (values) => {
     console.log("Success:", values);
@@ -24,39 +35,61 @@ const CenteredForm = () => {
   };
 
   return (
-    <div
-      className="page"
-      style={{
-        alignItems: "flex-end",
-        width: "100%",
-      }}
-    >
+    <>
       <div
         style={{
-          width: "100%",
-          maxWidth: "400px",
-          padding: isMobile ? "16px" : "24px", // 모바일에서 패딩을 줄임
-          borderRadius: "8px",
-          backgroundColor: "#121212",
-          color: "#fff",
-          zIndex: 99,
-          marginBottom: isMobile ? "96px" : "64px",
+          position: "fixed",
+          bottom: size === "mobile" ? 0 : "50%",
+          right: 0,
+          zIndex: 999,
+          backgroundColor: "#333333",
+          width: size === "mobile" ? "100%" : "50px",
+          height: size === "mobile" ? "40px" : "200px",
+          textAlign: "center",
+          display: "flex",
+          flexDirection: size === "mobile" ? "row" : "column",
+          justifyContent: "center",
+          alignItems: "center",
+          border: "none",
+          borderRadius: size === "mobile" ? 0 : "8px",
+          color: "white",
+          cursor: "pointer",
         }}
       >
+        {size === "mobile" ? (
+          <>
+            <UpOutlined style={{ fontSize: "18px", marginRight: "8px" }} />
+            <div>가맹점 신청하기</div>
+          </>
+        ) : (
+          <>
+            <LeftOutlined style={{ fontSize: "24px", marginBottom: "8px" }} />
+            <div
+              style={{
+                writingMode: "vertical-rl",
+              }}
+            >
+              가맹점 신청하기
+            </div>
+          </>
+        )}
+      </div>
+
+      <Modal open={open} onCancel={() => setOpen(false)} width={500} centered>
         <Form
           layout="vertical"
           onFinish={onFinish}
           validateTrigger="onBlur"
-          style={{ gap: isMobile ? "8px" : "16px" }} // 모바일에서 Form.Item 간 간격 조절
+          style={{ gap: size ? "8px" : "16px" }} // 모바일에서 Form.Item 간 간격 조절
         >
-          <Row gutter={isMobile ? 8 : 16}>
+          <Row gutter={size ? 8 : 16}>
             <Col span={12}>
               <Form.Item
                 name="franchise_name"
                 rules={[
                   { required: true, message: "가맹점명을 입력해주세요." },
                 ]}
-                style={{ marginBottom: isMobile ? "8px" : "16px" }}
+                style={{ marginBottom: size ? "8px" : "16px" }}
               >
                 <Input placeholder="가맹점명" />
               </Form.Item>
@@ -67,13 +100,13 @@ const CenteredForm = () => {
                 rules={[
                   { required: true, message: "담당자 이름을 입력해주세요." },
                 ]}
-                style={{ marginBottom: isMobile ? "8px" : "16px" }}
+                style={{ marginBottom: size ? "8px" : "16px" }}
               >
                 <Input placeholder="담당자 이름" />
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={isMobile ? 8 : 16}>
+          <Row gutter={size ? 8 : 16}>
             <Col span={12}>
               <Form.Item
                 name="franchise_manager_phone"
@@ -83,7 +116,7 @@ const CenteredForm = () => {
                     message: "담당자 전화번호를 입력해주세요.",
                   },
                 ]}
-                style={{ marginBottom: isMobile ? "8px" : "16px" }}
+                style={{ marginBottom: size ? "8px" : "16px" }}
               >
                 <Input placeholder="담당자 전화번호" />
               </Form.Item>
@@ -92,13 +125,16 @@ const CenteredForm = () => {
               <Form.Item
                 name="franchise_manager_email"
                 rules={[
-                  { required: true, message: "담당자 이메일을 입력해주세요." },
+                  {
+                    required: true,
+                    message: "담당자 이메일을 입력해주세요.",
+                  },
                   {
                     type: "email",
                     message: "이메일 형식이 올바르지 않습니다.",
                   },
                 ]}
-                style={{ marginBottom: isMobile ? "8px" : "16px" }}
+                style={{ marginBottom: size ? "8px" : "16px" }}
               >
                 <Input placeholder="담당자 이메일" />
               </Form.Item>
@@ -108,7 +144,7 @@ const CenteredForm = () => {
           <Form.Item
             name="franchise_address"
             rules={[{ required: true, message: "가맹점 주소를 입력해주세요." }]}
-            style={{ marginBottom: isMobile ? "8px" : "16px" }}
+            style={{ marginBottom: size ? "8px" : "16px" }}
           >
             <Input placeholder="가맹점 주소" />
           </Form.Item>
@@ -116,7 +152,7 @@ const CenteredForm = () => {
           <Form.Item
             name="franchise_room_cnt"
             rules={[{ required: true, message: "객실 수를 입력해주세요." }]}
-            style={{ marginBottom: isMobile ? "8px" : "16px" }}
+            style={{ marginBottom: size ? "8px" : "16px" }}
           >
             <InputNumber
               style={{
@@ -132,8 +168,8 @@ const CenteredForm = () => {
             </Button>
           </Form.Item>
         </Form>
-      </div>
-    </div>
+      </Modal>
+    </>
   );
 };
 

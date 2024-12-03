@@ -16,11 +16,36 @@ function Nav(props) {
         width: "100%",
       }}
     >
-      <Typography.Link style={navStyle}>MAIN</Typography.Link>
-      <Typography.Link style={navStyle}>INTRO</Typography.Link>
-      <Typography.Link style={navStyle}>SERVICE</Typography.Link>
-      <Typography.Link style={navStyle}>CUSTOMER</Typography.Link>
-      <Typography.Link style={navStyle}>CONTACT</Typography.Link>
+      <Typography.Link
+        style={navStyle}
+        onClick={() => (window.location.hash = "#1")}
+      >
+        MAIN
+      </Typography.Link>
+      <Typography.Link
+        style={navStyle}
+        onClick={() => (window.location.hash = "#2")}
+      >
+        INTRO
+      </Typography.Link>
+      <Typography.Link
+        style={navStyle}
+        onClick={() => (window.location.hash = "#5")}
+      >
+        SERVICE
+      </Typography.Link>
+      <Typography.Link
+        style={navStyle}
+        onClick={() => (window.location.hash = "#9")}
+      >
+        CUSTOMER
+      </Typography.Link>
+      <Typography.Link
+        style={navStyle}
+        onClick={() => (window.location.hash = "#10")}
+      >
+        CONTACT
+      </Typography.Link>
     </Space>
   );
 }

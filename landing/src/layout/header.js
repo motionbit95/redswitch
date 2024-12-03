@@ -22,7 +22,10 @@ function Header(props) {
         paddingBlock: "16px",
       }}
     >
-      <Col span={size === "mobile" ? 24 : 8}>
+      <Col
+        span={size === "mobile" ? 24 : 8}
+        onClick={() => (window.location.hash = "#1")}
+      >
         <Logo {...props} />
       </Col>
       <Col span={size === "mobile" ? 24 : 16}>

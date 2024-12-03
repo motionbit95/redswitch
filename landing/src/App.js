@@ -21,10 +21,10 @@ import Header from "./layout/header";
 import Link from "antd/es/typography/Link";
 import Scroll from "./component/scroll";
 import Content from "./layout/content";
-import { Intro1 } from "./page/intro";
+import { Customer } from "./page/Pages";
 
 let options = {
-  anchors: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
+  anchors: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
   navigation: false,
   fitToSection: true,
 };
@@ -37,6 +37,13 @@ function App(props) {
   const size = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
 
   useEffect(() => {
+    // URL의 hash가 첫 번째 앵커로 설정되지 않은 경우 변경
+    if (window.location.hash !== "#1") {
+      window.location.hash = "#1";
+    }
+  }, []);
+
+  useEffect(() => {
     window.addEventListener("resize", () => {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty("--vh", `${vh}px`);
@@ -46,18 +53,23 @@ function App(props) {
       window.removeEventListener("resize", () => {});
     };
   }, []);
+
   return (
     <div
       style={{
         minWidth: "300px",
+        height: "100vh",
+        overflow: "hidden",
+        position: "relative",
       }}
     >
       <Header size={size} />
       <Scroll size={size} />
       <SectionsContainer {...options}>
         <Section>
-          <Page pageNumber={1} groupNumber={3}>
-            <Intro1 size={size} />
+          <Page>
+            {/* <Main size={size} /> */}
+            <img src={img1} alt="main" className="image" />
           </Page>
         </Section>
         <Section>
@@ -67,27 +79,32 @@ function App(props) {
         </Section>
         <Section>
           <Page pageNumber={2} groupNumber={3}>
+            {/* <Intro2 size={size} /> */}
             <img src={img3} alt="intro2" className="image" />
           </Page>
         </Section>
         <Section>
           <Page pageNumber={3} groupNumber={3}>
             <img src={img4} alt="intro3" className="image" />
+            {/* <Intro3 size={size} /> */}
           </Page>
         </Section>
         <Section>
           <Page pageNumber={1} groupNumber={4}>
             <img src={img5} alt="service1" className="image" />
+            {/* <Service1 size={size} /> */}
           </Page>
         </Section>
         <Section>
           <Page pageNumber={2} groupNumber={4}>
             <img src={img6} alt="service2" className="image" />
+            {/* <Service2 size={size} /> */}
           </Page>
         </Section>
         <Section>
           <Page pageNumber={3} groupNumber={4}>
             <img src={img7} alt="service3" className="image" />
+            {/* <Service3 size={size} /> */}
           </Page>
         </Section>
         <Section>
@@ -97,13 +114,8 @@ function App(props) {
         </Section>
         <Section>
           <Page>
-            <img src={img9} alt="customer" className="image" />
-          </Page>
-        </Section>
-        <Section>
-          <Page>
-            <img src={img10} alt="contact" className="image" />
-            <CenteredForm />
+            {/* <img src={img9} alt="customer" className="image" /> */}
+            <Customer size={size} />
           </Page>
         </Section>
         <Section>
@@ -112,6 +124,7 @@ function App(props) {
           </Page>
         </Section>
       </SectionsContainer>
+      <CenteredForm size={size} />
       <InstagramButton />
     </div>
   );
