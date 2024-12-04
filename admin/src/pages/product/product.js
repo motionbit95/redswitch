@@ -81,18 +81,21 @@ const ProductCRUD = () => {
         });
 
       if (product.related_products && product.related_products.length > 0) {
-        let relatedProducts = [];
-        product.related_products.forEach((element) => {
-          console.log(element);
-          AxiosGet(`/products/materials/${element}`)
-            .then((response) => {
-              relatedProducts.push(response.data);
-              setRelatedProducts(relatedProducts);
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        });
+        const relatedProductsPromises = product.related_products.map(
+          (element) =>
+            AxiosGet(`/products/materials/${element}`).then(
+              (response) => response.data
+            )
+        );
+
+        // 모든 관련 제품의 데이터가 완료되면
+        Promise.all(relatedProductsPromises)
+          .then((relatedProductsData) => {
+            setRelatedProducts(relatedProductsData); // 한 번에 상태 업데이트
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       }
     }
     setIsModalVisible(true);
@@ -106,37 +109,76 @@ const ProductCRUD = () => {
   // 상품 추가/수정 처리
   const handleOk = async () => {
     if (!selectedProduct) {
-      message.error("상품를 선택해주세요.");
+      message.error("상품을 선택해주세요.");
       return;
     }
 
     try {
       const values = await form.validateFields();
-
       console.log(values);
-      if (currentProduct) {
-        // 수정
-        await AxiosPut(`/products/${currentProduct.PK}`, values);
-        message.success("상품이 수정되었습니다.");
-      } else {
-        // 추가
-        let relatedProductPKs = relatedProducts.map((product) => product.pk);
 
-        await AxiosPost("/products", {
-          ...values, // 폼에 입력 되는 정보 - 상품명, 가격, 수수료, 상세 설명
-          product_code: selectedProduct.product_code, // description에 입력 되는 정보 - 상품 코드
-          origin_price: selectedProduct.product_sale, // description에 입력되는 정보 - 상품 원가
-          thumbnail: selectedProduct.product_image, // description에 입력되는 정보 - 상품 이미지
+      // 추가 로직
+      let relatedProductPKs = relatedProducts.map((product) => product.pk);
+      console.log(relatedProductPKs);
+
+      // 수정 로직
+      if (currentProduct) {
+        const updatedProduct = {
+          ...values, // 폼에서 입력된 데이터
+          product_code: selectedProduct.product_code, // 상품 코드
+          origin_price: selectedProduct.product_sale, // 상품 원가
+          thumbnail: selectedProduct.original_image, // 상품 이미지
           material_id: selectedProduct.pk, // 물자 pk
-          blurred_image: "",
+          blurred_image: selectedProduct.blurred_image
+            ? selectedProduct.blurred_image
+            : selectedProduct.original_image, // 수정할 이미지
+          branch_id: selectedBranch.id, // 지점 ID
+          related_products: relatedProductPKs, // 관련 상품 ID 리스트
+        };
+
+        console.log(updatedProduct);
+
+        // 수정 요청: 현재 상품 PK로 수정 처리
+        const response = await AxiosPut(
+          `/products/${currentProduct.PK}`,
+          updatedProduct
+        );
+
+        if (response.status === 200) {
+          message.success("상품이 수정되었습니다.");
+          fetchProducts(); // 상품 목록 다시 불러오기
+          setIsModalVisible(false); // 모달 닫기
+        } else {
+          message.error("상품 수정 실패");
+        }
+      } else {
+        const newProduct = {
+          ...values, // 폼에 입력된 데이터
+          product_code: selectedProduct.product_code,
+          origin_price: selectedProduct.product_sale,
+          thumbnail: selectedProduct.original_image,
+          material_id: selectedProduct.pk,
+          blurred_image: selectedProduct.blurred_image
+            ? selectedProduct.blurred_image
+            : selectedProduct.original_image, // 수정할 이미지
           branch_id: selectedBranch.id,
-          related_products: relatedProductPKs,
-        });
-        message.success("상품이 추가되었습니다.");
+          related_products: relatedProductPKs, // 추가된 관련 상품들
+        };
+
+        console.log(newProduct);
+
+        const response = await AxiosPost("/products", newProduct);
+
+        if (response.status === 201) {
+          message.success("상품이 추가되었습니다.");
+          fetchProducts(); // 상품 목록 다시 불러오기
+          setIsModalVisible(false); // 모달 닫기
+        } else {
+          message.error("상품 추가 실패");
+        }
       }
-      fetchProducts();
-      setIsModalVisible(false);
     } catch (error) {
+      console.error(error);
       message.error("상품을 처리하는 데 실패했습니다.");
     }
   };

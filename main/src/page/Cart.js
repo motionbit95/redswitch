@@ -12,15 +12,39 @@ import {
 } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { cartStyles } from "../styles"; // Import the styles
+import ProductCard from "../component/ProductCard";
 
 const { Text } = Typography;
 
-const Cart = ({ token }) => {
+const Cart = ({ token, theme }) => {
   const [cartData, setCartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+
+  const fetchProducts = async (list) => {
+    try {
+      // 모든 비동기 요청을 Promise 배열로 처리
+      const relatedProductsPromises = list?.map(async (item) => {
+        const response = await fetch(
+          `${process.env.REACT_APP_SERVER_URL}/products/materials/${item}`
+        );
+        const data = await response.json();
+        console.log(data);
+        return { ...data, product_price: data.product_sale };
+      });
+
+      // 모든 Promise가 완료된 후 관련 제품 배열을 설정
+      const relatedProductsData = await Promise.all(relatedProductsPromises);
+
+      // 상태 업데이트
+      setRelatedProducts(relatedProductsData);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -32,8 +56,6 @@ const Cart = ({ token }) => {
         );
         const data = await response.json();
 
-        console.log(data);
-
         if (response.status === 200) {
           const cartData = await Promise.all(
             data.map(async (item) => {
@@ -44,6 +66,20 @@ const Cart = ({ token }) => {
               return { ...item, ...product };
             })
           );
+
+          let related_products = [];
+
+          cartData.forEach((item) => {
+            if (item.related_products) {
+              item.related_products.forEach((related_product) => {
+                if (!related_products.includes(related_product)) {
+                  related_products.push(related_product);
+                }
+              });
+            }
+          });
+
+          fetchProducts(related_products);
 
           setCartData(cartData);
           setSelectedItems(cartData.map((item) => item.pk));
@@ -209,6 +245,13 @@ const Cart = ({ token }) => {
 
       <div style={cartStyles.relatedProducts}>
         <Text style={cartStyles.relatedProductsText}>연관상품</Text>
+        <Row gutter={[16, 16]} justify="flex-start">
+          {relatedProducts.map((product, index) => (
+            <Col key={index} xs={12} sm={12} md={8} lg={6}>
+              <ProductCard product={product} theme={theme} isCertified={true} />
+            </Col>
+          ))}
+        </Row>
       </div>
 
       <div style={cartStyles.footer}>

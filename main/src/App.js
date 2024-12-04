@@ -247,7 +247,9 @@ function App() {
               />
               <Route
                 path="/cart"
-                element={<Cart token={localStorage.getItem("token")} />}
+                element={
+                  <Cart token={localStorage.getItem("token")} theme={theme} />
+                }
               />
               <Route
                 path="/*"

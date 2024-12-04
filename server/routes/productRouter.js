@@ -1662,6 +1662,7 @@ router.put("/:PK", async (req, res) => {
       product_image,
       blurred_image,
       options,
+      related_products,
     } = req.body;
 
     const product = new Product({
@@ -1673,6 +1674,7 @@ router.put("/:PK", async (req, res) => {
       product_image,
       blurred_image,
       options,
+      related_products,
     });
     const updatedProduct = await product.update();
     res.status(200).json(updatedProduct);
