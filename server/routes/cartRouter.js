@@ -184,8 +184,6 @@ router.put("/:pk", async (req, res) => {
     const { pk } = req.params;
     const cartData = req.body;
 
-    console.log(cartData);
-
     // Fetch the existing cart item
     const existingCartItemData = await Cart.getByPk(pk);
 

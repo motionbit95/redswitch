@@ -316,6 +316,7 @@ class Product {
     this.updated_at = data.updated_at || null;
     this.related_products = data.related_products || [];
     this.additional_fee = data.additional_fee || 0;
+    this.options = data.options || [];
   }
 
   toJSON() {
@@ -331,6 +332,7 @@ class Product {
       updated_at: this.updated_at,
       related_products: this.related_products,
       additional_fee: this.additional_fee,
+      options: this.options,
     };
   }
 

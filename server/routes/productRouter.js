@@ -1540,6 +1540,7 @@ router.get("/search/:branch_id", async (req, res) => {
   try {
     const { branch_id } = req.params;
     const products = await Product.searchByBranchId(branch_id);
+    console.log("products: ", products);
     res.status(200).json(products);
   } catch (error) {
     console.error("상품 조회 오류:", error);
@@ -1574,6 +1575,7 @@ router.get("/:PK", async (req, res) => {
   try {
     const { PK } = req.params;
     const product = await Product.getByPK(PK);
+    console.log("product: ", product);
     res.status(200).json(product);
   } catch (error) {
     console.error("상품 조회 오류:", error);
@@ -1659,6 +1661,7 @@ router.put("/:PK", async (req, res) => {
       product_price,
       product_image,
       blurred_image,
+      options,
     } = req.body;
 
     const product = new Product({
@@ -1669,6 +1672,7 @@ router.put("/:PK", async (req, res) => {
       product_price,
       product_image,
       blurred_image,
+      options,
     });
     const updatedProduct = await product.update();
     res.status(200).json(updatedProduct);

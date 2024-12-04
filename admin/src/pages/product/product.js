@@ -19,6 +19,7 @@ import {
 } from "antd";
 import {
   PlusOutlined,
+  MinusCircleOutlined,
   EditOutlined,
   DeleteOutlined,
   UploadOutlined,
@@ -111,6 +112,8 @@ const ProductCRUD = () => {
 
     try {
       const values = await form.validateFields();
+
+      console.log(values);
       if (currentProduct) {
         // 수정
         await AxiosPut(`/products/${currentProduct.PK}`, values);
@@ -410,6 +413,72 @@ const ProductCRUD = () => {
             <Col span={24}>
               <Form.Item label="상품 상세 설명" name="product_detail">
                 <ToastEditor initialValue={currentProduct?.product_detail} />
+              </Form.Item>
+            </Col>
+
+            <Col span={24}>
+              <Form.Item
+                label="상품 옵션"
+                tooltip="옵션 이름과 가격을 입력하세요."
+              >
+                <Form.List name="options">
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, fieldKey, ...restField }) => (
+                        <Space
+                          key={key}
+                          style={{ display: "flex", marginBottom: 8 }}
+                          align="baseline"
+                        >
+                          <Form.Item
+                            {...restField}
+                            name={[name, "optionName"]}
+                            fieldKey={[fieldKey, "optionName"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "옵션 이름을 입력하세요.",
+                              },
+                            ]}
+                          >
+                            <Input placeholder="옵션 이름" />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "optionPrice"]}
+                            fieldKey={[fieldKey, "optionPrice"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "옵션 가격을 입력하세요.",
+                              },
+                              {
+                                pattern: /^[0-9]*$/,
+                                message: "숫자만 입력 가능합니다.",
+                              },
+                            ]}
+                          >
+                            <InputNumber
+                              placeholder="옵션 가격"
+                              style={{ width: 120 }}
+                            />
+                          </Form.Item>
+                          <MinusCircleOutlined onClick={() => remove(name)} />
+                        </Space>
+                      ))}
+                      <Form.Item>
+                        <Button
+                          type="dashed"
+                          onClick={() => add()}
+                          block
+                          icon={<PlusOutlined />}
+                        >
+                          옵션 추가
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
               </Form.Item>
             </Col>
 

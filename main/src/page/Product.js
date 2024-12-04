@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Button, Descriptions, Divider, InputNumber, message } from "antd";
+import {
+  Button,
+  Checkbox,
+  Descriptions,
+  Divider,
+  InputNumber,
+  message,
+  Radio,
+  Typography,
+} from "antd";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import { useMediaQuery } from "react-responsive";
 import {
@@ -18,12 +27,29 @@ function Product({ branch, theme }) {
   const [productData, setProductData] = useState(null);
   const [materialData, setMaterialData] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [selectedOptions, setSelectedOptions] = useState([]); // 선택된 옵션 저장
+  const [showOptions, setShowOptions] = useState(false);
   const isLarge = useMediaQuery({ minWidth: 780 });
 
   const handleDecrement = () => quantity > 1 && setQuantity(quantity - 1);
   const handleIncrement = () => setQuantity(quantity + 1);
 
+  const handleOptionChange = (checkedValues) => {
+    setSelectedOptions(
+      checkedValues.map((id) =>
+        productData.options.find((option) => option.id === id)
+      )
+    );
+  };
+
   const handleAddToCart = async () => {
+    if (productData?.options?.length && !showOptions) {
+      // 옵션 선택이 필요한 경우 옵션 UI 표시
+      setShowOptions(true);
+      return;
+    }
+
+    // 옵션 선택 완료 후 장바구니에 추가
     try {
       const response = await fetch(
         `${process.env.REACT_APP_SERVER_URL}/carts`,
@@ -36,6 +62,7 @@ function Product({ branch, theme }) {
             count: quantity,
             branch_pk: branch,
             amount: quantity * parseInt(productData.product_price),
+            option: selectedOptions,
           }),
         }
       );
@@ -52,7 +79,15 @@ function Product({ branch, theme }) {
     }
   };
 
-  const handleBuyNow = () => message.success(`바로 구매: ${quantity}개`);
+  const handleBuyNow = () => {
+    if (productData?.options?.length && !selectedOptions) {
+      message.error("옵션을 선택해주세요.");
+      setShowOptions(true);
+      return;
+    }
+
+    message.success(`바로 구매: ${quantity}개`);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,6 +97,8 @@ function Product({ branch, theme }) {
         );
         const product = await productResponse.json();
         setProductData(product);
+
+        console.log(product);
 
         const materialResponse = await fetch(
           `${process.env.REACT_APP_SERVER_URL}/products/materials/${product.material_id}`
@@ -139,6 +176,7 @@ function Product({ branch, theme }) {
           </div>
         )}
       </div>
+
       {/* 상품 상세 정보 */}
       <div
         style={{
@@ -167,23 +205,108 @@ function Product({ branch, theme }) {
         }
       `}</style>
 
+      {/* 하단 고정 버튼 및 옵션 선택 */}
       <div style={fixedBottomStyle(theme)}>
-        <Button
-          size="large"
-          onClick={handleAddToCart}
-          style={{ width: "100%" }}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            width: "100%",
+          }}
         >
-          장바구니에 추가
-        </Button>
-        <Button
-          size="large"
-          type="primary"
-          danger
-          onClick={handleBuyNow}
-          style={{ width: "100%" }}
-        >
-          바로 구매하기
-        </Button>
+          {showOptions && productData?.options?.length > 0 && (
+            <div
+              style={{
+                marginBottom: "10px",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Typography.Text
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "large",
+                  marginBottom: "10px",
+                }}
+              >
+                옵션 선택
+              </Typography.Text>
+              <Checkbox.Group
+                style={{ width: "100%" }}
+                onChange={handleOptionChange}
+              >
+                {productData.options.map((option) => (
+                  <Checkbox key={option.id} value={option.id}>
+                    {option.optionName} (+
+                    {parseInt(option.optionPrice).toLocaleString()}원)
+                  </Checkbox>
+                ))}
+              </Checkbox.Group>
+              <Divider />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Typography.Text
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "large",
+                    marginBottom: "10px",
+                  }}
+                >
+                  예상 결제금액
+                </Typography.Text>
+                <Typography.Text
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "large",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {(
+                    parseInt(quantity) * parseInt(productData.product_price) +
+                    selectedOptions.reduce(
+                      (total, option) => total + option.optionPrice,
+                      0
+                    )
+                  ).toLocaleString()}
+                  원
+                </Typography.Text>
+              </div>
+            </div>
+          )}
+
+          {/* 버튼 그룹 */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "10px",
+              width: "100%",
+            }}
+          >
+            <Button
+              size="large"
+              onClick={handleAddToCart}
+              style={{ width: "100%" }}
+            >
+              장바구니에 추가
+            </Button>
+            <Button
+              size="large"
+              type="primary"
+              danger
+              onClick={handleBuyNow}
+              style={{ width: "100%" }}
+            >
+              바로 구매하기
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

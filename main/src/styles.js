@@ -204,6 +204,7 @@ export const cartStyles = {
     display: "flex",
     flexDirection: "column",
     gap: "20px",
+    paddingBottom: "130px",
   },
 
   cartContainer: {
@@ -297,6 +298,7 @@ export const cartStyles = {
     zIndex: 9999,
     boxShadow: "0 -2px 5px rgba(0, 0, 0, 0.1)",
     gap: "10px",
+    backgroundColor: "white",
   },
 
   footerContent: {
@@ -385,7 +387,7 @@ export const fixedBottomStyle = (theme) => ({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  padding: "20px 10px",
+  padding: "20px",
   backgroundColor: theme === "dark" ? "#1e1e1e" : "white",
   color: theme === "dark" ? "white" : "black",
   zIndex: 9999,

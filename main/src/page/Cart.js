@@ -32,6 +32,8 @@ const Cart = ({ token }) => {
         );
         const data = await response.json();
 
+        console.log(data);
+
         if (response.status === 200) {
           const cartData = await Promise.all(
             data.map(async (item) => {
@@ -155,9 +157,6 @@ const Cart = ({ token }) => {
                       size={8}
                       style={cartStyles.productSpace}
                     >
-                      <Text strong style={cartStyles.productPrice}>
-                        {(item.amount * item.count).toLocaleString()} 원
-                      </Text>
                       <Space>
                         <Text>수량:</Text>
                         <InputNumber
@@ -169,9 +168,34 @@ const Cart = ({ token }) => {
                           style={cartStyles.inputNumber}
                         />
                       </Space>
+                      <Text strong style={cartStyles.productPrice}>
+                        {(
+                          (item.amount +
+                            (item.option
+                              ? item.option.reduce(
+                                  (total, option) => total + option.optionPrice,
+                                  0
+                                )
+                              : 0)) *
+                          item.count
+                        ).toLocaleString()}{" "}
+                        원
+                      </Text>
                     </Space>
                   </div>
                 </div>
+                {item.option && item.option.length > 0 && (
+                  <div style={{ opacity: 0.5, marginTop: "10px" }}>
+                    옵션 :{" "}
+                    {item.option.map((option, index) => (
+                      <span key={index}>
+                        {option.optionName}
+                        {`(+${option.optionPrice}원)`}
+                        {index !== item.option.length - 1 && " / "}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </Card>
             </Col>
           ))}

@@ -2,6 +2,19 @@ const admin = require("firebase-admin");
 const database = admin.database();
 const cartRef = database.ref("carts");
 
+const areObjectsEqual = (obj1, obj2) => {
+  // obj1 또는 obj2가 배열이고, 빈 배열이라면 true 반환
+  if (
+    (Array.isArray(obj1) && obj1.length === 0 && obj2 === undefined) ||
+    (Array.isArray(obj2) && obj2.length === 0 && obj1 === undefined)
+  ) {
+    return true;
+  }
+
+  // 기본적인 객체 비교: JSON.stringify로 변환하여 비교
+  return JSON.stringify(obj1) === JSON.stringify(obj2);
+};
+
 class Cart {
   constructor(data) {
     this.pk = data.pk || null; // 기본 키
@@ -40,14 +53,19 @@ class Cart {
       throw new Error("Failed to fetch cart item");
     }
   }
-
   // Create or Update a cart item
   static async createOrUpdate(cartData) {
     try {
       // 이미 장바구니에 해당 상품이 있는지 확인
       const existingCartItems = await Cart.getAllByToken(cartData.token);
       const existingItem = existingCartItems.find(
-        (item) => item.product_pk === cartData.product_pk
+        (item) =>
+          item.product_pk === cartData.product_pk &&
+          areObjectsEqual(item.option, cartData.option)
+      );
+
+      existingCartItems.find((item) =>
+        areObjectsEqual(item.option, cartData.option)
       );
 
       if (existingItem) {
@@ -60,6 +78,7 @@ class Cart {
         return updatedCart;
       } else {
         // 장바구니에 해당 상품이 없으면 새 항목 생성
+        console.log("cartData", cartData);
         const newCartItem = new Cart(cartData);
         return await newCartItem.create();
       }
