@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Button, Col, Input, Row, Space } from "antd";
+import { useLocation } from "react-router-dom";
 
 const random = (length = 8) => {
   return Math.random().toString(16).substr(2, length);
 };
+
 //${process.env.REACT_APP_SERVER_URL}/payment/payCancel?tid=${order.tid}&ordNo=${order.ordNo}&canAmt=${order.goodsAmt}&ediDate=${order.ediDate}
-const PaymentTest = () => {
+const Payment = () => {
+  const location = useLocation();
   const [queryParams, setQueryParams] = useState({});
   const [amount, setAmount] = useState(0);
   const [order, setOrder] = useState({
@@ -14,7 +17,64 @@ const PaymentTest = () => {
     ordNo: "",
     amt: "",
     ediDate: "",
+    goodsNm: "", // 상품 이름을 저장할 필드
+    ...location.state.order,
   });
+
+  const [branchInfo, setBranchInfo] = useState(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+
+    console.log(order);
+
+    // 지점 정보 가져오기
+    const fetchBranchInfo = async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}/branches/${localStorage.getItem(
+          "branch"
+        )}`
+      );
+      const data = await response.json();
+      console.log(data);
+      if (response.status !== 200) {
+        const error = new Error(data.message);
+        error.response = data;
+        setBranchInfo(null);
+      } else {
+        setBranchInfo(data);
+      }
+    };
+
+    // 상품 정보 가져오기
+    const fetchProducts = async () => {
+      let productNames = [];
+      if (order.products) {
+        for (const item of order.products) {
+          const response = await fetch(
+            `${process.env.REACT_APP_SERVER_URL}/products/${item.product_pk}`
+          );
+          const data = await response.json();
+          console.log(data);
+
+          if (response.status === 200) {
+            productNames.push(data.product_name);
+          }
+        }
+      }
+
+      // 상품 이름들을 goodsNm에 할당
+      setOrder((prevOrder) => ({
+        ...prevOrder,
+        goodsNm: productNames.join(" / "), // 상품 이름들을 콤마로 구분하여 문자열로 저장
+      }));
+    };
+
+    fetchProducts();
+    fetchBranchInfo();
+
+    console.log("주문", order);
+  }, [order.products]); // order.products 변경 시마다 실행되도록 의존성 배열 설정
 
   useEffect(() => {
     if (window.location.search) {
@@ -61,8 +121,19 @@ const PaymentTest = () => {
   return (
     <div style={{ padding: 16 }}>
       <Row gutter={[16, 16]}>
-        <Col span={12}>
+        <Col span={24}>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: "large", fontWeight: "bold" }}>
+              {branchInfo?.branch_name}
+            </div>
+            <div style={{ fontSize: "small", opacity: 0.5 }}>
+              {branchInfo?.branch_address}
+            </div>
+          </div>
+
           <Space direction="vertical" style={{ width: "100%" }}>
+            <Input placeholder="호실을 입력해주세요." />
+
             <Input
               placeholder="금액을 입력하세요."
               value={amount}
@@ -76,7 +147,7 @@ const PaymentTest = () => {
             )}
           </Space>
         </Col>
-        <Col span={12}>
+        {/* <Col span={12}>
           <Space direction="vertical" style={{ width: "100%" }}>
             <Input
               placeholder="TID(tid)를 입력하세요."
@@ -100,10 +171,10 @@ const PaymentTest = () => {
             />
             <Button onClick={cancelPayment}>결제취소</Button>
           </Space>
-        </Col>
+        </Col> */}
       </Row>
     </div>
   );
 };
 
-export default PaymentTest;
+export default Payment;

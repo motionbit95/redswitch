@@ -35,7 +35,7 @@ function View(props) {
         >
           <Image
             src={require(`../assets/bdsm_type/${i + 1}.jpg`)}
-            style={{ border: "1px solid #8c8c8c" }}
+            style={{ border: "1px solid #8c8c8c", objectFit: "scale-down" }}
           />
         </div>
       </Col>

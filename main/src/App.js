@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import PaymentTest from "./page/Payment";
+import Payment from "./page/Payment";
 import PaymentResult from "./page/PaymentResult";
 import MainPage from "./page/MainPage";
 import { useEffect, useState } from "react";
@@ -210,24 +210,18 @@ function App() {
               >
                 비대면 어덜트토이 플랫폼
               </Typography.Text>
-              {window.location.pathname === "/cart" ? (
-                <Typography.Title
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  장바구니
-                </Typography.Title>
-              ) : (
-                <Button
-                  style={{ position: "absolute", right: "10px" }}
-                  icon={<TruckOutlined />}
-                  size="large"
-                  href="/cart"
-                  shape="circle"
-                />
-              )}
+              <Button
+                style={{
+                  display:
+                    window.location.pathname === "/cart" ? "none" : "flex",
+                  position: "absolute",
+                  right: "10px",
+                }}
+                icon={<TruckOutlined />}
+                size="large"
+                href="/cart"
+                shape="circle"
+              />
             </div>
           </Row>
           <BrowserRouter>
@@ -240,7 +234,7 @@ function App() {
                 path="/product/*"
                 element={<Product branch={branch} theme={theme} />}
               />
-              <Route path="/payment" element={<PaymentTest />} />
+              <Route path="/payment" element={<Payment />} />
               <Route
                 path="/payment/result"
                 element={<PaymentResult branch={branch} />}

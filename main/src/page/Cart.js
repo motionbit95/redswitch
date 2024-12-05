@@ -13,10 +13,12 @@ import {
 import { DeleteOutlined } from "@ant-design/icons";
 import { cartStyles } from "../styles"; // Import the styles
 import ProductCard from "../component/ProductCard";
+import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
 
 const Cart = ({ token, theme }) => {
+  const navigate = useNavigate();
   const [cartData, setCartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -158,6 +160,50 @@ const Cart = ({ token, theme }) => {
     return <div>Error: {error}</div>;
   }
 
+  // 랜덤 Unique Code 생성
+  async function generateRandomCode(length = 8) {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // 사용할 문자 집합
+    let code = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      code += characters[randomIndex];
+    }
+
+    return code;
+  }
+
+  const handleAddOrder = async () => {
+    const order = {
+      products: [],
+      amt: totalAmount,
+      ordNo: await generateRandomCode(),
+    };
+
+    cartData.forEach((item) => {
+      if (selectedItems.includes(item.pk)) {
+        order.products.push({
+          product_pk: item.product_pk,
+          count: item.count,
+          amount:
+            (item.amount +
+              (item.option
+                ? item.option.reduce(
+                    (total, option) => total + option.optionPrice,
+                    0
+                  )
+                : 0)) *
+            item.count,
+          option: item.option,
+        });
+      }
+    });
+
+    console.log(order);
+
+    navigate("/payment", { state: { order } });
+  };
+
   return (
     <div style={cartStyles.container}>
       <div style={cartStyles.cartContainer}>
@@ -270,7 +316,13 @@ const Cart = ({ token, theme }) => {
           </div>
         </div>
 
-        <Button size="large" type="primary" danger style={cartStyles.buyButton}>
+        <Button
+          size="large"
+          type="primary"
+          danger
+          style={cartStyles.buyButton}
+          onClick={handleAddOrder}
+        >
           총 {selectedItems.length}개 상품 구매하기
         </Button>
       </div>

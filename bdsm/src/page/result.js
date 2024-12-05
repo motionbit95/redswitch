@@ -13,6 +13,22 @@ function TestResult(props) {
   const navigate = useNavigate();
   // const anwers = location.state.answers;
 
+  const [materials, setMaterials] = useState([]);
+
+  useEffect(() => {
+    const fetchMaterial = async () => {
+      try {
+        const response = await AxiosGet("/products/materials");
+        console.log("Material fetched:", response.data);
+        setMaterials(response.data);
+      } catch (error) {
+        console.error("Error fetching material:", error);
+      }
+    };
+    // 상품 가지고 오기
+    fetchMaterial();
+  }, []);
+
   useEffect(() => {
     // console.log("answer!!!", anwers);
 
@@ -105,20 +121,25 @@ function TestResult(props) {
             내 성향에 맞는 성인용품은?
           </Typography.Title>
         </Col>
-        {Array.from({ length: 15 }, (_, index) => (
-          <Col span={8} key={index}>
-            <div
-              onClick={() => {
-                window.open("https://redswitch.kr");
-              }}
-              style={{
-                width: "100%",
-                aspectRatio: "1/1",
-                backgroundColor: "#d9d9d9",
-              }}
-            />
-          </Col>
-        ))}
+        {materials.map(
+          (material, index) =>
+            index < 15 && (
+              <Col span={8} key={index}>
+                <div
+                  onClick={() => {
+                    // window.open("https://redswitch.kr");
+                  }}
+                  style={{
+                    width: "100%",
+                    aspectRatio: "1/1",
+                    backgroundColor: "#d9d9d9",
+                    backgroundSize: "cover",
+                    backgroundImage: `url(${material?.original_image})`,
+                  }}
+                />
+              </Col>
+            )
+        )}
       </Row>
 
       <Footer theme={theme} />
