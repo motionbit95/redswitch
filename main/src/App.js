@@ -6,7 +6,7 @@ import MainPage from "./page/MainPage";
 import { useEffect, useState } from "react";
 import { ConfigProvider, Row, Space, Typography, Result, Button } from "antd";
 import Product from "./page/Product";
-import { TruckOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined } from "@ant-design/icons";
 import Cart from "./page/Cart";
 
 const darkTheme = {
@@ -166,11 +166,12 @@ function App() {
             <div
               style={{
                 width: "100%",
-                padding: "10px 10px 10px 10px",
+                padding: "10px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
+                position: "relative",
               }}
             >
               <Space
@@ -215,9 +216,9 @@ function App() {
                   display:
                     window.location.pathname === "/cart" ? "none" : "flex",
                   position: "absolute",
-                  right: "10px",
+                  right: "20px",
                 }}
-                icon={<TruckOutlined />}
+                icon={<ShoppingCartOutlined />}
                 size="large"
                 href="/cart"
                 shape="circle"

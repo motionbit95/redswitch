@@ -61,7 +61,7 @@ function Product({ branch, theme }) {
             product_pk,
             count: quantity,
             branch_pk: branch,
-            amount: quantity * parseInt(productData.product_price),
+            amount: parseInt(productData.product_price),
             option: selectedOptions,
           }),
         }

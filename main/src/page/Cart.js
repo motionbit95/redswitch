@@ -83,6 +83,8 @@ const Cart = ({ token, theme }) => {
 
           fetchProducts(related_products);
 
+          console.log(cartData);
+
           setCartData(cartData);
           setSelectedItems(cartData.map((item) => item.pk));
           setSelectAll(true);
@@ -201,7 +203,7 @@ const Cart = ({ token, theme }) => {
 
     console.log(order);
 
-    navigate("/payment", { state: { order } });
+    // navigate("/payment", { state: { order } });
   };
 
   return (

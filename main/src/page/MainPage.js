@@ -104,6 +104,9 @@ function MainPage(props) {
                 src={require("../asset/bdsm_banner.png")}
                 alt={"banner1"}
                 style={mainPageStyles.carouselImage}
+                onClick={() =>
+                  (window.location.href = "https://redswitch-bdsm.netlify.app")
+                }
               />
               <img
                 src={require("../asset/cert_banner.png")}
@@ -118,6 +121,9 @@ function MainPage(props) {
                 src={require("../asset/bdsm_banner.png")}
                 alt={"banner1"}
                 style={mainPageStyles.carouselImage}
+                onClick={() =>
+                  (window.location.href = "https://redswitch-bdsm.netlify.app")
+                }
               />
               <img
                 src={require("../asset/cert_banner.png")}
