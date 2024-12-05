@@ -10,6 +10,7 @@ import {
   Modal,
   Drawer,
   Space,
+  Checkbox,
 } from "antd";
 import { useMediaQuery } from "react-responsive";
 import { UpOutlined, LeftOutlined, CloseOutlined } from "@ant-design/icons";
@@ -27,7 +28,7 @@ const CenteredForm = (props) => {
     try {
       // 서버로 POST 요청
       const response = await axios.post(
-        "http://localhost:8080/posts/franchises",
+        "https://port-0-redswitch-server-17xco2nlszge3vt.sel5.cloudtype.app/posts/franchises",
         values
       );
       console.log("Response:", response.data);
@@ -104,15 +105,18 @@ const CenteredForm = (props) => {
       >
         <div
           style={{
-            height: "100%",
+            height: "90%",
+            maxHeight: "800px",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
+            justifyContent: "space-around",
           }}
         >
           <Space direction="vertical" size={"large"}>
             <TextBox size={size} title="가맹점 신청하기" />
-            <div>
+            <div
+              style={{ display: "flex", gap: "4px", flexDirection: "column" }}
+            >
               <Description
                 size={size}
                 description={`레드스위치는 건전한 성문화를 지향하는 성인 플랫폼으로써`}
@@ -127,20 +131,9 @@ const CenteredForm = (props) => {
               />
             </div>
           </Space>
-          <Space
-            onClick={handleopenModal}
-            style={{
-              cursor: "pointer",
-              display: "flex",
-              justifyContent: "center",
-              borderBottom: "1px solid #fff",
-            }}
-          >
-            <Description size={size} description={`개인정보처리방침`} />
-          </Space>
           <Col
             style={{
-              padding: "20px",
+              // padding: "20px",
               alignItems: "flex-end",
               justifyContent: "flex-end",
               display: "flex",
@@ -153,7 +146,7 @@ const CenteredForm = (props) => {
               validateTrigger="onBlur"
             >
               <Row gutter={size === "mobile" ? [8, 0] : [16, 4]}>
-                <Col span={12}>
+                <Col span={24}>
                   <Form.Item
                     name="franchise_name"
                     rules={[
@@ -164,7 +157,7 @@ const CenteredForm = (props) => {
                     <Input placeholder="가맹점명" />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col span={24}>
                   <Form.Item
                     name="franchise_manager"
                     rules={[
@@ -178,7 +171,7 @@ const CenteredForm = (props) => {
                     <Input placeholder="담당자 이름" />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col span={24}>
                   <Form.Item
                     name="franchise_manager_phone"
                     rules={[
@@ -192,7 +185,7 @@ const CenteredForm = (props) => {
                     <Input placeholder="담당자 전화번호" />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col span={24}>
                   <Form.Item
                     name="franchise_manager_email"
                     rules={[
@@ -240,6 +233,34 @@ const CenteredForm = (props) => {
                     />
                   </Form.Item>
                 </Col>
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: size ? "8px" : "16px",
+                    marginBottom: size ? "16px" : "32px",
+                  }}
+                >
+                  <Checkbox style={{ color: "white", alignItems: "center" }}>
+                    개인정보처리방침 동의
+                  </Checkbox>
+                  <Space
+                    onClick={handleopenModal}
+                    style={{
+                      cursor: "pointer",
+                      display: "flex",
+                      justifyContent: "center",
+                      borderBottom: "1px solid #fff",
+                    }}
+                  >
+                    <Description
+                      size={size}
+                      description={`개인정보처리방침 >`}
+                    />
+                  </Space>
+                </div>
+
                 <Col span={24}>
                   <Form.Item style={{ marginBottom: 0 }}>
                     <Button type="primary" danger htmlType="submit" block>
