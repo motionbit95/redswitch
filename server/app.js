@@ -17,10 +17,17 @@ app.use(cors());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
+require("dotenv").config();
 // Firebase Admin SDK
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./serviceAccountKey.json");
+// var serviceAccount = require("./serviceAccountKey.json");
+// Construct the credentials object using environment variables
+const serviceAccount = {
+  projectId: process.env.GOOGLE_PROJECT_ID,
+  privateKey: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  clientEmail: process.env.GOOGLE_CLIENT_EMAIL,
+};
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
