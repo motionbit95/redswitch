@@ -46,7 +46,7 @@ const ProductCRUD = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]); // 연관 상품 리스트
 
-  const [useBlurImage, setUseBlurImage] = useState(true);
+  const [useBlurImage, setUseBlurImage] = useState(false);
   const [blurred_image, setBlurredImage] = useState(null);
 
   const { getColumnSearchProps } = useSearchFilter();
@@ -70,7 +70,6 @@ const ProductCRUD = () => {
     setCurrentProduct(product);
     form.resetFields();
 
-    console.log("선택된 상품 : ", product);
     if (product) {
       AxiosGet(`/products/materials/${product.material_id}`)
         .then((response) => {
@@ -79,6 +78,15 @@ const ProductCRUD = () => {
         .catch((error) => {
           console.log(error);
         });
+
+      console.log("선택된 상품 : ", product);
+      if (product.blurred_image) {
+        setUseBlurImage(true);
+        setBlurredImage(product.blurred_image);
+      } else {
+        setUseBlurImage(false);
+        setBlurredImage(null);
+      }
 
       if (product.related_products && product.related_products.length > 0) {
         const relatedProductsPromises = product.related_products.map(
@@ -437,6 +445,7 @@ const ProductCRUD = () => {
                     <Switch
                       checkedChildren="사용"
                       unCheckedChildren="사용"
+                      checked={useBlurImage}
                       onChange={(checked) => setUseBlurImage(!checked)}
                     />
                   </Space>
@@ -445,7 +454,7 @@ const ProductCRUD = () => {
                 tooltip={"미리보기 방지 이미지, 성인인증 전 노출됩니다."}
               >
                 <>
-                  {!useBlurImage && (
+                  {useBlurImage && (
                     <FileUpload url={blurred_image} setUrl={setBlurredImage} />
                   )}
                 </>
