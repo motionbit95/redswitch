@@ -64,7 +64,7 @@ function App(props) {
       }}
     >
       <Header size={size} />
-      <Scroll size={size} />
+      {/* <Scroll size={size} /> */}
       <SectionsContainer {...options}>
         <Section>
           <Page>

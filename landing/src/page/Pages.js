@@ -360,6 +360,8 @@ export function Customer(props) {
       style={{
         overflow: "hidden",
         height: "100vh",
+        maxWidth: "780px",
+        justifyContent: "center",
         display: "flex",
         flex: 1,
         paddingTop: "80px",
@@ -368,81 +370,85 @@ export function Customer(props) {
       }}
     >
       <Col
-        span={size === "mobile" ? 24 : size === "tablet" ? 9 : 12}
-        style={{ padding: "20px", zIndex: 999 }}
-      >
-        <Space direction="vertical" size={"large"}>
-          <TextBox size={size} title="설치지점찾기" />
-          <div>
-            <Description
-              size={size}
-              description={`주변 설치 지점을 검색하여.`}
-            />
-            <Description
-              size={size}
-              description={`전국 어디서든 레드스위치를 경험할 수 있습니다.`}
-            />
-          </div>
-        </Space>
-      </Col>
-      <Col
-        span={size === "mobile" ? 24 : size === "tablet" ? 15 : 12}
+        span={24}
         style={{
           padding: "20px",
-          alignItems: "flex-end",
-          justifyContent: "flex-end",
-          display: "flex",
           marginBottom: "60px",
         }}
       >
-        <Space direction="vertical" align="center">
-          <Space
-            style={{
-              display: "flex",
-            }}
-          >
-            <Button style={{ borderRadius: "50%" }} icon={<LeftOutlined />} />
-            <Space style={{ padding: size === "mobile" ? 0 : "20px" }}>
-              {["1", "2", "3"].map((item) => {
-                return (
-                  <div
-                    style={{
-                      width: size === "mobile" ? "50px" : "100px",
-                      height: size === "mobile" ? "50px" : "100px",
-                      backgroundColor: "#f1f1f1",
-                      borderRadius: "50%",
-                    }}
-                  ></div>
-                );
-              })}
+        <Image
+          preview={false}
+          style={{
+            marginBottom:
+              size === "mobile"
+                ? "200px"
+                : size === "tablet"
+                ? "160px"
+                : "60px",
+          }}
+          src={require("../asset/page/9_title.png")}
+        />
+        <Col
+          span={24}
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            display: "flex",
+            marginBottom: "60px",
+          }}
+        >
+          <Space direction="vertical" align="center">
+            <Space
+              style={{
+                display: "flex",
+              }}
+            >
+              <Button style={{ borderRadius: "50%" }} icon={<LeftOutlined />} />
+              <Space style={{ padding: size === "mobile" ? 0 : "20px" }}>
+                {["1", "2", "3"].map((item) => {
+                  return (
+                    <div
+                      style={{
+                        width: size === "mobile" ? "50px" : "100px",
+                        height: size === "mobile" ? "50px" : "100px",
+                        backgroundColor: "#f1f1f1",
+                        borderRadius: "50%",
+                      }}
+                    ></div>
+                  );
+                })}
+              </Space>
+              <Button
+                style={{ borderRadius: "50%" }}
+                icon={<RightOutlined />}
+              />
             </Space>
-            <Button style={{ borderRadius: "50%" }} icon={<RightOutlined />} />
-          </Space>
-          <Space
-            style={{
-              display: "flex",
-            }}
-          >
-            <Button style={{ borderRadius: "50%" }} icon={<LeftOutlined />} />
-            <Space style={{ padding: size === "mobile" ? 0 : "20px" }}>
-              {["1", "2", "3"].map((item) => {
-                return (
-                  <div
-                    style={{
-                      width: size === "mobile" ? "80px" : "120px",
-                      height: size === "mobile" ? "80px" : "120px",
-                      backgroundColor: "#f1f1f1",
-                    }}
-                  ></div>
-                );
-              })}
+            <Space
+              style={{
+                display: "flex",
+              }}
+            >
+              <Button style={{ borderRadius: "50%" }} icon={<LeftOutlined />} />
+              <Space style={{ padding: size === "mobile" ? 0 : "20px" }}>
+                {["1", "2", "3"].map((item) => {
+                  return (
+                    <div
+                      style={{
+                        width: size === "mobile" ? "80px" : "120px",
+                        height: size === "mobile" ? "80px" : "120px",
+                        backgroundColor: "#f1f1f1",
+                      }}
+                    ></div>
+                  );
+                })}
+              </Space>
+              <Button
+                style={{ borderRadius: "50%" }}
+                icon={<RightOutlined />}
+              ></Button>
             </Space>
-            <Button
-              style={{ borderRadius: "50%" }}
-              icon={<RightOutlined />}
-            ></Button>
           </Space>
-        </Space>
+        </Col>
       </Col>
     </Row>
   );

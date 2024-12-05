@@ -26,11 +26,11 @@ import {
 } from "@ant-design/icons";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import SearchBranch from "../../components/popover/searchbranch";
-import SearchProduct from "../../components/popover/searchproduct";
 import ToastEditor from "../../components/toasteditor";
 import FileUpload from "../../components/button";
 import Material from "./material";
 import useSearchFilter from "../../hook/useSearchFilter";
+import SearchMaterial from "../../components/popover/searchmaterial";
 
 const ProductCRUD = () => {
   const [products, setProducts] = useState([]);
@@ -348,7 +348,7 @@ const ProductCRUD = () => {
           {selectedProduct ? (
             <Descriptions
               title={
-                <SearchProduct
+                <SearchMaterial
                   setSelectedProduct={(products) =>
                     setSelectedProduct(products[0])
                   }
@@ -380,7 +380,7 @@ const ProductCRUD = () => {
               </Descriptions.Item>
             </Descriptions>
           ) : (
-            <SearchProduct
+            <SearchMaterial
               setSelectedProduct={(products) => setSelectedProduct(products[0])}
               setIsModalVisible={setIsModalVisible}
               multiple={false}
@@ -529,7 +529,7 @@ const ProductCRUD = () => {
                 label="추가 판매 유도"
                 tooltip={"연관 상품으로 추천됩니다."}
               >
-                <SearchProduct
+                <SearchMaterial
                   setSelectedProduct={(products) =>
                     setRelatedProducts(products)
                   }

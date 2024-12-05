@@ -183,3 +183,23 @@ code {
   font-weight: normal;
   font-style: normal;
 }
+
+.custom-modal .ant-modal-content {
+  background-color: #2e2e2e;
+}
+
+.custom-modal .ant-modal-padding {
+  padding: 0;
+}
+
+.custom-modal .ant-modal-close {
+  color: #fff;
+}
+
+.custom-modal .ant-modal-header {
+  background-color: #2e2e2e;
+}
+
+.custom-modal .ant-modal-title {
+  color: #fff;
+}

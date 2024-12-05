@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { AxiosGet } from "../../api";
 import useSearchFilter from "../../hook/useSearchFilter";
 
-const SearchProduct = ({
+const SearchMaterial = ({
   selectedProduct,
   setSelectedProduct,
   multiple = false,
@@ -71,6 +71,7 @@ const SearchProduct = ({
 
     // 선택된 거래처들을 상태에 저장
     setSelectedProduct(selectProducts); // 상태를 전체 배열로 설정
+    setSelectedRowKeys([]);
 
     setPopoverVisible(false); // 팝오버 닫기
   };
@@ -130,7 +131,7 @@ const SearchProduct = ({
     onChange: onSelectChange,
   };
 
-  const searchProducts = (value) => {
+  const searchMaterials = (value) => {
     fetchProducts(value.search);
   };
 
@@ -140,7 +141,7 @@ const SearchProduct = ({
         form={form}
         layout="inline"
         style={{ marginBottom: 16 }}
-        onFinish={searchProducts}
+        onFinish={searchMaterials}
       >
         <Form.Item name="search" label="검색">
           <Input
@@ -162,7 +163,14 @@ const SearchProduct = ({
         pagination={{ pageSize: 5 }}
       />
       <Space style={{ marginTop: 16 }}>
-        <Button onClick={() => setPopoverVisible(false)}>닫기</Button>
+        <Button
+          onClick={() => {
+            setPopoverVisible(false);
+            setSelectedRowKeys([]);
+          }}
+        >
+          닫기
+        </Button>
         <Button type="primary" onClick={handleOK}>
           선택
         </Button>
@@ -186,4 +194,4 @@ const SearchProduct = ({
   );
 };
 
-export default SearchProduct;
+export default SearchMaterial;
