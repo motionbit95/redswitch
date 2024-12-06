@@ -139,7 +139,7 @@ function App() {
       localStorage.setItem("branch", window.location.pathname.split("/").pop());
       setBranch(window.location.pathname.split("/").pop());
     }
-  }, [branch]);
+  }, []);
 
   return (
     <ConfigProvider theme={theme === "dark" ? darkTheme : lightTheme}>

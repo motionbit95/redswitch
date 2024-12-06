@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Button, Col, Input, Row, Space } from "antd";
-import { useLocation } from "react-router-dom";
+import { Button, Col, Form, Image, Input, Row, Space, theme } from "antd";
+import { data, useLocation } from "react-router-dom";
+import { DownOutlined, UpOutlined } from "@ant-design/icons";
+import { fixedBottomStyle } from "../styles";
 
 const random = (length = 8) => {
   return Math.random().toString(16).substr(2, length);
@@ -10,23 +12,17 @@ const random = (length = 8) => {
 //${process.env.REACT_APP_SERVER_URL}/payment/payCancel?tid=${order.tid}&ordNo=${order.ordNo}&canAmt=${order.goodsAmt}&ediDate=${order.ediDate}
 const Payment = () => {
   const location = useLocation();
+  const [viewProduct, setViewProduct] = useState(false); // 상품 상세보기 여부
   const [queryParams, setQueryParams] = useState({});
   const [amount, setAmount] = useState(0);
-  const [order, setOrder] = useState({
-    tid: "",
-    ordNo: "",
-    amt: "",
-    ediDate: "",
-    goodsNm: "", // 상품 이름을 저장할 필드
-    ...location.state.order,
-  });
+  const [order, setOrder] = useState(location.state.order);
+
+  const [form] = Form.useForm();
 
   const [branchInfo, setBranchInfo] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-
-    console.log(order);
 
     // 지점 정보 가져오기
     const fetchBranchInfo = async () => {
@@ -48,17 +44,20 @@ const Payment = () => {
 
     // 상품 정보 가져오기
     const fetchProducts = async () => {
-      let productNames = [];
+      let products = [];
       if (order.products) {
         for (const item of order.products) {
           const response = await fetch(
             `${process.env.REACT_APP_SERVER_URL}/products/${item.product_pk}`
           );
           const data = await response.json();
-          console.log(data);
 
+          console.log("주문상품 : ", item, data);
           if (response.status === 200) {
-            productNames.push(data.product_name);
+            products.push({
+              ...item,
+              ...data,
+            });
           }
         }
       }
@@ -66,7 +65,7 @@ const Payment = () => {
       // 상품 이름들을 goodsNm에 할당
       setOrder((prevOrder) => ({
         ...prevOrder,
-        goodsNm: productNames.join(" / "), // 상품 이름들을 콤마로 구분하여 문자열로 저장
+        products: products,
       }));
     };
 
@@ -74,7 +73,7 @@ const Payment = () => {
     fetchBranchInfo();
 
     console.log("주문", order);
-  }, [order.products]); // order.products 변경 시마다 실행되도록 의존성 배열 설정
+  }, []); // order.products 변경 시마다 실행되도록 의존성 배열 설정
 
   useEffect(() => {
     if (window.location.search) {
@@ -100,12 +99,48 @@ const Payment = () => {
     }
   }, []); // Run once when the component mounts
 
-  const callPayPopup = async () => {
-    // PAYMENT DATA를 저장합니다.
-    const order_id = random();
+  const callPayPopup = async (values) => {
+    console.log("주문정보", order);
+    console.log("입력정보", values);
+
+    // 주문 데이터 생성
+    const newOrder = {
+      payment_pk: "",
+      branch_pk: localStorage.getItem("branch"),
+      order_code: order.ordNo, // 주문번호
+      customer_id: localStorage.getItem("token"), // 유저 토큰
+      customer_phone: values.customer_phone || "", // 유저 전화번호
+      customer_address:
+        branchInfo?.branch_address + " " + values.room_number || "", // 주문 주소 및 호실
+      select_products: order.products, // 상품 정보
+      order_status: 0, // 결제 대기
+      order_amount: order.amt, // 주문금액
+      delivery_message: values.delivery_message || "", // 배송 메시지
+      goods_name: order.products.map((item) => item.product_name).join(", "),
+    };
+
+    // 주문서를 저장합니다. - 임시 / 결제 완료 후 상태를 업데이트 합니다.
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newOrder),
+    });
+    const data = await response.json();
+    if (response.status !== 201) {
+      const error = new Error(data.message);
+      error.response = data;
+      throw error;
+    }
+
+    console.log(data);
+
+    // // PAYMENT DATA를 저장합니다.
     const searchParams = new URLSearchParams([
-      ["order_id", order_id],
-      ["amount", amount],
+      ["order_id", newOrder.order_code],
+      ["amount", newOrder.order_amount],
+      ["goodsNm", newOrder.goods_name],
     ]);
     window.location.replace(
       `${process.env.REACT_APP_SERVER_URL}/payments?${searchParams.toString()}`
@@ -119,10 +154,72 @@ const Payment = () => {
   };
 
   return (
-    <div style={{ padding: 16 }}>
-      <Row gutter={[16, 16]}>
+    <div
+      style={{
+        backgroundColor: "#f1f1f1",
+        paddingBottom: "100px",
+        overflow: "hidden",
+      }}
+    >
+      <Row
+        gutter={16}
+        style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
+      >
         <Col span={24}>
-          <div style={{ marginBottom: 16 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ fontSize: "large", fontWeight: "bold" }}>
+              주문상품 총 {order.products.length}개
+            </div>
+            <Button
+              type="link"
+              style={{ color: "black" }}
+              icon={viewProduct ? <UpOutlined /> : <DownOutlined />}
+              onClick={() => setViewProduct(!viewProduct)}
+            />
+          </div>
+        </Col>
+        {viewProduct && (
+          <Row
+            gutter={[16, 16]}
+            style={{ padding: 16, backgroundColor: "white" }}
+          >
+            {order.products.map((item) => (
+              <>
+                <Col span={6}>
+                  <Image src={item.blurred_image || item.original_image} />
+                </Col>
+                <Col span={18}>
+                  <div>{item?.product_name}</div>
+                  <Space>
+                    <div style={{ fontWeight: "bold", fontSize: "medium" }}>
+                      {item?.amount}원
+                    </div>
+                    <div style={{ opacity: 0.5 }}>{item?.count}개</div>
+                  </Space>
+                  {item?.option?.map((option) => (
+                    <div style={{ opacity: 0.5 }}>
+                      {option?.optionName} : {option?.optionPrice}원
+                    </div>
+                  ))}
+                </Col>
+              </>
+            ))}
+          </Row>
+        )}
+      </Row>
+
+      <Row
+        gutter={16}
+        style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
+      >
+        <Col span={24}>
+          <div>
             <div style={{ fontSize: "large", fontWeight: "bold" }}>
               {branchInfo?.branch_name}
             </div>
@@ -130,49 +227,99 @@ const Payment = () => {
               {branchInfo?.branch_address}
             </div>
           </div>
-
-          <Space direction="vertical" style={{ width: "100%" }}>
-            <Input placeholder="호실을 입력해주세요." />
-
-            <Input
-              placeholder="금액을 입력하세요."
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-            <Button onClick={callPayPopup}>결제 테스트하기</Button>
-            {queryParams && (
-              <pre>
-                <code>{JSON.stringify(queryParams, null, 2)}</code>
-              </pre>
-            )}
-          </Space>
         </Col>
-        {/* <Col span={12}>
-          <Space direction="vertical" style={{ width: "100%" }}>
-            <Input
-              placeholder="TID(tid)를 입력하세요."
-              value={order.tid}
-              onChange={(e) => setOrder({ ...order, tid: e.target.value })}
-            />
-            <Input
-              placeholder="주문번호(ordNo)를 입력하세요."
-              value={order.ordNo}
-              onChange={(e) => setOrder({ ...order, ordNo: e.target.value })}
-            />
-            <Input
-              placeholder="결제 금액(amt)을 입력하세요."
-              value={order.amt}
-              onChange={(e) => setOrder({ ...order, amt: e.target.value })}
-            />
-            <Input
-              placeholder="결제 일시(ediDate)를 입력하세요."
-              value={order.ediDate}
-              onChange={(e) => setOrder({ ...order, ediDate: e.target.value })}
-            />
-            <Button onClick={cancelPayment}>결제취소</Button>
-          </Space>
-        </Col> */}
+        <Col span={24}>
+          <Form form={form} style={{ width: "100%" }} onFinish={callPayPopup}>
+            <Form.Item
+              label="호실"
+              name="room_number"
+              rules={[{ required: true, message: "호실을 입력해주세요." }]}
+            >
+              <Input placeholder="호실을 입력해주세요." />
+            </Form.Item>
+            <Form.Item label="배송 메세지" name="delivery_message">
+              <Input placeholder="배송시 요청사항을 입력해주세요." />
+            </Form.Item>
+            <Form.Item label="연락처" name="customer_phone">
+              <Input placeholder="연락처를 입력해주세요.(선택)" />
+            </Form.Item>
+
+            {/* 버튼 그룹 */}
+            <div style={fixedBottomStyle(theme)}>
+              <Button
+                size="large"
+                type="primary"
+                danger
+                style={{ width: "100%" }}
+                htmlType="submit"
+              >
+                {parseInt(order.amt).toLocaleString()}원 결제하기
+              </Button>
+            </div>
+          </Form>
+        </Col>
       </Row>
+
+      <Row
+        gutter={16}
+        style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
+      >
+        <Col span={24}>
+          <div
+            style={{
+              fontSize: "large",
+              fontWeight: "bold",
+              marginBottom: 16,
+            }}
+          >
+            결제수단
+          </div>
+        </Col>
+        <Col span={24}>
+          <Button type="primary" danger>
+            카드
+          </Button>
+        </Col>
+      </Row>
+
+      <Row
+        gutter={16}
+        style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
+      >
+        <Col span={24}>
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "large",
+                fontWeight: "bold",
+                marginBottom: 16,
+              }}
+            >
+              총 결제금액
+            </div>
+            <div
+              style={{
+                fontSize: "large",
+                fontWeight: "bold",
+                marginBottom: 16,
+              }}
+            >
+              {parseInt(order.amt).toLocaleString()}원
+            </div>
+          </div>
+        </Col>
+      </Row>
+      <div style={{ padding: 16, fontSize: "small", opacity: 0.5 }}>
+        레드스위치는 통신판매중개자이며, 통신판매의 당사자가 아닙니다. 따라서
+        레드스위치는 상품, 거래정보 및 거래에 대하여 책임을 지지않습니다.
+        <br /> 위 내용을 확인하였으며 결제에 동의합니다.
+      </div>
     </div>
   );
 };

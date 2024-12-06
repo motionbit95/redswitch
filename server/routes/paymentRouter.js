@@ -38,6 +38,7 @@ router.get("/", (req, res) => {
 
   console.log(req.query.order_id);
   console.log(req.query.amount);
+  console.log(req.query.goodsNm);
 
   // 주문 정보를 가지고 오기
 
@@ -49,7 +50,7 @@ router.get("/", (req, res) => {
 
   res.render("pg", {
     merchantID,
-    goodsNm: "레드스위치",
+    goodsNm: req.query.goodsNm,
     goodsAmt,
     ordNm: "레드스위치",
     ordTel: "01000000000",

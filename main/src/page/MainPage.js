@@ -20,7 +20,7 @@ function MainPage(props) {
   const { branch, theme } = props;
   const [branchInfo, setBranchInfo] = useState(null);
   const [isAgree, setIsAgree] = useState(false); // 개인정보 동의 여부
-  const [isCertified, setIsCertified] = useState(false); // 인증 여부
+  const [isCertified, setIsCertified] = useState(localStorage.getItem("token")); // 인증 여부
   const [isCertModalVisible, setIsCertModalVisible] = useState(false); // 모달 트리거
   const token = localStorage.getItem("token");
 

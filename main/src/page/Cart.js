@@ -203,7 +203,7 @@ const Cart = ({ token, theme }) => {
 
     console.log(order);
 
-    // navigate("/payment", { state: { order } });
+    navigate("/payment", { state: { order } });
   };
 
   return (
