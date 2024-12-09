@@ -80,8 +80,8 @@ const Order = () => {
       key: "action",
       render: (text, record) => (
         <span>
-          {record.order_status !== 0 && <Button type="link">결제취소</Button>}
-          <Button type="link">삭제</Button>
+          {record.order_status !== 0 && <a>결제취소</a>}
+          <a>삭제</a>
         </span>
       ),
     },

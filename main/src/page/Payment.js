@@ -13,7 +13,6 @@ const random = (length = 8) => {
 const Payment = () => {
   const location = useLocation();
   const [viewProduct, setViewProduct] = useState(false); // 상품 상세보기 여부
-  const [queryParams, setQueryParams] = useState({});
   const [amount, setAmount] = useState(0);
   const [order, setOrder] = useState(location.state.order);
 
@@ -74,30 +73,6 @@ const Payment = () => {
 
     console.log("주문", order);
   }, []); // order.products 변경 시마다 실행되도록 의존성 배열 설정
-
-  useEffect(() => {
-    if (window.location.search) {
-      const queryString = window.location.search;
-
-      const urlParams = new URLSearchParams(queryString.split("?")[1]); // Get parameters after '?'
-      const dataParam = urlParams.get("data"); // Get 'data' parameter
-
-      // Step 1: Decode the URL-encoded string
-      const decodedData = decodeURIComponent(dataParam);
-
-      // Step 2: The decoded data is a query string, so we need to parse it
-      const params = new URLSearchParams(decodedData);
-
-      // Step 3: Convert it to an object
-      const parsedObject = {};
-      for (const [key, value] of params.entries()) {
-        parsedObject[key] = value;
-      }
-
-      console.log(parsedObject);
-      setQueryParams(parsedObject);
-    }
-  }, []); // Run once when the component mounts
 
   const callPayPopup = async (values) => {
     console.log("주문정보", order);
@@ -219,7 +194,7 @@ const Payment = () => {
         style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
       >
         <Col span={24}>
-          <div>
+          <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: "large", fontWeight: "bold" }}>
               {branchInfo?.branch_name}
             </div>
@@ -229,7 +204,12 @@ const Payment = () => {
           </div>
         </Col>
         <Col span={24}>
-          <Form form={form} style={{ width: "100%" }} onFinish={callPayPopup}>
+          <Form
+            form={form}
+            layout="vertical"
+            style={{ width: "100%" }}
+            onFinish={callPayPopup}
+          >
             <Form.Item
               label="호실"
               name="room_number"

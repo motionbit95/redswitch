@@ -8,6 +8,7 @@ import { ConfigProvider, Row, Space, Typography, Result, Button } from "antd";
 import Product from "./page/Product";
 import { ShoppingCartOutlined } from "@ant-design/icons";
 import Cart from "./page/Cart";
+import PaymentCancel from "./page/PaymentCancel";
 
 const darkTheme = {
   components: {
@@ -131,7 +132,7 @@ function App() {
   const [theme, setTheme] = useState("light");
 
   const [branch, setBranch] = useState(
-    window.location.pathname.split("/").pop()
+    localStorage.getItem("branch") || "test"
   );
 
   useEffect(() => {
@@ -239,6 +240,10 @@ function App() {
               <Route
                 path="/payment/result"
                 element={<PaymentResult branch={branch} />}
+              />
+              <Route
+                path="/payment/cancel"
+                element={<PaymentCancel branch={branch} />}
               />
               <Route
                 path="/cart"
