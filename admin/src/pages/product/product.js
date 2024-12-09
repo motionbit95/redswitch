@@ -31,6 +31,7 @@ import FileUpload from "../../components/button";
 import Material from "./material";
 import useSearchFilter from "../../hook/useSearchFilter";
 import SearchMaterial from "../../components/popover/searchmaterial";
+import SearchProduct from "../../components/popover/searchproduct";
 
 const ProductCRUD = () => {
   const [products, setProducts] = useState([]);
@@ -538,7 +539,7 @@ const ProductCRUD = () => {
                 label="추가 판매 유도"
                 tooltip={"연관 상품으로 추천됩니다."}
               >
-                <SearchMaterial
+                <SearchProduct
                   setSelectedProduct={(products) =>
                     setRelatedProducts(products)
                   }
