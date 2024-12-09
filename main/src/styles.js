@@ -289,7 +289,7 @@ export const cartStyles = {
 
   footer: {
     position: "fixed",
-    bottom: "0",
+    bottom: "60px",
     left: "0",
     right: "0",
     justifyContent: "center",
@@ -381,7 +381,7 @@ export const addToCartButtonStyle = {
 
 export const fixedBottomStyle = (theme) => ({
   position: "fixed",
-  bottom: "0",
+  bottom: "60px",
   right: "0",
   left: "0",
   display: "flex",

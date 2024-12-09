@@ -6,9 +6,12 @@ import MainPage from "./page/MainPage";
 import { useEffect, useState } from "react";
 import { ConfigProvider, Row, Space, Typography, Result, Button } from "antd";
 import Product from "./page/Product";
-import { ShoppingCartOutlined } from "@ant-design/icons";
 import Cart from "./page/Cart";
 import PaymentCancel from "./page/PaymentCancel";
+
+import Header from "./component/Header";
+import BottomNavbar from "./component/BottomNavbar";
+import OrderList from "./page/OrderList";
 
 const darkTheme = {
   components: {
@@ -164,7 +167,7 @@ function App() {
         <div>
           <Row>
             {/* Main Content Section */}
-            <div
+            {/* <div
               style={{
                 width: "100%",
                 padding: "10px",
@@ -196,22 +199,22 @@ function App() {
                     objectFit: "cover",
                   }}
                 />
-                <Typography.Text
-                  style={{ fontSize: "14px", fontWeight: "bold" }}
-                >
-                  REDSWITCH
-                </Typography.Text>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <Typography.Text
+                    style={{ fontSize: "large", fontWeight: "bold" }}
+                  >
+                    REDSWITCH
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      fontSize: "small",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    비대면 어덜트토이 플랫폼
+                  </Typography.Text>
+                </div>
               </Space>
-
-              <Typography.Text
-                style={{
-                  fontSize: "12px",
-                  fontWeight: "bold",
-                  marginBottom: "10px",
-                }}
-              >
-                비대면 어덜트토이 플랫폼
-              </Typography.Text>
               <Button
                 style={{
                   display:
@@ -224,7 +227,8 @@ function App() {
                 href="/cart"
                 shape="circle"
               />
-            </div>
+            </div> */}
+            <Header />
           </Row>
           <BrowserRouter>
             <Routes>
@@ -251,6 +255,7 @@ function App() {
                   <Cart token={localStorage.getItem("token")} theme={theme} />
                 }
               />
+              <Route path="/order" element={<OrderList theme={theme} />} />
               <Route
                 path="/*"
                 element={
@@ -265,6 +270,7 @@ function App() {
             </Routes>
           </BrowserRouter>
         </div>
+        <BottomNavbar theme={theme} />
       </div>
     </ConfigProvider>
   );
