@@ -34,7 +34,6 @@ const Cart = ({ token, theme }) => {
           `${process.env.REACT_APP_SERVER_URL}/products/materials/${item}`
         );
         const data = await response.json();
-        // console.log(data);
         return { ...data, product_price: data.product_sale };
       });
 
@@ -82,8 +81,6 @@ const Cart = ({ token, theme }) => {
           });
 
           fetchProducts(related_products);
-
-          console.log(cartData);
 
           setCartData(cartData);
           setSelectedItems(cartData.map((item) => item.pk));
@@ -189,6 +186,7 @@ const Cart = ({ token, theme }) => {
     cartData.forEach((item) => {
       if (selectedItems.includes(item.pk)) {
         order.products.push({
+          cart_pk: item.pk,
           product_pk: item.product_pk,
           count: item.count,
           amount:
@@ -204,8 +202,6 @@ const Cart = ({ token, theme }) => {
         });
       }
     });
-
-    console.log(order);
 
     navigate("/payment", { state: { order } });
   };

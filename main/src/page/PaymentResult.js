@@ -44,6 +44,21 @@ function PaymentResult(props) {
           console.log("주문 : ", res.data);
           setOrder(res.data);
 
+          // 장바구니에서 해당 상품을 제거합니다.
+          for (const item of res.data.select_products) {
+            console.log(item.cart_pk);
+            axios
+              .delete(
+                `${process.env.REACT_APP_SERVER_URL}/carts/${item.cart_pk}`
+              )
+              .then((res) => {
+                console.log(res);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+
           axios
             .get(
               `${process.env.REACT_APP_SERVER_URL}/branches/${res.data?.branch_pk}`
