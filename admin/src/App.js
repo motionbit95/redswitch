@@ -74,13 +74,13 @@ const App = () => {
     {
       key: "order",
       icon: React.createElement(TruckOutlined),
-      label: "주문관리",
-      children: [
-        {
-          key: "/order/order",
-          label: <Link to="/order/order">주문관리</Link>,
-        },
-      ],
+      label: <Link to="/order">주문관리</Link>,
+      // children: [
+      //   {
+      //     key: "/order/order",
+      //     label: <Link to="/order/order">주문관리</Link>,
+      //   },
+      // ],
     },
     {
       key: "product",
@@ -292,7 +292,7 @@ const App = () => {
                   element={<Purchase_order />}
                 />
 
-                <Route path="/order/order" element={<Order />} />
+                <Route path="/order" element={<Order />} />
 
                 <Route path="/post/notification" element={<NoticeBoard />} />
 

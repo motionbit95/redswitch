@@ -18,6 +18,7 @@ class Orders {
     this.orderAmount = data.order_amount; // 주문 금액
     this.goodsName = data.goods_name; // 상품명
     this.deliveryMessage = data.delivery_message || null; // 배송 메시지
+    this.checked = data.checked || 0;
   }
 
   // JSON으로 변환
@@ -37,6 +38,7 @@ class Orders {
       order_amount: this.orderAmount,
       goods_name: this.goodsName,
       delivery_message: this.deliveryMessage,
+      checked: this.checked,
     };
   }
 
@@ -78,7 +80,7 @@ class Orders {
       snapshot.forEach((child) => {
         orders.push({ id: child.key, ...child.val() }); // 모든 주문 추가
       });
-      return orders;
+      return orders.reverse();
     } catch (error) {
       console.error("주문 목록 조회 오류:", error);
       throw new Error("주문 목록 조회 실패");

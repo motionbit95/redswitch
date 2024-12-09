@@ -34,7 +34,7 @@ const Cart = ({ token, theme }) => {
           `${process.env.REACT_APP_SERVER_URL}/products/materials/${item}`
         );
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         return { ...data, product_price: data.product_sale };
       });
 
@@ -148,8 +148,12 @@ const Cart = ({ token, theme }) => {
   };
 
   const totalAmount = cartData.reduce((total, item) => {
+    let optionsAmount = 0;
+    item.option?.forEach((element) => {
+      optionsAmount += element.optionPrice;
+    });
     if (selectedItems.includes(item.pk)) {
-      return total + item.amount * item.count;
+      return total + item.amount * item.count + optionsAmount;
     }
     return total;
   }, 0);
