@@ -65,6 +65,8 @@ class Payment {
       snapshot.forEach((child) => {
         payments.push({ pk: child.key, ...child.val() });
       });
+
+      console.log("payment!!!", payments);
       return payments;
     } catch (error) {
       console.error("Error fetching payments:", error);
@@ -98,6 +100,30 @@ class Payment {
     } catch (error) {
       console.error("Error deleting payment:", error);
       throw new Error("Failed to delete payment");
+    }
+  }
+
+  // Get payment by order number (ordNo)
+  static async getByOrdNo(ordNo) {
+    try {
+      const snapshot = await paymentsRef
+        .orderByChild("ordNo")
+        .equalTo(ordNo)
+        .once("value");
+      if (!snapshot.exists()) {
+        throw new Error("Payment not found");
+      }
+
+      const payments = [];
+      snapshot.forEach((child) => {
+        payments.push({ pk: child.key, ...child.val() });
+      });
+
+      // ordNo에 해당하는 결제 정보가 여러 개일 수 있으므로 배열로 반환
+      return payments;
+    } catch (error) {
+      console.error("Error fetching payment by ordNo:", error);
+      throw new Error("Failed to fetch payment by ordNo");
     }
   }
 }

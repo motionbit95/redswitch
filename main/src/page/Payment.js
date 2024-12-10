@@ -118,7 +118,9 @@ const Payment = () => {
       ["goodsNm", newOrder.goods_name],
     ]);
     window.location.replace(
-      `${process.env.REACT_APP_SERVER_URL}/payments?${searchParams.toString()}`
+      `${
+        process.env.REACT_APP_SERVER_URL
+      }/payments/callPopup?${searchParams.toString()}`
     );
   };
 

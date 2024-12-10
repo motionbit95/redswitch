@@ -35,7 +35,7 @@ function encryptSHA256(data) {
   return crypto.createHash("sha256").update(data).digest("hex");
 }
 
-router.get("/", (req, res) => {
+router.get("/callPopup", (req, res) => {
   console.log("PG Sample page");
 
   console.log(req.query.order_id);
@@ -104,6 +104,43 @@ router.post("/payResult", (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /payments/payCancel:
+ *   get:
+ *     summary: PayCancel
+ *     description: PayCancel
+ *     tags:
+ *       - Payments
+ *     parameters:
+ *       - name: ediDate
+ *         in: query
+ *         required: true
+ *         description: 결제 날짜
+ *         schema:
+ *           type: string
+ *       - name: canAmt
+ *         in: query
+ *         required: true
+ *         description: 취소금액
+ *         schema:
+ *           type: string
+ *       - name: ordNo
+ *         in: query
+ *         required: true
+ *         description: 주문번호
+ *         schema:
+ *           type: string
+ *       - name: tid
+ *         in: query
+ *         required: true
+ *         description: 거래 ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: PayCancel
+ */
 router.get("/payCancel", (req, res) => {
   const encData = encryptSHA256(
     merchantID + req.query.ediDate + req.query.canAmt + merchantKey
@@ -379,6 +416,42 @@ router.delete("/:id", async (req, res) => {
     const { id } = req.params;
     const result = await Payment.deleteById(id);
     res.status(200).json(result);
+  } catch (error) {
+    res
+      .status(error.message === "Payment not found" ? 404 : 500)
+      .json({ message: error.message });
+  }
+});
+
+// 주문 번호로 조회
+/**
+ * @swagger
+ * /payments/ordNo/{ordNo}:
+ *   get:
+ *     summary: 주문 번호로 결제 정보 조회
+ *     description: 주문 번호를 사용하여 결제 정보를 조회합니다.
+ *     tags:
+ *       - Payments
+ *     parameters:
+ *       - name: ordNo
+ *         in: path
+ *         required: true
+ *         description: 주문 번호
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 결제 정보 조회 성공
+ *       404:
+ *         description: 결제 정보가 존재하지 않음
+ *       500:
+ *         description: 서버 오류
+ */
+router.get("/ordNo/:ordNo", async (req, res) => {
+  try {
+    const { ordNo } = req.params;
+    const payment = await Payment.getByOrdNo(ordNo);
+    res.status(200).json(payment);
   } catch (error) {
     res
       .status(error.message === "Payment not found" ? 404 : 500)
