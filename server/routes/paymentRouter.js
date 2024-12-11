@@ -7,6 +7,7 @@ var router = express.Router();
 const qs = require("qs");
 
 const Payment = require("../model/Payment");
+const Orders = require("../model/Orders");
 
 const merchantKey =
   "0KHf4qt04B6LEBwZ8M8z5bN/p/I0VQaaMy/SiQfjmVyYFpv6R+OB9toybcTYoOak09rVE4ytGLuvEs5wUEt3pA=="; // 상점키
@@ -255,6 +256,15 @@ router.post("/", async (req, res) => {
     const paymentData = req.body;
     const payment = new Payment(paymentData);
     const newPayment = await payment.create();
+
+    // order 상태 변경
+    const order = await Orders.getByOrderCode(paymentData.ordNo);
+    Object.assign(order, { order_status: 1 }); // 결제완료 플래그
+    const updatedOrder = await new Orders(order).update();
+    console.log("주문 정보가 변경되었습니다.", updatedOrder);
+
+    // 재고 수량 변경(재고 감소)
+
     res.status(201).json(newPayment);
   } catch (error) {
     res

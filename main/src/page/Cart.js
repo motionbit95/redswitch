@@ -31,15 +31,26 @@ const Cart = ({ token, theme }) => {
       // 모든 비동기 요청을 Promise 배열로 처리
       const relatedProductsPromises = list?.map(async (item) => {
         const response = await fetch(
-          `${process.env.REACT_APP_SERVER_URL}/products/materials/${item}`
+          `${process.env.REACT_APP_SERVER_URL}/products/${item}`
         );
         const data = await response.json();
-        return { ...data, product_price: data.product_sale };
+
+        // material 데이터를 병합
+        try {
+          const materialResponse = await fetch(
+            `${process.env.REACT_APP_SERVER_URL}/products/materials/${data.material_id}`
+          );
+          const material = await materialResponse.json();
+          return { ...data, original_image: material.original_image };
+        } catch (error) {
+          console.error("Failed to fetch material:", error);
+          return { ...data, original_image: undefined }; // material이 없을 경우
+        }
       });
 
       // 모든 Promise가 완료된 후 관련 제품 배열을 설정
       const relatedProductsData = await Promise.all(relatedProductsPromises);
-
+      console.log("relatedProductsData : ", relatedProductsData);
       // 상태 업데이트
       setRelatedProducts(relatedProductsData);
     } catch (error) {
