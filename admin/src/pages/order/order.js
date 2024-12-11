@@ -13,7 +13,6 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
-import { render } from "@testing-library/react";
 import useSearchFilter from "../../hook/useSearchFilter";
 
 const Order = () => {
@@ -25,6 +24,7 @@ const Order = () => {
 
   const { getColumnSearchProps } = useSearchFilter();
 
+  // 물자 정보 - 주문 상품의 거래처 표시 위함
   useEffect(() => {
     const fetchMaterials = async () => {
       AxiosGet("/products/materials")
@@ -36,6 +36,7 @@ const Order = () => {
     fetchMaterials();
   }, []);
 
+  // 주문 정보
   useEffect(() => {
     const fetchOrders = async () => {
       AxiosGet("/orders")
@@ -55,6 +56,7 @@ const Order = () => {
     fetchOrders();
   }, []);
 
+  // 지점 정보 - 주문 지점 및 지역을 표시하기 위함
   useEffect(() => {
     const fetchBranches = async () => {
       AxiosGet("/branches")
@@ -66,6 +68,7 @@ const Order = () => {
     fetchBranches();
   }, [orders]);
 
+  // 결제 정보 - 결제 취소 위함
   useEffect(() => {
     const fetchPayments = async () => {
       AxiosGet("/payments")
@@ -77,6 +80,7 @@ const Order = () => {
     fetchPayments();
   }, [orders]);
 
+  // 결제 대기인 주문을 필터링 하기 위함
   useEffect(() => {
     let filteredOrders = [];
     orders.map((order) => {
@@ -92,7 +96,7 @@ const Order = () => {
     setFilteredOrders(filteredOrders);
   }, [payments]);
 
-  // Update Checked Status on Server
+  // 주문 확인 여부 체크
   const updateCheckedStatus = async (id) => {
     try {
       await AxiosPut(`/orders/${id}`, { checked: 1 }); // Update server
@@ -106,6 +110,7 @@ const Order = () => {
     }
   };
 
+  // 메인 테이블 컬럼 속성
   const columns = [
     {
       title: "No.",
@@ -211,7 +216,7 @@ const Order = () => {
     },
   ];
 
-  // Sub Table columns
+  // 서브 테이블 컬럼 속성
   const subColumns = [
     {
       title: "상품코드",
@@ -292,6 +297,7 @@ const Order = () => {
     },
   ];
 
+  // 필터링
   const onSubmit = (values) => {
     // 필터링 함수 만들기
     console.log(values);

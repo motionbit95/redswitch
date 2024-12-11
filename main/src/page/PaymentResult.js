@@ -9,10 +9,6 @@ function PaymentResult(props) {
   const [order, setOrder] = useState({});
   const [branch, setBranch] = useState({});
 
-  const goHome = () => {
-    window.location.href = `/spot/${localStorage.getItem("branch")}`;
-  };
-
   useEffect(() => {
     if (window.location.search) {
       const queryString = window.location.search;
@@ -77,11 +73,18 @@ function PaymentResult(props) {
     }
   }, []); // Run once when the component mounts
 
+  // 메인으로 이동
+  const goHome = () => {
+    window.location.href = `/spot/${localStorage.getItem("branch")}`;
+  };
+
+  // 주문번호 저장
   const copyToClipboard = () => {
     navigator.clipboard.writeText(queryParams.ordNo);
     message.success("주문번호가 클립보드에 복사되었습니다.");
   };
 
+  // 주문 취소
   const cancelPayment = async () => {
     console.log(queryParams);
     if (order.order_status < 1) {

@@ -1,24 +1,17 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Button, Col, Form, Image, Input, Row, Space, theme } from "antd";
-import { data, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import { fixedBottomStyle } from "../styles";
-
-const random = (length = 8) => {
-  return Math.random().toString(16).substr(2, length);
-};
 
 //${process.env.REACT_APP_SERVER_URL}/payment/payCancel?tid=${order.tid}&ordNo=${order.ordNo}&canAmt=${order.goodsAmt}&ediDate=${order.ediDate}
 const Payment = () => {
   const location = useLocation();
-  const [viewProduct, setViewProduct] = useState(false); // 상품 상세보기 여부
-  const [amount, setAmount] = useState(0);
-  const [order, setOrder] = useState(location.state.order);
-
   const [form] = Form.useForm();
 
-  const [branchInfo, setBranchInfo] = useState(null);
+  const [viewProduct, setViewProduct] = useState(false); // 상품 상세보기 여부 플래그
+  const [order, setOrder] = useState(location.state.order); // 주문 정보
+  const [branchInfo, setBranchInfo] = useState(null); // 지점 정보
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -80,7 +73,7 @@ const Payment = () => {
 
     // 주문 데이터 생성
     const newOrder = {
-      payment_pk: "",
+      payment_pk: "", // 결제 전
       branch_pk: localStorage.getItem("branch"),
       order_code: order.ordNo, // 주문번호
       customer_id: localStorage.getItem("token"), // 유저 토큰
@@ -111,7 +104,7 @@ const Payment = () => {
 
     console.log(data);
 
-    // // PAYMENT DATA를 저장합니다.
+    // 결제 페이지(홀빅) 호출
     const searchParams = new URLSearchParams([
       ["order_id", newOrder.order_code],
       ["amount", newOrder.order_amount],
@@ -121,12 +114,6 @@ const Payment = () => {
       `${
         process.env.REACT_APP_SERVER_URL
       }/payments/callPopup?${searchParams.toString()}`
-    );
-  };
-
-  const cancelPayment = async () => {
-    window.location.replace(
-      `${process.env.REACT_APP_SERVER_URL}/payments/payCancel?tid=${order.tid}&ordNo=${order.ordNo}&canAmt=${order.amt}&ediDate=${order.ediDate}`
     );
   };
 

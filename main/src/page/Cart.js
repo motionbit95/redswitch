@@ -26,38 +26,7 @@ const Cart = ({ token, theme }) => {
   const [selectAll, setSelectAll] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
-  const fetchProducts = async (list) => {
-    try {
-      // 모든 비동기 요청을 Promise 배열로 처리
-      const relatedProductsPromises = list?.map(async (item) => {
-        const response = await fetch(
-          `${process.env.REACT_APP_SERVER_URL}/products/${item}`
-        );
-        const data = await response.json();
-
-        // material 데이터를 병합
-        try {
-          const materialResponse = await fetch(
-            `${process.env.REACT_APP_SERVER_URL}/products/materials/${data.material_id}`
-          );
-          const material = await materialResponse.json();
-          return { ...data, original_image: material.original_image };
-        } catch (error) {
-          console.error("Failed to fetch material:", error);
-          return { ...data, original_image: undefined }; // material이 없을 경우
-        }
-      });
-
-      // 모든 Promise가 완료된 후 관련 제품 배열을 설정
-      const relatedProductsData = await Promise.all(relatedProductsPromises);
-      console.log("relatedProductsData : ", relatedProductsData);
-      // 상태 업데이트
-      setRelatedProducts(relatedProductsData);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
-
+  // 장바구니 리스트를 토큰 세션정보로 불러오기
   useEffect(() => {
     window.scrollTo(0, 0);
 
@@ -111,6 +80,7 @@ const Cart = ({ token, theme }) => {
     fetchCart();
   }, [token]);
 
+  // 전체선택, 해제에 따른 선택 아이템 업데이트
   useEffect(() => {
     if (selectAll) {
       setSelectedItems(cartData.map((item) => item.pk));
@@ -119,6 +89,40 @@ const Cart = ({ token, theme }) => {
     }
   }, [selectAll, cartData]);
 
+  // 상품 목록 가지고 오기 - 연관 상품 보여주기 위함
+  const fetchProducts = async (list) => {
+    try {
+      // 모든 비동기 요청을 Promise 배열로 처리
+      const relatedProductsPromises = list?.map(async (item) => {
+        const response = await fetch(
+          `${process.env.REACT_APP_SERVER_URL}/products/${item}`
+        );
+        const data = await response.json();
+
+        // material 데이터를 병합
+        try {
+          const materialResponse = await fetch(
+            `${process.env.REACT_APP_SERVER_URL}/products/materials/${data.material_id}`
+          );
+          const material = await materialResponse.json();
+          return { ...data, original_image: material.original_image };
+        } catch (error) {
+          console.error("Failed to fetch material:", error);
+          return { ...data, original_image: undefined }; // material이 없을 경우
+        }
+      });
+
+      // 모든 Promise가 완료된 후 관련 제품 배열을 설정
+      const relatedProductsData = await Promise.all(relatedProductsPromises);
+      console.log("relatedProductsData : ", relatedProductsData);
+      // 상태 업데이트
+      setRelatedProducts(relatedProductsData);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
+  // 장바구니 목록에서 삭제
   const handleDelete = (pk) => {
     setCartData(cartData.filter((item) => item.pk !== pk));
     setSelectedItems(selectedItems.filter((item) => item !== pk));
@@ -130,6 +134,7 @@ const Cart = ({ token, theme }) => {
       .catch((error) => console.error(error));
   };
 
+  // 상품 수량 변경
   const handleQuantityChange = async (value, pk) => {
     if (!value) return;
     setCartData((prevCartData) =>
@@ -147,6 +152,7 @@ const Cart = ({ token, theme }) => {
     });
   };
 
+  // 장바구니 선택 플래그 변경
   const handleCheckboxChange = (e, pk) => {
     if (e.target.checked) {
       setSelectedItems([...selectedItems, pk]);
@@ -155,6 +161,7 @@ const Cart = ({ token, theme }) => {
     }
   };
 
+  // 총 금액
   const totalAmount = cartData.reduce((total, item) => {
     let optionsAmount = 0;
     item.option?.forEach((element) => {
@@ -187,6 +194,7 @@ const Cart = ({ token, theme }) => {
     return code;
   }
 
+  // 주문서 저장
   const handleAddOrder = async () => {
     const order = {
       products: [],

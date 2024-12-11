@@ -184,6 +184,11 @@ router.get("/payCancel", (req, res) => {
         .catch((error) => {
           console.log(error);
         });
+
+      // TODO(sjpark) -> 주문 상태 변경 - 주문 취소
+
+      // TODO(sjpark) -> 재고 수량 복원
+
       // 환불 결과를 저장합니다.
       // res.send(response.data);
       res.redirect(
