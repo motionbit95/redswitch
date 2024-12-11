@@ -127,7 +127,7 @@ const ProductCRUD = () => {
       console.log(values);
 
       // 추가 로직
-      let relatedProductPKs = relatedProducts.map((product) => product.pk);
+      let relatedProductPKs = relatedProducts.map((product) => product.PK);
       console.log(relatedProductPKs);
 
       // 수정 로직
@@ -565,14 +565,9 @@ const ProductCRUD = () => {
                     key: "product_name",
                   },
                   {
-                    title: "거래처명",
-                    dataIndex: "provider_name",
-                    key: "provider_name",
-                  },
-                  {
-                    title: "원가",
-                    dataIndex: "product_sale",
-                    key: "product_sale",
+                    title: "소비자 판매 가격",
+                    dataIndex: "product_price",
+                    key: "product_price",
                   },
                 ]}
               />

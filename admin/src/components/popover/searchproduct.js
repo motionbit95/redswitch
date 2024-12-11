@@ -37,9 +37,10 @@ const SearchProduct = ({
     try {
       AxiosGet("/products")
         .then((response) => {
+          console.log(">>>>>", response.data);
           setProducts(
             response.data
-              .map((item) => ({ key: item.pk, ...item }))
+              .map((item) => ({ key: item.PK, ...item }))
               .filter((item) => item.product_name.includes(search))
               .map((item) => ({ key: item.id, ...item }))
           );
@@ -54,7 +55,7 @@ const SearchProduct = ({
 
   const handleOK = () => {
     if (!selectedRowKeys.length) {
-      message.warning("지점을 선택해주세요.");
+      message.warning("상품을 선택해주세요.");
       return;
     }
 
@@ -89,11 +90,6 @@ const SearchProduct = ({
       key: "product_name",
       ...getColumnSearchProps("product_name"),
     },
-    // {
-    //   title: "거래처명",
-    //   dataIndex: "provider_name",
-    //   key: "provider_name",
-    // },
     {
       title: "소비자 판매 가격",
       dataIndex: "product_price",
@@ -103,6 +99,7 @@ const SearchProduct = ({
 
   const onSelectChange = (newSelectedRowKeys) => {
     setSelectedRowKeys(newSelectedRowKeys);
+    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
   };
 
   const rowSelection = {

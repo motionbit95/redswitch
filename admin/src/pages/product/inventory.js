@@ -17,14 +17,104 @@ import SearchBranch from "../../components/popover/searchbranch";
 import { useEffect } from "react";
 import { AxiosGet, AxiosPost, AxiosPut } from "../../api";
 
-const InventoryAddModal = (props) => {
+const AddModal = (props) => {
+  const { data } = props;
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
+
+  const handleSubmit = async () => {
+    if (!data.length) {
+      message.error("발주할 상품이 없습니다.");
+      return;
+    }
+    console.log(data);
+
+    // try {
+    //   const data = selectedMaterials.map((item) => ({
+    //     provider_id: item.provider_id,
+    //     material_pk: item.material_pk,
+    //     product_code: item.product_code,
+    //     provider_code: item.provider_code,
+    //     ordered_cnt: item.ordered_cnt,
+    //   }));
+
+    //   await AxiosPost("/products/ordering_product", data);
+
+    //   message.success("발주상품이 성공적으로 저장되었습니다.");
+    //   props.setIsModalOpen(false);
+    //   setSelectedMaterials([]);
+    // } catch (error) {
+    //   console.error("발주 저장 오류:", error);
+    //   message.error("발주 저장에 실패했습니다.");
+    // }
+  };
+
   return (
     <Modal
       centered
       open={props.isModalOpen}
+      width={800}
+      title="발주 추가"
       onCancel={() => props.setIsModalOpen(false)}
-    ></Modal>
+      footer={[
+        <Button key="back" onClick={() => props.setIsModalOpen(false)}>
+          취소
+        </Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit}>
+          확인
+        </Button>,
+      ]}
+    >
+      <Table
+        size="small"
+        dataSource={data}
+        columns={[
+          {
+            title: "No.",
+            dataIndex: "index",
+            key: "index",
+            render: (text, record, index) => index + 1,
+          },
+          {
+            title: "상품명",
+            dataIndex: "product_name",
+            key: "product_name",
+          },
+          {
+            title: "현재 재고",
+            dataIndex: "inventory_cnt",
+            key: "inventory_cnt",
+          },
+          {
+            title: "발주수량",
+            dataIndex: "ordered_cnt",
+            key: "ordered_cnt",
+
+            render: (_, record) => (
+              <InputNumber
+                type="number"
+                size="small"
+                defaultValue={record.ordered_cnt || 1}
+                min={1}
+              />
+            ),
+          },
+          {
+            title: "동작",
+            key: "action",
+
+            render: (_, record) => (
+              <Space>
+                <a>삭제</a>
+              </Space>
+            ),
+          },
+        ]}
+      />
+    </Modal>
   );
 };
 
@@ -43,20 +133,36 @@ const Inventory = () => {
   const [filteredInfo, setFilteredInfo] = useState({});
   const [sortedInfo, setSortedInfo] = useState({});
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
   const [editRowKey, setEditRowKey] = useState(null);
   const [editedInventory, setEditedInventory] = useState({});
 
   // 상품 목록 불러오기
   const fetchProducts = async () => {
     try {
-      const response = await AxiosGet(`/products/search/${selectedBranch.id}`);
-      const productsWithKeys = response.data.map((product) => ({
+      const productsResponse = await AxiosGet(
+        `/products/search/${selectedBranch.id}`
+      );
+      const inventoriesResponse = await AxiosGet(`/products/inventories`);
+
+      console.log("Products:", productsResponse.data);
+      console.log("Inventories:", inventoriesResponse.data);
+
+      const inventoriesMap = {};
+      inventoriesResponse.data.forEach((inventory) => {
+        inventoriesMap[inventory.pk] = inventory;
+      });
+
+      const productsWithInventories = productsResponse.data.map((product) => ({
         ...product,
         key: product.PK,
+        inventory_cnt: inventoriesMap[product.PK]?.inventory_cnt || 0,
+        inventory_min_cnt: inventoriesMap[product.PK]?.inventory_min_cnt || 0,
       }));
-      setProducts(productsWithKeys);
+
+      setProducts(productsWithInventories);
     } catch (error) {
-      message.error("상품 목록을 불러오는 데 실패했습니다.");
+      message.error("상품 및 재고 목록을 불러오는 데 실패했습니다.");
     }
   };
 
@@ -64,19 +170,19 @@ const Inventory = () => {
     fetchProducts();
   }, []);
 
-  const handleEditInventory = (inventory) => {
-    console.log(inventory.PK);
-    setEditRowKey(inventory.PK);
+  const handleEditInventory = (product) => {
+    console.log(product.PK);
+    setEditRowKey(product.PK);
     setEditedInventory({
-      inventory_cnt: inventory.inventory_cnt || 0,
-      inventory_min_cnt: inventory.inventory_min_cnt || 0,
+      inventory_cnt: product.inventory_cnt || 0,
+      inventory_min_cnt: product.inventory_min_cnt || 0,
     });
   };
 
   const handleInputChange = (field, value, inventory) => {
-    console.log(">>>>>>>>>>>", inventory.PK);
-    setEditedInventory((prevState) => ({
-      ...prevState,
+    console.log(inventory.PK, field, value);
+    setEditedInventory((prev) => ({
+      ...prev,
       [field]: value,
     }));
   };
@@ -85,15 +191,19 @@ const Inventory = () => {
     try {
       if (record.inventory_cnt !== undefined) {
         // 재고 수정
-        await AxiosPut(`/products/inventories/${record.pk}`, {
+        await AxiosPut(`/products/inventories/${record.PK}`, {
+          ...record,
           inventory_cnt: editedInventory.inventory_cnt,
           inventory_min_cnt: editedInventory.inventory_min_cnt,
         });
         message.success("재고가 성공적으로 수정되었습니다.");
+        fetchProducts();
       } else {
         // 재고 생성
+        console.log(record.PK);
         await AxiosPost(`/products/inventories`, {
-          product_id: record.pk,
+          ...record,
+          product_pk: record.PK,
           inventory_cnt: editedInventory.inventory_cnt,
           inventory_min_cnt: editedInventory.inventory_min_cnt,
           branch_id: selectedBranch.id,
@@ -101,7 +211,9 @@ const Inventory = () => {
         message.success("재고가 성공적으로 생성되었습니다.");
       }
       setEditRowKey(null);
-      fetchProducts();
+      await fetchProducts();
+
+      console.log("Updated products:", products);
     } catch (error) {
       message.error("재고를 저장하는 데 실패했습니다.");
     }
@@ -149,41 +261,50 @@ const Inventory = () => {
       title: "재고 수량",
       dataIndex: "inventory_cnt",
       key: "inventory_cnt",
-      width: 150,
+      width: 100,
       render: (text, record) =>
         editRowKey === record.PK ? (
-          <Input
+          <InputNumber
+            size="small"
             value={editedInventory.inventory_cnt}
             min={0}
             onChange={(value) =>
               handleInputChange("inventory_cnt", value, record)
             }
           />
-        ) : (
+        ) : // 재고 수량이 없으면 0
+        text ? (
           text
+        ) : (
+          0
         ),
     },
     {
-      title: "재고 최소 수량",
+      title: "재고 한도",
       dataIndex: "inventory_min_cnt",
       key: "inventory_min_cnt",
-      width: 150,
+      width: 100,
       render: (text, record) =>
         editRowKey === record.PK ? (
-          <Input
+          <InputNumber
+            size="small"
             value={editedInventory.inventory_min_cnt}
             min={0}
             onChange={(value) =>
               handleInputChange("inventory_min_cnt", value, record)
             }
           />
-        ) : (
+        ) : // 재고 최소 수량이 없으면 0
+        text ? (
           text
+        ) : (
+          0
         ),
     },
     {
       title: "동작",
       key: "action",
+      width: 150,
 
       render: (text, record) => (
         <Space>
@@ -214,6 +335,11 @@ const Inventory = () => {
 
   const onSelectChange = (newSelectedRowKeys) => {
     setSelectedRowKeys(newSelectedRowKeys);
+    const filteredProducts = products.filter((product) =>
+      newSelectedRowKeys.includes(product.PK)
+    );
+    setSelectedProducts(filteredProducts);
+    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
   };
 
   const rowSelection = {
@@ -265,10 +391,11 @@ const Inventory = () => {
           showSizeChanger: true,
         }}
       />
-      {/* 재고 추가 모달 */}
-      <InventoryAddModal
+      {/* 발주 추가 모달 */}
+      <AddModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
+        data={selectedProducts}
       />
     </div>
   );

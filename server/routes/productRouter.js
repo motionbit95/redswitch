@@ -1251,7 +1251,9 @@ router.post("/inventories", async (req, res) => {
       provider_id,
     } = req.body;
 
-    if (!product_pk || !branch_id || !provider_id) {
+    console.log("req.body: ", req.body);
+
+    if (!product_pk || !branch_id) {
       return res.status(400).json({ message: "필수 필드가 누락되었습니다." });
     }
 

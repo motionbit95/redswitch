@@ -670,7 +670,7 @@ class Inventory {
     this.product_pk = data.product_pk;
     this.product_code = data.product_code || "A01010001";
     this.branch_id = data.branch_id;
-    this.provider_id = data.provider_id;
+    this.provider_id = data.provider_id || null;
   }
 
   toJSON() {
