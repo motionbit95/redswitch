@@ -92,9 +92,7 @@ const ProductCRUD = () => {
       if (product.related_products && product.related_products.length > 0) {
         const relatedProductsPromises = product.related_products.map(
           (element) =>
-            AxiosGet(`/products/materials/${element}`).then(
-              (response) => response.data
-            )
+            AxiosGet(`/products/${element}`).then((response) => response.data)
         );
 
         // 모든 관련 제품의 데이터가 완료되면

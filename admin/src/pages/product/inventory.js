@@ -18,49 +18,74 @@ import { useEffect } from "react";
 import { AxiosGet, AxiosPost, AxiosPut } from "../../api";
 
 const AddModal = (props) => {
-  const { data } = props;
+  const { data, onComplete, isModalOpen, setIsModalOpen } = props;
   const [form] = Form.useForm();
+  const [products, setProducts] = useState(data);
 
   useEffect(() => {
-    console.log(data);
+    setProducts(data);
   }, [data]);
 
+  const handleQuantityChange = (value, record) => {
+    console.log(value, record);
+    setProducts((prevData) =>
+      prevData.map((item) =>
+        item.PK === record ? { ...item, ordered_cnt: value } : item
+      )
+    );
+  };
+
+  // 삭제 기능
+  const handleDelete = (record) => {
+    console.log(
+      products.filter((item) => item.PK !== record),
+      record
+    );
+    setProducts((prevData) => prevData.filter((item) => item.PK !== record));
+  };
+
   const handleSubmit = async () => {
-    if (!data.length) {
+    if (!products.length) {
       message.error("발주할 상품이 없습니다.");
       return;
     }
-    console.log(data);
 
-    // try {
-    //   const data = selectedMaterials.map((item) => ({
-    //     provider_id: item.provider_id,
-    //     material_pk: item.material_pk,
-    //     product_code: item.product_code,
-    //     provider_code: item.provider_code,
-    //     ordered_cnt: item.ordered_cnt,
-    //   }));
-
-    //   await AxiosPost("/products/ordering_product", data);
-
-    //   message.success("발주상품이 성공적으로 저장되었습니다.");
-    //   props.setIsModalOpen(false);
-    //   setSelectedMaterials([]);
-    // } catch (error) {
-    //   console.error("발주 저장 오류:", error);
-    //   message.error("발주 저장에 실패했습니다.");
+    // if (products.some((item) => !item.ordered_cnt || item.ordered_cnt <= 0)) {
+    //   message.error("발주수량을 입력해주세요.");
+    //   return;
     // }
+
+    console.log(
+      products,
+      products.map((item) => ({
+        product_pk: item.PK,
+        ordered_cnt: item.ordered_cnt,
+      }))
+    );
+    // setIsModalOpen(false);
+    // onComplete();
   };
 
   return (
     <Modal
       centered
-      open={props.isModalOpen}
+      open={isModalOpen}
       width={800}
       title="발주 추가"
-      onCancel={() => props.setIsModalOpen(false)}
+      onCancel={() => {
+        setProducts([]);
+        onComplete();
+        setIsModalOpen(false);
+      }}
       footer={[
-        <Button key="back" onClick={() => props.setIsModalOpen(false)}>
+        <Button
+          key="back"
+          onClick={() => {
+            setProducts([]);
+            onComplete();
+            setIsModalOpen(false);
+          }}
+        >
           취소
         </Button>,
         <Button key="submit" type="primary" onClick={handleSubmit}>
@@ -70,7 +95,7 @@ const AddModal = (props) => {
     >
       <Table
         size="small"
-        dataSource={data}
+        dataSource={products}
         columns={[
           {
             title: "No.",
@@ -95,10 +120,10 @@ const AddModal = (props) => {
 
             render: (_, record) => (
               <InputNumber
-                type="number"
                 size="small"
-                defaultValue={record.ordered_cnt || 1}
+                defaultValue={record.ordered_cnt || 0}
                 min={1}
+                onChange={(value) => handleQuantityChange(value, record.PK)}
               />
             ),
           },
@@ -108,7 +133,7 @@ const AddModal = (props) => {
 
             render: (_, record) => (
               <Space>
-                <a>삭제</a>
+                <a onClick={() => handleDelete(record.PK)}>삭제</a>
               </Space>
             ),
           },
@@ -121,7 +146,6 @@ const AddModal = (props) => {
 const Inventory = () => {
   const [form] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const [selectedBranch, setSelectedBranch] = useState(
     localStorage.getItem("selectedBranch")
@@ -396,6 +420,9 @@ const Inventory = () => {
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         data={selectedProducts}
+        onComplete={(data) => {
+          setSelectedRowKeys([]);
+        }}
       />
     </div>
   );
