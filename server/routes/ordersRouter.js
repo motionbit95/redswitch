@@ -265,20 +265,52 @@ router.get("/code/:order_code", async (req, res) => {
   }
 });
 
-// router.get("/orders", async (req, res) => {
-//   const { customerId } = req.query;
+/**
+ * @swagger
+ * /orders/token/{user_token}:
+ *   get:
+ *     summary: 특정 사용자 토큰의 주문 조회
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: user_token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 사용자 토큰
+ *     responses:
+ *       200:
+ *         description: 주문 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: 성공 여부
+ *                 data:
+ *                   type: object
+ *                   description: 주문 데이터
+ *       404:
+ *         description: 주문을 찾을 수 없음
+ *       500:
+ *         description: 주문 조회 중 오류
+ * */
+router.get("/token/:token", async (req, res) => {
+  const { token } = req.params;
 
-//   if (!customerId) {
-//     return res.status(400).json({ error: "customerId는 필수입니다." });
-//   }
+  if (!token) {
+    return res.status(400).json({ error: "token은 필수입니다." });
+  }
 
-//   try {
-//     const orders = await Orders.findOrderByCustomerId(customerId);
-//     res.status(200).json(orders);
-//   } catch (error) {
-//     console.error("주문 조회 엔드포인트 오류:", error);
-//     res.status(500).json({ error: "주문 조회 실패" });
-//   }
-// });
+  try {
+    const orders = await Orders.findOrderByCustomerId(token);
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("주문 조회 엔드포인트 오류:", error);
+    res.status(500).json({ error: "주문 조회 실패" });
+  }
+});
 
 module.exports = router;

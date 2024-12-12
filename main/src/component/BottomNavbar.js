@@ -20,7 +20,7 @@ function BottomNavbar(props) {
       setMenu(2);
     }
 
-    if (window.location.href.includes("payment")) {
+    if (window.location.href.includes("order")) {
       setMenu(3);
     }
   }, []);

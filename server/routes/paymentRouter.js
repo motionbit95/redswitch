@@ -90,16 +90,15 @@ router.post("/payResult", (req, res) => {
       axios
         .post("http://localhost:8080/payments", response.data)
         .then(() => {
-          console.log("승인 결과 DB에 저장완료");
+          // Assuming `response.data` is your response object
+          res.redirect(
+            "http://localhost:3000/payment/result?data=" +
+              encodeURIComponent("{" + qs.stringify(response.data) + "}")
+          );
         })
         .catch((error) => {
           console.log(error);
         });
-      // Assuming `response.data` is your response object
-      res.redirect(
-        "http://localhost:3000/payment/result?data=" +
-          encodeURIComponent("{" + qs.stringify(response.data) + "}")
-      );
     })
     .catch((error) => {
       console.log(error);
@@ -176,22 +175,36 @@ router.get("/payCancel", (req, res) => {
         },
       }
     )
-    .then((response) => {
+    .then(async (response) => {
       axios
         .post("http://localhost:8080/payments", response.data)
-        .then(() => {
-          console.log("환불 결과 DB에 저장완료");
-        })
+        .then(() => {})
         .catch((error) => {
           console.log(error);
         });
 
-      // TODO(sjpark) -> 주문 상태 변경 - 주문 취소
+      // order 상태 변경
+      const order = await Orders.getByOrderCode(data.ordNo);
+      console.log(order);
+      Object.assign(order, { order_status: 2 }); // 결제 취소 플래그
+      const updatedOrder = await new Orders(order).update();
 
-      // TODO(sjpark) -> 재고 수량 복원
+      // 재고 수량 변경(재고 감소)
+      for (let i = 0; i < updatedOrder.select_products.length; i++) {
+        let product = updatedOrder.select_products[i];
+        // 재고 데이터 가지고 오기
+        try {
+          const inventory = await Inventory.getByPK(product.PK);
+          // 있는거만 수정하자
+          Object.assign(inventory, {
+            inventory_cnt: inventory.inventory_cnt - product.count || 0,
+          });
 
-      // 환불 결과를 저장합니다.
-      // res.send(response.data);
+          const newInventory = await new Inventory(inventory).update();
+        } catch (error) {
+          continue;
+        }
+      }
       res.redirect(
         "http://localhost:3000/payment/cancel?data=" +
           encodeURIComponent("{" + qs.stringify(response.data) + "}")
@@ -260,6 +273,7 @@ router.post("/sendResponse", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const paymentData = req.body;
+    console.log("결제 데이터", paymentData);
     const payment = new Payment(paymentData);
     const newPayment = await payment.create();
 
@@ -269,8 +283,8 @@ router.post("/", async (req, res) => {
     const updatedOrder = await new Orders(order).update();
 
     // 재고 수량 변경(재고 감소)
-    for (let i = 0; i < updatedOrder.selectProducts.length; i++) {
-      let product = updatedOrder.selectProducts[i];
+    for (let i = 0; i < updatedOrder.select_products.length; i++) {
+      let product = updatedOrder.select_products[i];
       // 재고 데이터 가지고 오기
       try {
         const inventory = await Inventory.getByPK(product.PK);

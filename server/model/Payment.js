@@ -8,10 +8,12 @@ class Payment {
     this.tid = data.tid || null;
     this.ediDate = data.ediDate || null;
     this.ordNo = data.ordNo || null;
-    this.goodsAmt = data.goodsAmt || null;
+    this.amt = data.amt || null;
     this.cancelYN = data.cancelYN || null;
     this.payMethod = data.payMethod || null;
     this.appNo = data.appNo || null;
+    this.fnNm = data.fnNm || null;
+    this.quota = data.quota || null;
   }
 
   toJSON() {
@@ -20,10 +22,12 @@ class Payment {
       tid: this.tid,
       ediDate: this.ediDate,
       ordNo: this.ordNo,
-      goodsAmt: this.goodsAmt,
+      goodsAmt: this.amt,
       cancelYN: this.cancelYN,
       payMethod: this.payMethod,
       appNo: this.appNo,
+      fnNm: this.fnNm,
+      quota: this.quota,
     };
   }
 

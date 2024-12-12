@@ -5,19 +5,19 @@ const ordersRef = database.ref("orders");
 class Orders {
   constructor(data) {
     this.id = data.id || null; // 주문 ID
-    this.paymentPk = data.payment_pk; // 결제 PK
-    this.branchPk = data.branch_pk; // 지점 PK
-    this.orderCode = data.order_code; // 주문 코드
-    this.customerId = data.customer_id; // 고객 ID
-    this.customerPhone = data.customer_phone; // 고객 전화번호
-    this.customerAddress = data.customer_address; // 고객 주소
-    this.selectProducts = data.select_products || []; // 선택된 상품들
-    this.orderStatus = data.order_status; // 주문 상태
-    this.createdAt = data.created_at || new Date().toISOString(); // 생성 시간
-    this.updatedAt = data.updated_at || null; // 수정 시간
-    this.orderAmount = data.order_amount; // 주문 금액
-    this.goodsName = data.goods_name; // 상품명
-    this.deliveryMessage = data.delivery_message || null; // 배송 메시지
+    this.payment_pk = data.payment_pk; // 결제 PK
+    this.branch_pk = data.branch_pk; // 지점 PK
+    this.order_code = data.order_code; // 주문 코드
+    this.customer_id = data.customer_id; // 고객 ID
+    this.customer_phone = data.customer_phone; // 고객 전화번호
+    this.customer_address = data.customer_address; // 고객 주소
+    this.select_products = data.select_products || []; // 선택된 상품들
+    this.order_status = data.order_status; // 주문 상태
+    this.created_at = data.created_at || new Date().toISOString(); // 생성 시간
+    this.updated_at = data.updated_at || null; // 수정 시간
+    this.order_amount = data.order_amount; // 주문 금액
+    this.goods_name = data.goods_name; // 상품명
+    this.delivery_message = data.delivery_message || null; // 배송 메시지
     this.checked = data.checked || 0;
   }
 
@@ -25,19 +25,19 @@ class Orders {
   toJSON() {
     return {
       id: this.id,
-      payment_pk: this.paymentPk,
-      branch_pk: this.branchPk,
-      order_code: this.orderCode,
-      customer_id: this.customerId,
-      customer_phone: this.customerPhone,
-      customer_address: this.customerAddress,
-      select_products: this.selectProducts,
-      order_status: this.orderStatus,
-      created_at: this.createdAt,
-      updated_at: this.updatedAt,
-      order_amount: this.orderAmount,
-      goods_name: this.goodsName,
-      delivery_message: this.deliveryMessage,
+      payment_pk: this.payment_pk,
+      branch_pk: this.branch_pk,
+      order_code: this.order_code,
+      customer_id: this.customer_id,
+      customer_phone: this.customer_phone,
+      customer_address: this.customer_address,
+      select_products: this.select_products,
+      order_status: this.order_status,
+      created_at: this.created_at,
+      updated_at: this.updated_at,
+      order_amount: this.order_amount,
+      goods_name: this.goods_name,
+      delivery_message: this.delivery_message,
       checked: this.checked,
     };
   }
@@ -95,6 +95,7 @@ class Orders {
       }
       this.updatedAt = new Date().toISOString(); // 수정 시간 업데이트
       await ordersRef.child(this.id).update(this.toJSON()); // 데이터베이스 업데이트
+      console.log("주문 업데이트 성공 : ", this);
       return this;
     } catch (error) {
       console.error("주문 업데이트 오류:", error);
@@ -152,7 +153,9 @@ class Orders {
         );
       });
 
-      return ordersList.filter((order) => order.customerId === customerId);
+      return ordersList
+        .filter((order) => order.customer_id === customerId)
+        .reverse();
     } catch (error) {
       console.error("주문 조회 오류:", error);
       throw new Error("주문 조회 실패");

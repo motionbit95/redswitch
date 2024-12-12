@@ -3,11 +3,14 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Footer } from "../component/Footer";
 import { CopyOutlined } from "@ant-design/icons";
+import { useLocation } from "react-router-dom";
 
 function PaymentResult(props) {
-  const [queryParams, setQueryParams] = useState({});
-  const [order, setOrder] = useState({});
-  const [branch, setBranch] = useState({});
+  const [queryParams, setQueryParams] = useState({}); // 결제 데이터
+  const [order, setOrder] = useState({}); // 주문 데이터
+  const [branch, setBranch] = useState({}); // 지점 데이터
+  const location = useLocation();
+  const [orderStatus, setOrderStatus] = useState(0);
 
   useEffect(() => {
     if (window.location.search) {
@@ -73,6 +76,40 @@ function PaymentResult(props) {
     }
   }, []); // Run once when the component mounts
 
+  useEffect(() => {
+    if (location.state) {
+      console.log(location.state.order);
+      setOrder(location.state.order);
+
+      axios
+        .get(
+          `${process.env.REACT_APP_SERVER_URL}/branches/${location.state.order?.branch_pk}`
+        )
+        .then((res) => {
+          console.log("지점 :", res.data);
+          setBranch(res.data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      // order
+      axios
+        .get(
+          `${process.env.REACT_APP_SERVER_URL}/payments/ordNo/${location.state.order?.order_code}`
+        )
+        .then((res) => {
+          setQueryParams({ ...res.data[0], amt: res.data[0].goodsAmt });
+          setOrderStatus(res.data.length);
+        })
+        .catch((err) => {
+          // 결제 데이터가 없음
+          setQueryParams(null);
+          console.log(err);
+        });
+    }
+  }, []);
+
   // 메인으로 이동
   const goHome = () => {
     window.location.href = `/spot/${localStorage.getItem("branch")}`;
@@ -80,26 +117,28 @@ function PaymentResult(props) {
 
   // 주문번호 저장
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(queryParams.ordNo);
+    navigator.clipboard.writeText(queryParams?.ordNo);
     message.success("주문번호가 클립보드에 복사되었습니다.");
   };
 
   // 주문 취소
   const cancelPayment = async () => {
     console.log(queryParams);
-    if (order.order_status < 1) {
+    if (orderStatus < 2) {
       window.location.replace(
-        `${process.env.REACT_APP_SERVER_URL}/payments/payCancel?tid=${queryParams.tid}&ordNo=${queryParams.ordNo}&canAmt=${queryParams.amt}&ediDate=${queryParams.ediDate}`
+        `${process.env.REACT_APP_SERVER_URL}/payments/payCancel?tid=${queryParams?.tid}&ordNo=${queryParams?.ordNo}&canAmt=${queryParams?.amt}&ediDate=${queryParams?.ediDate}`
       );
+    } else if (orderStatus === 2) {
+      message.error("이미 취소된 주문입니다.");
     } else {
-      message.error("이미 승인된 주문입니다.");
+      message.error("취소 불가 주문입니다.");
     }
   };
 
   return (
     <div>
       <div style={{ padding: "20px" }}>
-        {queryParams && (
+        {window.location.search && (
           <h1 style={{ textAlign: "center", marginBottom: 32 }}>
             주문이
             <br />
@@ -117,60 +156,64 @@ function PaymentResult(props) {
             marginBottom: 16,
           }}
         >
-          {queryParams && (
-            <div>
-              {queryParams.appDtm?.substring(0, 4)}.
-              {queryParams.appDtm?.substring(4, 6)}.
-              {queryParams.appDtm?.substring(6, 8)} 주문
-            </div>
+          {order && (
+            <div>{new Date(order.created_at).toLocaleDateString()} 주문</div>
           )}
-          <div>주문번호 : {queryParams.ordNo}</div>
+          <div>주문번호 : {order?.order_code}</div>
         </div>
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <Card title="결제정보" style={{ fontSize: "medium" }}>
-            <div
-              style={{
-                display: "flex",
-                width: "100%",
-                justifyContent: "space-between",
-                marginBottom: 16,
-              }}
-            >
-              {queryParams && <div>상품가격</div>}
-              <div>{parseInt(queryParams.amt).toLocaleString("ko-KR")}원</div>
-            </div>
-            <Divider />
-            <div
-              style={{
-                display: "flex",
-                width: "100%",
-                justifyContent: "space-between",
-                marginBottom: 16,
-              }}
-            >
-              {queryParams && (
+          {queryParams && ( // 결제 정보가 있을 때만
+            <Card title="결제정보" style={{ fontSize: "medium" }}>
+              <div
+                style={{
+                  display: "flex",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  marginBottom: 16,
+                }}
+              >
+                {queryParams && <div>상품가격</div>}
                 <div>
-                  {queryParams.fnNm} /{" "}
-                  {parseInt(queryParams.quota) > 0
-                    ? parseInt(queryParams.quota) + "개월"
-                    : "일시불"}
+                  {parseInt(queryParams?.amt).toLocaleString("ko-KR")}원
                 </div>
-              )}
-              <div>{parseInt(queryParams.amt).toLocaleString("ko-KR")}원</div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                width: "100%",
-                justifyContent: "space-between",
-                marginBottom: 16,
-                fontWeight: "bold",
-              }}
-            >
-              {queryParams && <div>총 결제금액</div>}
-              <div>{parseInt(queryParams.amt).toLocaleString("ko-KR")}원</div>
-            </div>
-          </Card>
+              </div>
+              <Divider />
+              <div
+                style={{
+                  display: "flex",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  marginBottom: 16,
+                }}
+              >
+                {queryParams && (
+                  <div>
+                    {queryParams?.fnNm} /{" "}
+                    {parseInt(queryParams?.quota) > 0
+                      ? parseInt(queryParams?.quota) + "개월"
+                      : "일시불"}
+                  </div>
+                )}
+                <div>
+                  {parseInt(queryParams?.amt).toLocaleString("ko-KR")}원
+                </div>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  marginBottom: 16,
+                  fontWeight: "bold",
+                }}
+              >
+                {queryParams && <div>총 결제금액</div>}
+                <div>
+                  {parseInt(queryParams?.amt).toLocaleString("ko-KR")}원
+                </div>
+              </div>
+            </Card>
+          )}
           <Card style={{ fontSize: "large" }}>
             <div style={{ fontWeight: "bold" }}>
               <div>{branch.branch_name}</div>
@@ -194,7 +237,11 @@ function PaymentResult(props) {
                 fontSize: "large",
               }}
             >
-              {order.order_status === 0 ? "결제대기" : "결제완료"}
+              {orderStatus === 0
+                ? "결제대기"
+                : orderStatus === 1
+                ? "결제완료"
+                : "주문취소"}
             </div>
             {order.select_products?.map((product, index) => (
               <Space>
