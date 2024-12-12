@@ -133,7 +133,7 @@ router.post("/login", async (req, res) => {
       { expiresIn: "2h" }
     );
 
-    res.status(200).send({ token, user_id: user[userKey].user_id });
+    res.status(200).send({ token, id: user[userKey].id });
   } catch (error) {
     console.error("로그인 오류:", error);
     res.status(500).send({ error: "로그인 실패" });
