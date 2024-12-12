@@ -10,6 +10,7 @@ import {
   ShopOutlined,
   TeamOutlined,
   SolutionOutlined,
+  NotificationOutlined,
 } from "@ant-design/icons";
 import { Breadcrumb, Layout, Menu, theme, Button, Space } from "antd";
 import { Footer } from "antd/es/layout/layout";
@@ -45,7 +46,9 @@ const App = () => {
   const defaultOpenKeys = window.location.pathname.split("/")[1];
   const defaultSelectedKeys = window.location.pathname;
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const token = localStorage.getItem("authToken");
+
+  const [isLoggedIn, setIsLoggedIn] = useState(token ? true : false);
   const [currentUser, setCurrentUser] = useState({});
 
   useEffect(() => {
@@ -56,15 +59,19 @@ const App = () => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const response = await AxiosGet(`/accounts`);
+        const response = await AxiosGet(
+          `/accounts/${localStorage.getItem("id")}`
+        );
         if (response.status === 200) {
-          console.log(response.data);
+          console.log("유저 정보", response.data);
           setCurrentUser(response.data);
           setIsLoggedIn(true);
         }
       } catch (error) {
         if (error?.response?.status === 401) {
           setCurrentUser({});
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("id");
           setIsLoggedIn(false);
         }
       }
@@ -74,6 +81,8 @@ const App = () => {
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("id");
     setIsLoggedIn(false);
   };
 
@@ -237,18 +246,29 @@ const App = () => {
           >
             Redswitch
           </div>
-          <Space>
-            {isLoggedIn ? (
-              <LoginForm
-                isLoggedIn={isLoggedIn}
-                setIsLoggedIn={setIsLoggedIn}
-              />
-            ) : (
-              <Space>
-                <Button onClick={handleLogout}>Logout</Button>
+          <Space size={50}>
+            <div style={{ color: "white" }}>{currentUser.user_id}</div>
+            <Space size={"large"}>
+              {isLoggedIn ? (
+                <Space>
+                  <Button onClick={handleLogout}>Logout</Button>
+                </Space>
+              ) : (
+                <LoginForm
+                  isLoggedIn={isLoggedIn}
+                  setIsLoggedIn={setIsLoggedIn}
+                />
+              )}
+              <Space style={{ marginTop: "5px" }}>
+                <NotificationOutlined
+                  style={{ fontSize: "20px", color: "white" }}
+                  onClick={() => {
+                    window.location.href = "/post/inquiry";
+                  }}
+                />
               </Space>
-            )}
-            {/* <Switch checked={isDarkMode} onChange={toggleTheme} /> */}
+              {/* <Switch checked={isDarkMode} onChange={toggleTheme} /> */}
+            </Space>
           </Space>
         </Header>
         <Layout>

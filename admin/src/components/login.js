@@ -25,7 +25,7 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (!isLoggedIn) {
       setOpen(true);
     }
   }, [isLoggedIn]);
@@ -39,8 +39,15 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
         user_password: values.password,
       });
       if (response.status === 200) {
+        const { token, id } = response.data;
+
+        console.log(token, id);
+
+        // 토큰과 아이디를 localStorage에 저장
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("id", id);
+
         message.success("로그인 성공");
-        localStorage.setItem("token", response.data.token);
         setIsLoggedIn(true);
         setOpen(false);
         navigate("/admin");
@@ -60,6 +67,7 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
       <Drawer
         width={"100%"}
         height="100vh"
+        motion={false}
         bodyStyle={{
           justifyContent: "center",
           alignContent: "center",
