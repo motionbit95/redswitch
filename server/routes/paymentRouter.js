@@ -8,6 +8,7 @@ const qs = require("qs");
 
 const Payment = require("../model/Payment");
 const Orders = require("../model/Orders");
+const { Inventory } = require("../model/Product");
 
 const merchantKey =
   "0KHf4qt04B6LEBwZ8M8z5bN/p/I0VQaaMy/SiQfjmVyYFpv6R+OB9toybcTYoOak09rVE4ytGLuvEs5wUEt3pA=="; // 상점키
@@ -266,9 +267,23 @@ router.post("/", async (req, res) => {
     const order = await Orders.getByOrderCode(paymentData.ordNo);
     Object.assign(order, { order_status: 1 }); // 결제완료 플래그
     const updatedOrder = await new Orders(order).update();
-    console.log("주문 정보가 변경되었습니다.", updatedOrder);
 
     // 재고 수량 변경(재고 감소)
+    for (let i = 0; i < updatedOrder.selectProducts.length; i++) {
+      let product = updatedOrder.selectProducts[i];
+      // 재고 데이터 가지고 오기
+      try {
+        const inventory = await Inventory.getByPK(product.PK);
+        // 있는거만 수정하자
+        Object.assign(inventory, {
+          inventory_cnt: inventory.inventory_cnt - product.count || 0,
+        });
+
+        const newInventory = await new Inventory(inventory).update();
+      } catch (error) {
+        continue;
+      }
+    }
 
     res.status(201).json(newPayment);
   } catch (error) {
