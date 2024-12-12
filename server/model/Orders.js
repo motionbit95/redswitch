@@ -136,6 +136,28 @@ class Orders {
       throw new Error("주문 조회에 실패했습니다.");
     }
   }
+
+  static async findOrderByCustomerId(customerId) {
+    if (!customerId) {
+      throw new Error("customerId는 필수입니다.");
+    }
+
+    try {
+      const snapshot = await ordersRef.once("value"); // Firebase에서 전체 주문 데이터 가져오기
+      const ordersList = [];
+
+      snapshot.forEach((childSnapshot) => {
+        ordersList.push(
+          new Orders({ id: childSnapshot.key, ...childSnapshot.val() })
+        );
+      });
+
+      return ordersList.filter((order) => order.customerId === customerId);
+    } catch (error) {
+      console.error("주문 조회 오류:", error);
+      throw new Error("주문 조회 실패");
+    }
+  }
 }
 
 module.exports = Orders;

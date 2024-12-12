@@ -265,4 +265,20 @@ router.get("/code/:order_code", async (req, res) => {
   }
 });
 
+// router.get("/orders", async (req, res) => {
+//   const { customerId } = req.query;
+
+//   if (!customerId) {
+//     return res.status(400).json({ error: "customerId는 필수입니다." });
+//   }
+
+//   try {
+//     const orders = await Orders.findOrderByCustomerId(customerId);
+//     res.status(200).json(orders);
+//   } catch (error) {
+//     console.error("주문 조회 엔드포인트 오류:", error);
+//     res.status(500).json({ error: "주문 조회 실패" });
+//   }
+// });
+
 module.exports = router;
