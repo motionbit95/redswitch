@@ -32,6 +32,8 @@ import Salse from "./pages/sales/salse";
 import Settlement from "./pages/sales/settlement";
 import BDSMAdvertise from "./pages/bdsm/bdsm_advertise";
 import NoticeBoard from "./pages/post/post";
+import InquiryBoard from "./pages/post/inquiry";
+import { AxiosGet } from "./api";
 
 const { Header, Content, Sider } = Layout;
 
@@ -43,12 +45,33 @@ const App = () => {
   const defaultOpenKeys = window.location.pathname.split("/")[1];
   const defaultSelectedKeys = window.location.pathname;
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState({});
+
   useEffect(() => {
     console.log("App component mounted");
     console.log(window.location.pathname.split("/")[1]);
   }, []);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const response = await AxiosGet(`/accounts`);
+        if (response.status === 200) {
+          console.log(response.data);
+          setCurrentUser(response.data);
+          setIsLoggedIn(true);
+        }
+      } catch (error) {
+        if (error?.response?.status === 401) {
+          setCurrentUser({});
+          setIsLoggedIn(false);
+        }
+      }
+    };
+
+    getUser();
+  }, []);
 
   const handleLogout = () => {
     setIsLoggedIn(false);
@@ -113,6 +136,10 @@ const App = () => {
         {
           key: "/post/notification",
           label: <Link to="/post/notification">공지사항</Link>,
+        },
+        {
+          key: "/post/inquiry",
+          label: <Link to="/post/inquiry">게시판</Link>,
         },
         {
           key: "/provider/post",
@@ -212,11 +239,14 @@ const App = () => {
           </div>
           <Space>
             {isLoggedIn ? (
+              <LoginForm
+                isLoggedIn={isLoggedIn}
+                setIsLoggedIn={setIsLoggedIn}
+              />
+            ) : (
               <Space>
                 <Button onClick={handleLogout}>Logout</Button>
               </Space>
-            ) : (
-              <LoginForm setIsLoggedIn={setIsLoggedIn} />
             )}
             {/* <Switch checked={isDarkMode} onChange={toggleTheme} /> */}
           </Space>
@@ -295,6 +325,7 @@ const App = () => {
                 <Route path="/order" element={<Order />} />
 
                 <Route path="/post/notification" element={<NoticeBoard />} />
+                <Route path="/post/inquiry" element={<InquiryBoard />} />
 
                 <Route path="/sales/sales" element={<Salse />} />
                 <Route path="/sales/settlement" element={<Settlement />} />

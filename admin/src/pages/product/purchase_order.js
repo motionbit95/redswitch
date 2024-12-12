@@ -171,33 +171,6 @@ const Purchase_order = () => {
     }
   };
 
-  const handleOrder = async () => {
-    if (!selectedProvider) {
-      message.error("다시 거래처를 선택해주세요.");
-      return;
-    }
-
-    try {
-      // 발주 이력 생성 요청
-      const response = await AxiosPost("/products/ordering_history", {
-        provider_id: selectedProvider.id,
-        arrive: false, // 기본값
-      });
-
-      // 서버 응답 처리
-      if (response && response.status === 201) {
-        message.success("발주 이력이 성공적으로 저장되었습니다.");
-        console.log("생성된 발주 이력:", response.data);
-        // 필요 시 발주 이력 ID를 상태로 저장하거나 추가 작업 수행
-        setIsModalOpen(true);
-        fetchOrders();
-      }
-    } catch (error) {
-      console.error("발주 이력 저장 오류:", error);
-      message.error("발주 이력을 저장하는 데 실패했습니다.");
-    }
-  };
-
   const handleEdit = (id) => {
     setIsEditModalOpen(true);
   };
@@ -276,7 +249,7 @@ const Purchase_order = () => {
           setSelectedProvider={(providers) => setSelectedProvider(providers[0])}
           multiple={false}
         />
-        <Popconfirm
+        {/* <Popconfirm
           title="발주 이력을 추가하시겠습니까?"
           onConfirm={handleOrder}
         >
@@ -287,7 +260,7 @@ const Purchase_order = () => {
           >
             발주 추가
           </Button>
-        </Popconfirm>
+        </Popconfirm> */}
       </Row>
       <Table
         size="small"
@@ -296,11 +269,11 @@ const Purchase_order = () => {
         pagination={{ pageSize: 10 }}
       />
 
-      {/* 재고 추가, 수정 모달 */}
+      {/* 재고 추가, 수정 모달
       <PurchaseAddModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
-      />
+      /> */}
     </div>
   );
 };

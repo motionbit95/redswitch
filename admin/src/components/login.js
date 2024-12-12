@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -11,17 +11,24 @@ import {
   theme,
   message,
   Typography,
+  Drawer,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { AxiosPost } from "../api";
-const LoginForm = ({ setIsLoggedIn }) => {
+const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      setOpen(true);
+    }
+  }, [isLoggedIn]);
 
   const onFinish = async (values) => {
     console.log("Received values of form: ", values);
@@ -33,8 +40,9 @@ const LoginForm = ({ setIsLoggedIn }) => {
       });
       if (response.status === 200) {
         message.success("로그인 성공");
+        localStorage.setItem("token", response.data.token);
         setIsLoggedIn(true);
-        setModalOpen(false);
+        setOpen(false);
         navigate("/admin");
       } else if (response.status === 404) {
         message.error(response.data.message);
@@ -46,24 +54,28 @@ const LoginForm = ({ setIsLoggedIn }) => {
 
   return (
     <>
-      <Button type="primary" onClick={() => setModalOpen(true)}>
+      <Button type="primary" onClick={() => setOpen(true)}>
         Login
       </Button>
-      <Modal
-        title={
-          <Typography.Title
-            level={2}
-            style={{ textAlign: "center", fontWeight: "bold" }}
-          >
-            레드스위치 관리자포탈
-          </Typography.Title>
-        }
-        visible={modalOpen}
-        centered
-        maskClosable={false}
+      <Drawer
+        width={"100%"}
+        height="100vh"
+        bodyStyle={{
+          justifyContent: "center",
+          alignContent: "center",
+        }}
+        open={open}
         footer={null}
-        onCancel={() => setModalOpen(false)}
+        onClose={() => setOpen(false)}
+        closeIcon={null}
+        placement="left"
       >
+        <Typography.Title
+          level={2}
+          style={{ textAlign: "center", fontWeight: "bold" }}
+        >
+          레드스위치 관리자포탈
+        </Typography.Title>
         <Form
           form={form}
           name="login"
@@ -72,7 +84,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            width: "80%",
+            width: 400,
             margin: "40px auto",
           }}
           onFinish={onFinish}
@@ -122,7 +134,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
             </Col>
           </Row>
         </Form>
-      </Modal>
+      </Drawer>
     </>
   );
 };

@@ -16,7 +16,9 @@ import React, { useState } from "react";
 import SearchBranch from "../../components/popover/searchbranch";
 import { useEffect } from "react";
 import { AxiosGet, AxiosPost, AxiosPut } from "../../api";
+import useSearchFilter from "../../hook/useSearchFilter";
 
+// 발주 추가 모달
 const AddModal = (props) => {
   const { data, onComplete, isModalOpen, setIsModalOpen } = props;
   const [form] = Form.useForm();
@@ -26,6 +28,7 @@ const AddModal = (props) => {
     setProducts(data);
   }, [data]);
 
+  // 발주 수량 변경
   const handleQuantityChange = (value, record) => {
     console.log(value, record);
     setProducts((prevData) =>
@@ -121,7 +124,8 @@ const AddModal = (props) => {
             render: (_, record) => (
               <InputNumber
                 size="small"
-                defaultValue={record.ordered_cnt || 0}
+                defaultValue={0}
+                value={record.ordered_cnt || 0}
                 min={1}
                 onChange={(value) => handleQuantityChange(value, record.PK)}
               />
@@ -146,20 +150,30 @@ const AddModal = (props) => {
 const Inventory = () => {
   const [form] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { getColumnSearchProps } = useSearchFilter();
+
+  const [products, setProducts] = useState([]);
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
 
   const [selectedBranch, setSelectedBranch] = useState(
     localStorage.getItem("selectedBranch")
       ? JSON.parse(localStorage.getItem("selectedBranch"))
       : null
   );
-  const [products, setProducts] = useState([]);
 
-  const [filteredInfo, setFilteredInfo] = useState({});
-  const [sortedInfo, setSortedInfo] = useState({});
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [editRowKey, setEditRowKey] = useState(null);
   const [editedInventory, setEditedInventory] = useState({});
+
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   // 상품 목록 불러오기
   const fetchProducts = async () => {
@@ -190,10 +204,7 @@ const Inventory = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
+  // 상품 수정 버튼
   const handleEditInventory = (product) => {
     console.log(product.PK);
     setEditRowKey(product.PK);
@@ -203,6 +214,7 @@ const Inventory = () => {
     });
   };
 
+  // 재고 수량 변경
   const handleInputChange = (field, value, inventory) => {
     console.log(inventory.PK, field, value);
     setEditedInventory((prev) => ({
@@ -211,7 +223,13 @@ const Inventory = () => {
     }));
   };
 
+  // 재고 수량 변경 완료 버튼
   const handleSubmit = async (record) => {
+    console.log(
+      "인벤토리 수량은?",
+      record.inventory_cnt,
+      record.inventory_min_cnt
+    );
     try {
       if (record.inventory_cnt !== undefined) {
         // 재고 수정
@@ -243,24 +261,37 @@ const Inventory = () => {
     }
   };
 
+  // 재고 수량 변경 취소 버튼
   const handleEditInventoryCancel = () => {
     setEditRowKey(null);
     setEditedInventory({});
   };
 
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-  });
-
+  // 페이지 인덱스 변경
   const handleTablePageChange = (pagination) => {
     setPagination(pagination);
   };
 
+  // 페이지 변경 이벤트
   const handlePageChange = (pagination, filters, sorter) => {
     console.log("Various parameters", pagination, filters, sorter);
-    setFilteredInfo(filters);
-    setSortedInfo(sorter);
+  };
+
+  // 발주 선택 리스트
+  const onSelectChange = (newSelectedRowKeys) => {
+    setSelectedRowKeys(newSelectedRowKeys);
+    const filteredProducts = products.filter((product) =>
+      newSelectedRowKeys.includes(product.PK)
+    );
+    setSelectedProducts(filteredProducts);
+    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
+  };
+
+  // 테이블 row 선택 체크박스
+  const rowSelection = {
+    type: "checkbox",
+    selectedRowKeys,
+    onChange: onSelectChange,
   };
 
   const columns = [
@@ -280,6 +311,7 @@ const Inventory = () => {
       title: "상품명",
       dataIndex: "product_name",
       key: "product_name",
+      ...getColumnSearchProps("product_name"),
     },
     {
       title: "재고 수량",
@@ -296,11 +328,9 @@ const Inventory = () => {
               handleInputChange("inventory_cnt", value, record)
             }
           />
-        ) : // 재고 수량이 없으면 0
-        text ? (
-          text
         ) : (
-          0
+          // 재고 수량이 없으면 0
+          <div>{text ? text : 0}</div>
         ),
     },
     {
@@ -357,21 +387,6 @@ const Inventory = () => {
     },
   ];
 
-  const onSelectChange = (newSelectedRowKeys) => {
-    setSelectedRowKeys(newSelectedRowKeys);
-    const filteredProducts = products.filter((product) =>
-      newSelectedRowKeys.includes(product.PK)
-    );
-    setSelectedProducts(filteredProducts);
-    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
-  };
-
-  const rowSelection = {
-    type: "checkbox",
-    selectedRowKeys,
-    onChange: onSelectChange,
-  };
-
   return (
     <div>
       <Row
@@ -405,9 +420,9 @@ const Inventory = () => {
         columns={columns}
         dataSource={products}
         rowSelection={rowSelection}
-        onChange={(pagination, filters, sorter) => {
+        onChange={(pagination) => {
           handleTablePageChange(pagination);
-          handlePageChange(pagination, filters, sorter);
+          handlePageChange(pagination);
         }}
         pagination={{
           ...pagination,
