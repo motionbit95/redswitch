@@ -15,6 +15,7 @@ import {
   Cascader,
   Typography,
   Tooltip,
+  Descriptions,
 } from "antd";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import SearchBranch from "../../components/popover/searchbranch";
@@ -269,12 +270,27 @@ const Account = () => {
         title={isEditModalVisible ? "계정 수정" : "계정 추가"}
         visible={isAddModalVisible || isEditModalVisible}
         centered
+        width={700}
         onCancel={() => {
           setIsAddModalVisible(false);
           setIsEditModalVisible(false);
           form.resetFields(); // 폼 데이터 초기화
         }}
-        footer={null}
+        footer={[
+          <Button
+            key="back"
+            onClick={() => {
+              setIsAddModalVisible(false);
+              setIsEditModalVisible(false);
+              form.resetFields(); // 폼 데이터 초기화
+            }}
+          >
+            취소
+          </Button>,
+          <Button key="submit" type="primary" onClick={() => form.submit()}>
+            {isEditModalVisible ? "수정 완료" : "추가 완료"}
+          </Button>,
+        ]}
       >
         <Form
           form={form}
@@ -282,127 +298,163 @@ const Account = () => {
           initialValues={isEditModalVisible ? currentAccount : {}} // 수정 모드일 경우 currentAccount, 추가 모드일 경우 빈 객체
           onFinish={isEditModalVisible ? handleUpdate : handleAdd} // 처리 함수는 수정/추가에 따라 다름
         >
-          <Form.Item
-            name="permission"
-            label="권한"
-            rules={[{ required: true, message: "Permission을 선택해주세요" }]}
-          >
-            <Select>
-              <Select.Option value="1">본사관리자</Select.Option>
-              <Select.Option value="2">지사관리자</Select.Option>
-              <Select.Option value="3">지점관리자</Select.Option>
-            </Select>
-          </Form.Item>
-
-          <Row gutter={16}>
-            <Col span={12}>
+          <Descriptions bordered column={2}>
+            <Descriptions.Item label="ID" labelStyle={{ whiteSpace: "nowrap" }}>
               <Form.Item
                 name="user_id"
-                label="ID"
                 rules={[{ required: true, message: "ID를 입력해주세요" }]}
+                style={{ marginBottom: 0 }}
               >
                 <Input />
               </Form.Item>
-            </Col>
-            <Col span={12}>
+            </Descriptions.Item>
+
+            <Descriptions.Item
+              label="패스워드"
+              labelStyle={{ whiteSpace: "nowrap" }}
+            >
               <Form.Item
                 name="user_password"
-                label="패스워드"
                 rules={[{ required: true, message: "패스워드를 입력해주세요" }]}
+                style={{ marginBottom: 0 }}
               >
                 <Input.Password />
               </Form.Item>
-            </Col>
-          </Row>
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="권한"
+              labelStyle={{ whiteSpace: "nowrap" }}
+              span={2}
+            >
+              <Form.Item
+                name="permission"
+                rules={[
+                  { required: true, message: "Permission을 선택해주세요" },
+                ]}
+                style={{ marginBottom: 0 }}
+              >
+                <Select>
+                  <Select.Option value="1">본사관리자</Select.Option>
+                  <Select.Option value="2">지사관리자</Select.Option>
+                  <Select.Option value="3">지점관리자</Select.Option>
+                </Select>
+              </Form.Item>
+            </Descriptions.Item>
 
-          <Row gutter={16}>
-            <Col span={12}>
+            <Descriptions.Item
+              label="이름"
+              labelStyle={{ whiteSpace: "nowrap" }}
+            >
               <Form.Item
                 name="user_name"
-                label="이름"
                 rules={[{ required: true, message: "이름을 입력해주세요" }]}
+                style={{ marginBottom: 0 }}
               >
                 <Input />
               </Form.Item>
-            </Col>
-            <Col span={12}>
+            </Descriptions.Item>
+
+            <Descriptions.Item
+              label="전화번호"
+              labelStyle={{ whiteSpace: "nowrap" }}
+            >
               <Form.Item
                 name="user_phone"
-                label="전화번호"
                 rules={[{ required: true, message: "전화번호를 입력해주세요" }]}
+                style={{ marginBottom: 0 }}
               >
                 <Input />
               </Form.Item>
-            </Col>
-          </Row>
+            </Descriptions.Item>
 
-          <Form.Item
-            name="user_email"
-            label="이메일"
-            rules={[{ required: true, message: "이메일을 입력해주세요" }]}
-          >
-            <Input />
-          </Form.Item>
+            <Descriptions.Item
+              label="이메일"
+              labelStyle={{ whiteSpace: "nowrap" }}
+            >
+              <Form.Item
+                name="user_email"
+                rules={[{ required: true, message: "이메일을 입력해주세요" }]}
+                style={{ marginBottom: 0 }}
+              >
+                <Input />
+              </Form.Item>
+            </Descriptions.Item>
 
-          <Form.Item name="office_position" label="직급">
-            <Input />
-          </Form.Item>
+            <Descriptions.Item
+              label="직급"
+              labelStyle={{ whiteSpace: "nowrap" }}
+            >
+              <Form.Item name="office_position" style={{ marginBottom: 0 }}>
+                <Input />
+              </Form.Item>
+            </Descriptions.Item>
 
-          {/* Branch 선택 */}
-          <Form.Item name="branch_id" label="지점 선택">
-            <div style={{ marginTop: 10 }}>
-              {selectedBranch.map((branch, index) => (
-                <Tag
-                  style={{ marginRight: 8, marginBottom: 8 }} // 간격 추가
-                  key={branch.branch_name}
-                  color={
-                    index % 3 === 0 ? "red" : index % 3 === 1 ? "blue" : "green"
-                  }
-                  closable
-                  onClose={() => handleCloseBranch(branch.branch_name)}
-                >
-                  {branch.branch_name}
-                </Tag>
-              ))}
-            </div>
-            <SearchBranch
-              selectedBranch={selectedBranch}
-              setSelectedBranch={setSelectedBranch}
-              multiple={true}
-            />
-          </Form.Item>
+            <Descriptions.Item
+              label="지점 선택"
+              labelStyle={{ whiteSpace: "nowrap" }}
+            >
+              <Form.Item name="branch_id" style={{ marginBottom: 0 }}>
+                <div style={{ marginTop: 10 }}>
+                  {selectedBranch.map((branch, index) => (
+                    <Tag
+                      style={{ marginRight: 8, marginBottom: 8 }} // 간격 추가
+                      key={branch.branch_name}
+                      color={
+                        index % 3 === 0
+                          ? "red"
+                          : index % 3 === 1
+                          ? "blue"
+                          : "green"
+                      }
+                      closable
+                      onClose={() => handleCloseBranch(branch.branch_name)}
+                    >
+                      {branch.branch_name}
+                    </Tag>
+                  ))}
+                </div>
+                <SearchBranch
+                  selectedBranch={selectedBranch}
+                  setSelectedBranch={setSelectedBranch}
+                  multiple={true}
+                />
+              </Form.Item>
+            </Descriptions.Item>
 
-          {/* Provider 선택 */}
-          <Form.Item name="provider_id" label="거래처 선택">
-            <div style={{ marginTop: 10 }}>
-              {selectedProvider.map((provider, index) => (
-                <Tag
-                  style={{ marginRight: 8, marginBottom: 8 }} // 간격 추가
-                  key={provider.provider_name}
-                  color={
-                    index % 3 === 0 ? "red" : index % 3 === 1 ? "blue" : "green"
-                  }
-                  closable
-                  onClose={() => handleCloseProvider(provider.provider_name)}
-                >
-                  {provider.provider_name}
-                </Tag>
-              ))}
-            </div>
-            <SearchProvider
-              selectedProvider={selectedProvider}
-              setSelectedProvider={setSelectedProvider}
-              multiple={true}
-            />
-          </Form.Item>
-
-          <div style={{ display: "flex", justifyContent: "right" }}>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                {isEditModalVisible ? "수정 완료" : "추가 완료"}
-              </Button>
-            </Form.Item>
-          </div>
+            <Descriptions.Item
+              label="거래처 선택"
+              labelStyle={{ whiteSpace: "nowrap" }}
+            >
+              <Form.Item name="provider_id" style={{ marginBottom: 0 }}>
+                <div style={{ marginTop: 10 }}>
+                  {selectedProvider.map((provider, index) => (
+                    <Tag
+                      style={{ marginRight: 8, marginBottom: 8 }} // 간격 추가
+                      key={provider.provider_name}
+                      color={
+                        index % 3 === 0
+                          ? "red"
+                          : index % 3 === 1
+                          ? "blue"
+                          : "green"
+                      }
+                      closable
+                      onClose={() =>
+                        handleCloseProvider(provider.provider_name)
+                      }
+                    >
+                      {provider.provider_name}
+                    </Tag>
+                  ))}
+                </div>
+                <SearchProvider
+                  selectedProvider={selectedProvider}
+                  setSelectedProvider={setSelectedProvider}
+                  multiple={true}
+                />
+              </Form.Item>
+            </Descriptions.Item>
+          </Descriptions>
         </Form>
       </Modal>
     </div>

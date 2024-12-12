@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import {
   DotChartOutlined,
@@ -12,7 +12,18 @@ import {
   SolutionOutlined,
   NotificationOutlined,
 } from "@ant-design/icons";
-import { Breadcrumb, Layout, Menu, theme, Button, Space, Modal } from "antd";
+import {
+  Breadcrumb,
+  Layout,
+  Menu,
+  theme,
+  Button,
+  Space,
+  Badge,
+  Popover,
+  Typography,
+  Modal,
+} from "antd";
 import { Footer } from "antd/es/layout/layout";
 import BDSMQuestions from "./pages/bdsm/bdsm_questions";
 import BDSMResults from "./pages/bdsm/bdsm_results";
@@ -36,8 +47,25 @@ import NoticeBoard from "./pages/post/post";
 import InquiryBoard from "./pages/post/inquiry";
 import { AxiosGet } from "./api";
 import useFirebase from "./hook/useFilrebase";
+import Spot from "./pages/admin/spot";
+import soundFile from "./assets/VoicesAI_1724058982121.mp3";
 
 const { Header, Content, Sider } = Layout;
+
+let AudioContext;
+let audioContext;
+
+window.onload = function () {
+  navigator.mediaDevices
+    .getUserMedia({ audio: true })
+    .then(() => {
+      AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioContext = new AudioContext();
+    })
+    .catch((e) => {
+      console.error(`Audio permissions denied: ${e}`);
+    });
+};
 
 const App = () => {
   const {
@@ -57,6 +85,8 @@ const App = () => {
   const [selectedAlarm, setSelectedAlarm] = useState(null); // 선택된 알림 상태
   const [isModalVisible, setIsModalVisible] = useState(false); // 모달 visibility 상태
 
+  const audioRef = useRef(null); // 알람 반복을 위한 audioRef
+
   // useFirebase 훅을 사용하여 알림 데이터를 가져옴
   const { alarms, loading } = useFirebase(branchPks);
 
@@ -75,6 +105,11 @@ const App = () => {
   const handleCloseModal = () => {
     setIsModalVisible(false);
     setSelectedAlarm(null);
+
+    if (audioRef.current) {
+      audioRef.current.pause(); // 소리 중지
+      audioRef.current = null;
+    }
   };
 
   // 알림이 추가되면 자동으로 모달을 띄우기 위한 useEffect
@@ -83,8 +118,23 @@ const App = () => {
       const latestAlarm = alarms[alarms.length - 1]; // 가장 최근 알림
       setSelectedAlarm(latestAlarm); // 최신 알림 설정
       setIsModalVisible(true); // 모달 표시
+
+      const audio = new Audio(soundFile);
+      playSound(); // 알림 소리 재생
     }
   }, [alarms]); // alarms 배열이 변경될 때마다 실행
+
+  const playSound = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    audioRef.current = new Audio(soundFile);
+    audioRef.current.loop = true; // 반복 재생 설정
+    audioRef.current
+      .play()
+      .catch((e) => console.error("Audio play failed:", e));
+  };
 
   useEffect(() => {
     console.log("App component mounted");
@@ -223,8 +273,14 @@ const App = () => {
           label: <Link to="/admin/account">계정관리</Link>,
         },
         {
-          key: "/admin/hompage",
-          label: <Link to="/admin/hompage">홈페이지관리</Link>,
+          key: "homepage",
+          label: "홈페이지관리",
+          children: [
+            {
+              key: "/admin/spot",
+              label: <Link to="/admin/spot">설치지점관리</Link>,
+            },
+          ],
         },
         {
           key: "bdsm",
@@ -320,13 +376,26 @@ const App = () => {
                 />
               )}
               <Space style={{ marginTop: "5px" }}>
-                <NotificationOutlined
-                  style={{
-                    fontSize: "20px",
-                    color: "white",
-                    cursor: "pointer",
-                  }}
-                />
+                <Popover
+                  placement="bottomRight"
+                  title={
+                    <Typography.Text
+                      style={{ fontSize: "18px", fontWeight: "bold" }}
+                    >
+                      알림
+                    </Typography.Text>
+                  }
+                >
+                  <Badge count={5} size="small">
+                    <NotificationOutlined
+                      style={{
+                        fontSize: "20px",
+                        color: "white",
+                        cursor: "pointer",
+                      }}
+                    />
+                  </Badge>
+                </Popover>
               </Space>
               {/* <Switch checked={isDarkMode} onChange={toggleTheme} /> */}
             </Space>
@@ -384,6 +453,7 @@ const App = () => {
               <Routes>
                 <Route path="/admin" element={<Main />} />
                 <Route path="/admin/account" element={<Account />} />
+                <Route path="/admin/spot" element={<Spot />} />
 
                 <Route path="/branch/branch" element={<Branch />} />
 
