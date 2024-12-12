@@ -1232,6 +1232,10 @@ router.delete("/ordering_product/:pk", async (req, res) => {
  *               provider_id:
  *                 type: string
  *                 description: 거래처 ID
+ *               managed:
+ *                 type: boolean
+ *                 default: false
+ *                 description: 재고 관리 여부 플래그
  *     responses:
  *       201:
  *         description: 재고 생성 성공
@@ -1249,6 +1253,7 @@ router.post("/inventories", async (req, res) => {
       product_code,
       branch_id,
       provider_id,
+      managed,
     } = req.body;
 
     console.log("req.body: ", req.body);
@@ -1364,6 +1369,8 @@ router.get("/inventories", async (req, res) => {
  *                 type: string
  *               provider_id:
  *                 type: string
+ *               managed:
+ *                 type: boolean
  *     responses:
  *       200:
  *         description: 재고 수정 성공
@@ -1382,6 +1389,7 @@ router.put("/inventories/:pk", async (req, res) => {
       product_code,
       branch_id,
       provider_id,
+      managed,
     } = req.body;
 
     const inventory = new Inventory({
@@ -1392,6 +1400,7 @@ router.put("/inventories/:pk", async (req, res) => {
       product_code,
       branch_id,
       provider_id,
+      managed,
     });
 
     const updatedInventory = await inventory.update();

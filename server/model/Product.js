@@ -671,6 +671,7 @@ class Inventory {
     this.product_code = data.product_code || "A01010001";
     this.branch_id = data.branch_id;
     this.provider_id = data.provider_id || null;
+    this.managed = data.isManaged || false;
   }
 
   toJSON() {
@@ -683,6 +684,7 @@ class Inventory {
       product_code: this.product_code,
       branch_id: this.branch_id,
       provider_id: this.provider_id,
+      managed: this.managed,
     };
   }
 
