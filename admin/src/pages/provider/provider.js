@@ -11,12 +11,14 @@ import {
   Space,
   message,
   Popconfirm,
+  Descriptions,
 } from "antd";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import { UploadOutlined } from "@ant-design/icons";
 import KakaoAddressSearch from "../../components/kakao";
 import FormItem from "antd/es/form/FormItem";
 import FileUpload from "../../components/button";
+import TextArea from "antd/es/input/TextArea";
 
 const ProviderModal = ({
   visible,
@@ -36,11 +38,25 @@ const ProviderModal = ({
     <Modal
       title={isEditMode ? "거래처 수정" : "거래처 추가"}
       visible={visible}
+      width={800}
       onCancel={() => {
         onCancel();
         form.resetFields();
       }}
-      footer={null}
+      footer={[
+        <Button
+          key="cancel"
+          onClick={() => {
+            onCancel();
+            form.resetFields();
+          }}
+        >
+          취소
+        </Button>,
+        <Button key="submit" type="primary" onClick={() => form.submit()}>
+          {isEditMode ? "수정 완료" : "추가 완료"}
+        </Button>,
+      ]}
       centered
     >
       <Form
@@ -49,148 +65,186 @@ const ProviderModal = ({
         initialValues={initialValues}
         onFinish={onSubmit}
       >
-        <Row gutter={16}>
-          <Col span={12}>
+        <Descriptions bordered column={2} size="small">
+          <Descriptions.Item
+            span={1}
+            label="거래처명"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
             <Form.Item
               name="provider_name"
-              label="거래처명"
               rules={[{ required: true, message: "거래처명을 입력해주세요" }]}
+              style={{ marginBottom: 0 }}
             >
               <Input />
             </Form.Item>
-          </Col>
-          <Col span={12}>
+          </Descriptions.Item>
+
+          <Descriptions.Item
+            span={1}
+            label="거래처 코드"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
             <Form.Item
               name="provider_code"
-              label="거래처 코드"
               rules={[
                 { required: true, message: "거래처 코드을 입력해주세요" },
               ]}
+              style={{ marginBottom: 0 }}
             >
               <Input />
             </Form.Item>
-          </Col>
-        </Row>
+          </Descriptions.Item>
 
-        <Row gutter={16} style={{ display: "none" }}>
-          <Col span={12}>
-            <FormItem
-              name="provider_sido"
-              label="시도"
-              rules={[{ required: true, message: "시도를 입력해주세요" }]}
+          <Descriptions.Item
+            span={2}
+            label="거래처 주소"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item
+              name="provider_address"
+              rules={[
+                { required: true, message: "거래처 주소를 입력해주세요" },
+              ]}
+              style={{ marginBottom: 0 }}
             >
-              <Input readOnly />
-            </FormItem>
-          </Col>
-          <Col span={12}>
-            <FormItem
-              name="provider_sigungu"
-              label="시군구"
-              rules={[{ required: true, message: "시구를 입력해주세요" }]}
-            >
-              <Input readOnly />
-            </FormItem>
-          </Col>
-        </Row>
+              <Row gutter={8} style={{ width: "100%" }}>
+                <Col span={18}>
+                  <Input readOnly value={address} />
+                </Col>
+                <Col span={6}>
+                  <KakaoAddressSearch
+                    onSelectAddress={(selectedAddress, sido, sigungu) => {
+                      form.setFieldsValue({
+                        provider_address: selectedAddress,
+                        provider_sido: sido,
+                        provider_sigungu: sigungu,
+                      });
+                      setAddress(selectedAddress);
+                    }}
+                  />
+                </Col>
+              </Row>
+            </Form.Item>
+          </Descriptions.Item>
 
-        <Form.Item
-          name="provider_address"
-          label="거래처 주소"
-          rules={[{ required: true, message: "거래처 주소를 입력해주세요" }]}
-        >
-          <Row gutter={8} style={{ width: "100%" }}>
-            <Col span={18}>
-              <Input readOnly value={address} />
-            </Col>
-            <Col span={6}>
-              <KakaoAddressSearch
-                onSelectAddress={(selectedAddress, sido, sigungu) => {
-                  form.setFieldsValue({
-                    provider_address: selectedAddress,
-                    provider_sido: sido,
-                    provider_sigungu: sigungu,
-                  });
-                  setAddress(selectedAddress);
-                }}
-              />
-            </Col>
-          </Row>
-        </Form.Item>
-
-        <Row gutter={16}>
-          <Col span={12}>
+          <Descriptions.Item
+            label="거래처 전화번호"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
             <Form.Item
               name="provider_contact"
-              label="거래처 전화번호"
               rules={[
                 { required: true, message: "거래처 전화번호를 입력해주세요" },
               ]}
+              style={{ marginBottom: 0 }}
             >
               <Input />
             </Form.Item>
-          </Col>
-          <Col span={12}>
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="사업자등록번호"
+            labelStyle={{ whiteSpace: "nowrap" }}
+            span={2}
+          >
             <Form.Item
               name="provider_brn"
-              label="사업자등록번호"
               rules={[{ required: true, message: "사업자번호를 입력해주세요" }]}
+              style={{ marginBottom: 0 }}
             >
               <Input />
             </Form.Item>
-          </Col>
-        </Row>
+          </Descriptions.Item>
 
-        <Row gutter={16}>
-          <Col span={12}>
+          <Descriptions.Item
+            span={1}
+            label="대표자명"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
             <Form.Item
               name="provider_ceo_name"
-              label="대표자명"
               rules={[{ required: true, message: "대표자명을 입력해주세요" }]}
+              style={{ marginBottom: 0 }}
             >
               <Input />
             </Form.Item>
-          </Col>
-          <Col span={12}>
+          </Descriptions.Item>
+
+          <Descriptions.Item
+            span={1}
+            label="대표자 전화번호"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
             <Form.Item
               name="provider_ceo_phone"
-              label="대표자 전화번호"
               rules={[
                 { required: true, message: "대표자 전화번호를 입력해주세요" },
               ]}
+              style={{ marginBottom: 0 }}
             >
               <Input />
             </Form.Item>
-          </Col>
-        </Row>
+          </Descriptions.Item>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="provider_manager_name" label="담당자명">
+          <Descriptions.Item
+            span={1}
+            label="담당자명"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item name="provider_manager_name" style={{ marginBottom: 0 }}>
               <Input />
             </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="provider_manager_phone" label="담당자 전화번호">
+          </Descriptions.Item>
+          <Descriptions.Item
+            span={1}
+            label="담당자 전화번호"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item
+              name="provider_manager_phone"
+              style={{ marginBottom: 0 }}
+            >
               <Input />
             </Form.Item>
-          </Col>
-        </Row>
+          </Descriptions.Item>
 
-        <Form.Item name="bank_account_number" label="계좌번호">
-          <Input />
-        </Form.Item>
+          <Descriptions.Item
+            span={1}
+            label="결제 방식"
+            labelStyle={{ whiteSpace: "nowrap" }}
+            style={{ marginBottom: 0 }}
+          >
+            <Form.Item name="bank_account_number" style={{ marginBottom: 0 }}>
+              <TextArea rows={3} />
+            </Form.Item>
+          </Descriptions.Item>
+          <Descriptions.Item
+            span={1}
+            label="특이사항"
+            labelStyle={{ whiteSpace: "nowrap" }}
+            style={{ marginBottom: 0 }}
+          >
+            <Form.Item name="provider_description" style={{ marginBottom: 0 }}>
+              <TextArea rows={3} />
+            </Form.Item>
+          </Descriptions.Item>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="business_file" label="사업자등록증 파일">
+          <Descriptions.Item
+            label="사업자등록증 파일"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item name="business_file" style={{ marginBottom: 0 }}>
               <FileUpload
                 url={form.getFieldValue("business_file")}
                 setUrl={(url) => form.setFieldsValue({ business_file: url })}
               />
             </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="bankbook_file" label="통장사본 파일">
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="통장사본 파일"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item name="bankbook_file" style={{ marginBottom: 0 }}>
               <Upload
                 name="file"
                 listType="picture"
@@ -201,16 +255,29 @@ const ProviderModal = ({
                 <Button icon={<UploadOutlined />}>파일 업로드</Button>
               </Upload>
             </Form.Item>
-          </Col>
-        </Row>
+          </Descriptions.Item>
 
-        <div style={{ display: "flex", justifyContent: "right" }}>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              {isEditMode ? "수정 완료" : "추가 완료"}
-            </Button>
-          </Form.Item>
-        </div>
+          <Row gutter={16} style={{ display: "none" }}>
+            <Col span={12}>
+              <FormItem
+                name="provider_sido"
+                label="시도"
+                rules={[{ required: true, message: "시도를 입력해주세요" }]}
+              >
+                <Input readOnly />
+              </FormItem>
+            </Col>
+            <Col span={12}>
+              <FormItem
+                name="provider_sigungu"
+                label="시군구"
+                rules={[{ required: true, message: "시구를 입력해주세요" }]}
+              >
+                <Input readOnly />
+              </FormItem>
+            </Col>
+          </Row>
+        </Descriptions>
       </Form>
     </Modal>
   );

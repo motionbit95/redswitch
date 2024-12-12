@@ -19,6 +19,7 @@ class Provider {
     this.provider_ceo_phone = data.provider_ceo_phone;
     this.provider_manager_name = data.provider_manager_name || null;
     this.provider_manager_phone = data.provider_manager_phone || null;
+    this.provider_description = data.provider_description || null;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || null;
     this.payment_type = data.payment_type || null;

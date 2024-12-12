@@ -261,9 +261,10 @@ const App = () => {
               )}
               <Space style={{ marginTop: "5px" }}>
                 <NotificationOutlined
-                  style={{ fontSize: "20px", color: "white" }}
-                  onClick={() => {
-                    window.location.href = "/post/inquiry";
+                  style={{
+                    fontSize: "20px",
+                    color: "white",
+                    cursor: "pointer",
                   }}
                 />
               </Space>

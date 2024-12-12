@@ -21,6 +21,7 @@ class Branch {
     this.branch_manager_phone = data.branch_manager_phone || null;
     this.branch_sido = data.branch_sido || null;
     this.branch_sigungu = data.branch_sigungu || null;
+    this.branch_description = data.branch_description || null;
   }
 
   toJSON() {
