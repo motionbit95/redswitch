@@ -12,7 +12,7 @@ import {
   SolutionOutlined,
   NotificationOutlined,
 } from "@ant-design/icons";
-import { Breadcrumb, Layout, Menu, theme, Button, Space } from "antd";
+import { Breadcrumb, Layout, Menu, theme, Button, Space, Modal } from "antd";
 import { Footer } from "antd/es/layout/layout";
 import BDSMQuestions from "./pages/bdsm/bdsm_questions";
 import BDSMResults from "./pages/bdsm/bdsm_results";
@@ -35,6 +35,7 @@ import BDSMAdvertise from "./pages/bdsm/bdsm_advertise";
 import NoticeBoard from "./pages/post/post";
 import InquiryBoard from "./pages/post/inquiry";
 import { AxiosGet } from "./api";
+import useFirebase from "./hook/useFilrebase";
 
 const { Header, Content, Sider } = Layout;
 
@@ -50,6 +51,40 @@ const App = () => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(token ? true : false);
   const [currentUser, setCurrentUser] = useState({});
+
+  // useFirebase 훅을 사용하여 알림 데이터를 가져옴
+  const [branchPks, setBranchPks] = useState(["-OCqwefrb7HMt2OMw2qE"]); // branchPks 초기값을 배열로 설정(이끌림호텔 충장점 - 테스트)
+  const [selectedAlarm, setSelectedAlarm] = useState(null); // 선택된 알림 상태
+  const [isModalVisible, setIsModalVisible] = useState(false); // 모달 visibility 상태
+
+  // useFirebase 훅을 사용하여 알림 데이터를 가져옴
+  const { alarms, loading } = useFirebase(branchPks);
+
+  // branchPks 변경 시 호출되는 함수
+  const handleBranchChange = (value) => {
+    setBranchPks(value);
+  };
+
+  // 알림 항목을 클릭할 때 호출되는 함수
+  const handleAlarmClick = (alarm) => {
+    setSelectedAlarm(alarm); // 클릭한 알림 데이터를 설정
+    setIsModalVisible(true); // 모달을 표시
+  };
+
+  // 모달을 닫는 함수
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedAlarm(null);
+  };
+
+  // 알림이 추가되면 자동으로 모달을 띄우기 위한 useEffect
+  useEffect(() => {
+    if (alarms.length > 0) {
+      const latestAlarm = alarms[alarms.length - 1]; // 가장 최근 알림
+      setSelectedAlarm(latestAlarm); // 최신 알림 설정
+      setIsModalVisible(true); // 모달 표시
+    }
+  }, [alarms]); // alarms 배열이 변경될 때마다 실행
 
   useEffect(() => {
     console.log("App component mounted");
@@ -220,6 +255,31 @@ const App = () => {
 
   return (
     <Router>
+      {/* 모달을 통한 알림 상세 내용 표시 */}
+      <Modal
+        title={selectedAlarm?.alarm_title}
+        visible={isModalVisible}
+        onCancel={handleCloseModal}
+        footer={null}
+        width={600}
+        closable={false} // X 버튼을 없애기 위해 추가
+      >
+        <p>
+          <strong>내용:</strong> {selectedAlarm?.alarm_content}
+        </p>
+        <p>
+          <strong>지점 PK:</strong> {selectedAlarm?.branch_pk}
+        </p>
+        <p>
+          <strong>주문 PK:</strong> {selectedAlarm?.order_pk}
+        </p>
+        <p>
+          <strong>생성 시간:</strong>{" "}
+          {selectedAlarm
+            ? new Date(selectedAlarm.created_at).toLocaleString()
+            : ""}
+        </p>
+      </Modal>
       <Layout style={{ minHeight: "100vh", minWidth: "1200px" }}>
         <Header
           style={{

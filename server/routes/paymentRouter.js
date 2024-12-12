@@ -9,6 +9,7 @@ const qs = require("qs");
 const Payment = require("../model/Payment");
 const Orders = require("../model/Orders");
 const { Inventory } = require("../model/Product");
+const OrderAlarm = require("../model/OrderAlarm");
 
 const merchantKey =
   "0KHf4qt04B6LEBwZ8M8z5bN/p/I0VQaaMy/SiQfjmVyYFpv6R+OB9toybcTYoOak09rVE4ytGLuvEs5wUEt3pA=="; // 상점키
@@ -298,6 +299,17 @@ router.post("/", async (req, res) => {
         continue;
       }
     }
+
+    // 알람 생성
+    const alarm = new OrderAlarm({
+      alarm_title: "주문",
+      alarm_content: "주문이 접수되었습니다.",
+      branch_pk: order.branch_pk,
+      order_pk: order.pk,
+    });
+
+    let newAlarm = await alarm.create();
+    console.log(newAlarm);
 
     res.status(201).json(newPayment);
   } catch (error) {
