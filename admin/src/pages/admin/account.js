@@ -321,25 +321,6 @@ const Account = () => {
                 <Input.Password />
               </Form.Item>
             </Descriptions.Item>
-            <Descriptions.Item
-              label="권한"
-              labelStyle={{ whiteSpace: "nowrap" }}
-              span={2}
-            >
-              <Form.Item
-                name="permission"
-                rules={[
-                  { required: true, message: "Permission을 선택해주세요" },
-                ]}
-                style={{ marginBottom: 0 }}
-              >
-                <Select>
-                  <Select.Option value="1">본사관리자</Select.Option>
-                  <Select.Option value="2">지사관리자</Select.Option>
-                  <Select.Option value="3">지점관리자</Select.Option>
-                </Select>
-              </Form.Item>
-            </Descriptions.Item>
 
             <Descriptions.Item
               label="이름"
@@ -370,6 +351,7 @@ const Account = () => {
             <Descriptions.Item
               label="이메일"
               labelStyle={{ whiteSpace: "nowrap" }}
+              span={2}
             >
               <Form.Item
                 name="user_email"
@@ -380,6 +362,24 @@ const Account = () => {
               </Form.Item>
             </Descriptions.Item>
 
+            <Descriptions.Item
+              label="권한"
+              labelStyle={{ whiteSpace: "nowrap" }}
+            >
+              <Form.Item
+                name="permission"
+                rules={[
+                  { required: true, message: "Permission을 선택해주세요" },
+                ]}
+                style={{ marginBottom: 0 }}
+              >
+                <Select>
+                  <Select.Option value="1">본사관리자</Select.Option>
+                  <Select.Option value="2">지사관리자</Select.Option>
+                  <Select.Option value="3">지점관리자</Select.Option>
+                </Select>
+              </Form.Item>
+            </Descriptions.Item>
             <Descriptions.Item
               label="직급"
               labelStyle={{ whiteSpace: "nowrap" }}

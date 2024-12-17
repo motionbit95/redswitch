@@ -47,6 +47,7 @@ const AddModal = (props) => {
     setProducts((prevData) => prevData.filter((item) => item.PK !== record));
   };
 
+  // 발주 신청 - 지점
   const handleSubmit = async () => {
     if (!products.length) {
       message.error("발주할 상품이 없습니다.");
@@ -68,6 +69,50 @@ const AddModal = (props) => {
     // setIsModalOpen(false);
     // onComplete();
   };
+
+  const columns = [
+    {
+      title: "No.",
+      dataIndex: "index",
+      key: "index",
+      render: (text, record, index) => index + 1,
+    },
+    {
+      title: "상품명",
+      dataIndex: "product_name",
+      key: "product_name",
+    },
+    {
+      title: "현재 재고",
+      dataIndex: "inventory_cnt",
+      key: "inventory_cnt",
+    },
+    {
+      title: "발주수량",
+      dataIndex: "ordered_cnt",
+      key: "ordered_cnt",
+
+      render: (_, record) => (
+        <InputNumber
+          size="small"
+          defaultValue={0}
+          value={record.ordered_cnt || 0}
+          min={1}
+          onChange={(value) => handleQuantityChange(value, record.PK)}
+        />
+      ),
+    },
+    {
+      title: "동작",
+      key: "action",
+
+      render: (_, record) => (
+        <Space>
+          <a onClick={() => handleDelete(record.PK)}>삭제</a>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <Modal
@@ -96,53 +141,7 @@ const AddModal = (props) => {
         </Button>,
       ]}
     >
-      <Table
-        size="small"
-        dataSource={products}
-        columns={[
-          {
-            title: "No.",
-            dataIndex: "index",
-            key: "index",
-            render: (text, record, index) => index + 1,
-          },
-          {
-            title: "상품명",
-            dataIndex: "product_name",
-            key: "product_name",
-          },
-          {
-            title: "현재 재고",
-            dataIndex: "inventory_cnt",
-            key: "inventory_cnt",
-          },
-          {
-            title: "발주수량",
-            dataIndex: "ordered_cnt",
-            key: "ordered_cnt",
-
-            render: (_, record) => (
-              <InputNumber
-                size="small"
-                defaultValue={0}
-                value={record.ordered_cnt || 0}
-                min={1}
-                onChange={(value) => handleQuantityChange(value, record.PK)}
-              />
-            ),
-          },
-          {
-            title: "동작",
-            key: "action",
-
-            render: (_, record) => (
-              <Space>
-                <a onClick={() => handleDelete(record.PK)}>삭제</a>
-              </Space>
-            ),
-          },
-        ]}
-      />
+      <Table size="small" dataSource={products} columns={columns} />
     </Modal>
   );
 };

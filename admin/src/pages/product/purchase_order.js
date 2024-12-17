@@ -23,124 +23,6 @@ import { useNavigate } from "react-router-dom";
 import { AxiosDelete, AxiosGet, AxiosPost } from "../../api";
 import dayjs from "dayjs";
 
-const PurchaseAddModal = (props) => {
-  const [form] = Form.useForm();
-  const [selectedMaterials, setSelectedMaterials] = useState([]);
-
-  useEffect(() => {
-    console.log("선택된 물자들!!!!>>>>>", selectedMaterials);
-  }, [selectedMaterials]);
-
-  const columns = [
-    {
-      title: "상품명",
-      dataIndex: "product_name",
-      key: "product_name",
-    },
-    {
-      title: "상품코드",
-      dataIndex: "product_code",
-      key: "product_code",
-    },
-    {
-      title: "수량",
-      dataIndex: "ordered_cnt",
-      key: "ordered_cnt",
-      render: (_, record) => (
-        <InputNumber
-          type="number"
-          defaultValue={record.ordered_cnt || 1}
-          min={1}
-          onChange={(value) => handleQuantityChange(record.key, value)}
-        />
-      ),
-    },
-    {
-      title: "삭제",
-      key: "delete",
-      render: (_, record) => (
-        <Button danger onClick={() => handleDelete(record.key)}>
-          삭제
-        </Button>
-      ),
-    },
-  ];
-
-  const handleQuantityChange = (key, ordered_cnt) => {
-    setSelectedMaterials((prev) =>
-      prev.map((item) =>
-        item.key === key ? { ...item, ordered_cnt: ordered_cnt } : item
-      )
-    );
-  };
-
-  const handleDelete = (key) => {
-    setSelectedMaterials((prev) => prev.filter((item) => item.key !== key));
-  };
-
-  const handleSubmit = async () => {
-    if (!selectedMaterials.length) {
-      message.error("발주할 상품이 없습니다.");
-      return;
-    }
-
-    // try {
-    //   const data = selectedMaterials.map((item) => ({
-    //     provider_id: item.provider_id,
-    //     material_pk: item.material_pk,
-    //     product_code: item.product_code,
-    //     provider_code: item.provider_code,
-    //     ordered_cnt: item.ordered_cnt,
-    //   }));
-
-    //   await AxiosPost("/products/ordering_product", data);
-
-    //   message.success("발주상품이 성공적으로 저장되었습니다.");
-    //   props.setIsModalOpen(false);
-    //   setSelectedMaterials([]);
-    // } catch (error) {
-    //   console.error("발주 저장 오류:", error);
-    //   message.error("발주 저장에 실패했습니다.");
-    // }
-  };
-
-  const handleCancel = () => {
-    setSelectedMaterials([]);
-    props.setIsModalOpen(false);
-  };
-
-  return (
-    <Modal
-      title="발주 추가"
-      centered
-      open={props.isModalOpen}
-      width={1000}
-      onCancel={handleCancel}
-      footer={[
-        <Button onClick={handleCancel}>취소</Button>,
-        <Button onClick={handleSubmit}>저장</Button>,
-      ]}
-    >
-      <SearchMaterial
-        setSelectedProduct={(products) =>
-          setSelectedMaterials((prev) => [
-            ...prev,
-            ...products.map((product) => ({ ...product, ordered_cnt: 1 })),
-          ])
-        }
-        multiple={true}
-      />
-      <Table
-        columns={columns}
-        dataSource={selectedMaterials}
-        rowKey="key"
-        pagination={false}
-        size="small"
-      />
-    </Modal>
-  );
-};
-
 const Purchase_order = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -154,6 +36,7 @@ const Purchase_order = () => {
     fetchOrders();
   }, []);
 
+  // 발주 이력 가져오기 (본사 기준)
   const fetchOrders = async () => {
     if (!selectedProvider) {
       return;
@@ -161,20 +44,22 @@ const Purchase_order = () => {
     try {
       const response = await AxiosGet("/products/ordering_history");
       setOrderHistory(response.data);
-      const filteredOrders = response.data.filter(
-        (order) => order?.provider_id === selectedProvider?.id
-      );
-
-      setOrderHistory(filteredOrders);
     } catch (error) {
       message.error("발주 이력을 불러오는 데 실패했습니다.");
     }
   };
 
-  const handleEdit = (id) => {
-    setIsEditModalOpen(true);
+  // 발주 내역 수정
+  const handleEditSubmit = () => {
+    console.log();
   };
 
+  // 발주 내역 확인 버튼
+  const handleDetail = (id) => {
+    console.log(id);
+  };
+
+  // 발주 이력 삭제
   const handleDelete = (id) => {
     AxiosDelete(`/products/ordering_history/${id}`)
       .then((response) => {
@@ -200,28 +85,31 @@ const Purchase_order = () => {
       sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
     },
     {
-      title: "거래처 명",
-      dataIndex: "provider_name",
-      key: "provider_name",
+      title: "지점 명",
+      dataIndex: "branch_name",
+      key: "branch_name",
     },
     {
-      title: "수령 여부",
+      title: "발주 상태",
     },
     {
       title: "입고 일자",
+    },
+    {
+      title: "발주 내역",
+      key: "action",
+      render: (_, record) => (
+        <Button
+          icon={<SearchOutlined />}
+          onClick={() => handleDetail(record)}
+        />
+      ),
     },
     {
       title: "동작",
       key: "action",
       render: (_, record) => (
         <Space>
-          <a
-            onClick={() => {
-              handleEdit(record.pk);
-            }}
-          >
-            수정
-          </a>
           <Popconfirm
             title="발주 이력을 삭제하시겠습니까?"
             onConfirm={() => handleDelete(record.pk)}
@@ -235,45 +123,13 @@ const Purchase_order = () => {
 
   return (
     <div>
-      <Row
-        style={{
-          display: "flex",
-          width: "100%",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 16,
-        }}
-      >
-        <SearchProvider
-          selectedProvider={selectedProvider}
-          setSelectedProvider={(providers) => setSelectedProvider(providers[0])}
-          multiple={false}
-        />
-        {/* <Popconfirm
-          title="발주 이력을 추가하시겠습니까?"
-          onConfirm={handleOrder}
-        >
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            disabled={!selectedProvider}
-          >
-            발주 추가
-          </Button>
-        </Popconfirm> */}
-      </Row>
+      <div style={{ marginTop: 45 }} />
       <Table
         size="small"
         columns={columns}
         dataSource={orderHistory}
         pagination={{ pageSize: 10 }}
       />
-
-      {/* 재고 추가, 수정 모달
-      <PurchaseAddModal
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-      /> */}
     </div>
   );
 };

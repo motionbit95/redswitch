@@ -23,6 +23,8 @@ import {
   Popover,
   Typography,
   Modal,
+  List,
+  Tabs,
 } from "antd";
 import { Footer } from "antd/es/layout/layout";
 import BDSMQuestions from "./pages/bdsm/bdsm_questions";
@@ -49,6 +51,7 @@ import { AxiosGet } from "./api";
 import useFirebase from "./hook/useFilrebase";
 import Spot from "./pages/admin/spot";
 import soundFile from "./assets/VoicesAI_1724058982121.mp3";
+import TabPane from "antd/es/tabs/TabPane";
 
 const { Header, Content, Sider } = Layout;
 
@@ -71,6 +74,16 @@ const App = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const duminotifications = [
+    { id: 1, message: "새로운 알림이 도착했습니다." },
+    { id: 2, message: "시스템 점검 예정입니다." },
+  ];
+
+  const dumiorders = [
+    { id: 1, message: "주문이 완료되었습니다." },
+    { id: 2, message: "배송이 시작되었습니다." },
+  ];
 
   const defaultOpenKeys = window.location.pathname.split("/")[1];
   const defaultSelectedKeys = window.location.pathname;
@@ -385,6 +398,31 @@ const App = () => {
                       알림
                     </Typography.Text>
                   }
+                  content={
+                    <Tabs defaultActiveKey="1" centered>
+                      <TabPane tab="알림" key="1">
+                        <List
+                          dataSource={duminotifications}
+                          renderItem={(item) => (
+                            <List.Item>
+                              {`${item.id}. ${item.message}`}
+                            </List.Item>
+                          )}
+                        />
+                      </TabPane>
+                      <TabPane tab="주문" key="2">
+                        <List
+                          dataSource={dumiorders}
+                          renderItem={(item) => (
+                            <List.Item>
+                              {`${item.id}. ${item.message}`}
+                            </List.Item>
+                          )}
+                        />
+                      </TabPane>
+                    </Tabs>
+                  }
+                  trigger="click"
                 >
                   <Badge count={5} size="small">
                     <NotificationOutlined
