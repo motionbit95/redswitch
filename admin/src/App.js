@@ -11,6 +11,7 @@ import {
   TeamOutlined,
   SolutionOutlined,
   NotificationOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import {
   Breadcrumb,
@@ -25,6 +26,8 @@ import {
   Modal,
   List,
   Tabs,
+  Row,
+  Col,
 } from "antd";
 import { Footer } from "antd/es/layout/layout";
 import BDSMQuestions from "./pages/bdsm/bdsm_questions";
@@ -133,7 +136,7 @@ const App = () => {
       setIsModalVisible(true); // 모달 표시
 
       const audio = new Audio(soundFile);
-      playSound(); // 알림 소리 재생
+      // playSound(); // 알림 소리 재생
     }
   }, [alarms]); // alarms 배열이 변경될 때마다 실행
 
@@ -390,6 +393,7 @@ const App = () => {
               )}
               <Space style={{ marginTop: "5px" }}>
                 <Popover
+                  overlayStyle={{ width: 400 }}
                   placement="bottomRight"
                   title={
                     <Typography.Text
@@ -400,12 +404,24 @@ const App = () => {
                   }
                   content={
                     <Tabs defaultActiveKey="1" centered>
-                      <TabPane tab="알림" key="1">
+                      <TabPane tab="공지사항" key="1">
                         <List
                           dataSource={duminotifications}
                           renderItem={(item) => (
                             <List.Item>
-                              {`${item.id}. ${item.message}`}
+                              <Row
+                                style={{
+                                  width: "100%",
+                                  justifyContent: "space-between",
+                                }}
+                                gutter={6}
+                              >
+                                <Col>{`${item.id}. ${item.message}`}</Col>
+                                <Button
+                                  style={{ border: "none" }}
+                                  icon={<CloseOutlined />}
+                                />
+                              </Row>
                             </List.Item>
                           )}
                         />
@@ -415,7 +431,20 @@ const App = () => {
                           dataSource={dumiorders}
                           renderItem={(item) => (
                             <List.Item>
-                              {`${item.id}. ${item.message}`}
+                              <Row
+                                style={{
+                                  width: "100%",
+
+                                  justifyContent: "space-between",
+                                }}
+                                gutter={6}
+                              >
+                                <Col>{`${item.id}. ${item.message}`}</Col>
+                                <Button
+                                  style={{ border: "none" }}
+                                  icon={<CloseOutlined />}
+                                />
+                              </Row>
                             </List.Item>
                           )}
                         />

@@ -42,6 +42,7 @@ class Branch {
       branch_manager_phone: this.branch_manager_phone,
       branch_sido: this.branch_sido,
       branch_sigungu: this.branch_sigungu,
+      branch_description: this.branch_description,
     };
   }
 

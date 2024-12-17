@@ -44,6 +44,7 @@ class Provider {
       created_at: this.created_at,
       updated_at: this.updated_at,
       payment_type: this.payment_type,
+      provider_description: this.provider_description,
     };
   }
 

@@ -56,7 +56,14 @@ const BranchModal = ({
         >
           취소
         </Button>,
-        <Button key="submit" type="primary" onClick={() => form.submit()}>
+        <Button
+          key="submit"
+          type="primary"
+          onClick={() => {
+            console.log("여기");
+            form.submit();
+          }}
+        >
           {isEditMode ? "수정 완료" : "추가 완료"}
         </Button>,
       ]}
@@ -324,6 +331,7 @@ function Branch(props) {
 
   // Handle form submit for branch creation or update
   const handleSubmit = async (values) => {
+    console.log("values", values);
     try {
       let branchData = { ...values };
 
