@@ -449,7 +449,7 @@ class Product {
 class OrderingHistory {
   constructor(data) {
     this.pk = data.pk || null; // Primary Key
-    this.provider_id = data.provider_id;
+    this.branch_id = data.branch_id;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || null;
     this.arrive = data.arrive || 0;
@@ -457,7 +457,7 @@ class OrderingHistory {
 
   toJSON() {
     return {
-      provider_id: this.provider_id,
+      branch_id: this.branch_id,
       created_at: this.created_at,
       updated_at: this.updated_at,
       arrive: this.arrive,

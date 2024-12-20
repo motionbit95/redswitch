@@ -720,9 +720,9 @@ router.delete("/materials/:pk", async (req, res) => {
  */
 router.post("/ordering_history", async (req, res) => {
   try {
-    const { provider_id, arrive } = req.body;
+    const { branch_id, arrive } = req.body;
 
-    if (!provider_id) {
+    if (!branch_id) {
       return res.status(400).json({ message: "필수 필드가 누락되었습니다." });
     }
 

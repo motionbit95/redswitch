@@ -20,12 +20,14 @@ import useSearchFilter from "../../hook/useSearchFilter";
 
 // 발주 추가 모달
 const AddModal = (props) => {
-  const { data, onComplete, isModalOpen, setIsModalOpen } = props;
+  const { data, onComplete, isModalOpen, setIsModalOpen, selectedBranch } =
+    props;
   const [form] = Form.useForm();
   const [products, setProducts] = useState(data);
 
   useEffect(() => {
     setProducts(data);
+    console.log(selectedBranch);
   }, [data]);
 
   // 발주 수량 변경
@@ -59,8 +61,24 @@ const AddModal = (props) => {
     //   return;
     // }
 
+    if (!selectedBranch) {
+      message.error("지점을 선택해주세요.");
+      return;
+    }
+    try {
+      const response = await AxiosPost("/products/ordering_history", {
+        branch_id: selectedBranch.id,
+      });
+      if (response.status === 201) {
+        // 여기에 상품을 담아서 저정하는 것을 구현
+      } else {
+        message.error("발주 생성 실패.");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
     console.log(
-      products,
       products.map((item) => ({
         product_pk: item.PK,
         ordered_cnt: item.ordered_cnt,
@@ -434,6 +452,7 @@ const Inventory = () => {
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         data={selectedProducts}
+        selectedBranch={selectedBranch}
         onComplete={(data) => {
           setSelectedRowKeys([]);
         }}

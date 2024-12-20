@@ -23,31 +23,68 @@ import { useNavigate } from "react-router-dom";
 import { AxiosDelete, AxiosGet, AxiosPost } from "../../api";
 import dayjs from "dayjs";
 
+const DetailModal = ({ isModalOpen, setIsModalOpen, historyPK }) => {
+  useEffect(() => {
+    const fetchPurchaseOrder = async () => {
+      try {
+        const response = await AxiosGet(
+          `/products/ordering_product/${historyPK}`
+        );
+        console.log(response.data);
+      } catch (error) {
+        message.error("발주 내역을 불러오는 데 실패했습니다.");
+      }
+    };
+    fetchPurchaseOrder();
+  });
+
+  return (
+    <Modal
+      title="발주 내역"
+      open={isModalOpen}
+      onCancel={() => setIsModalOpen(false)}
+      footer={null}
+    >
+      <p>id: {historyPK}</p>
+    </Modal>
+  );
+};
+
 const Purchase_order = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [selectedProvider, setSelectedProvider] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [orderHistory, setOrderHistory] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [historyPK, setHistoryPK] = useState([]);
 
+  // 발주 이력 가져오기 (본사 기준)
   useEffect(() => {
-    console.log("orderHistory", orderHistory);
+    const fetchOrders = async () => {
+      if (!selectedProvider) {
+        return;
+      }
+      try {
+        const response = await AxiosGet("/products/ordering_history");
+        setOrderHistory(response.data);
+      } catch (error) {
+        message.error("발주 이력을 불러오는 데 실패했습니다.");
+      }
+    };
     fetchOrders();
   }, []);
 
-  // 발주 이력 가져오기 (본사 기준)
-  const fetchOrders = async () => {
-    if (!selectedProvider) {
-      return;
-    }
-    try {
-      const response = await AxiosGet("/products/ordering_history");
-      setOrderHistory(response.data);
-    } catch (error) {
-      message.error("발주 이력을 불러오는 데 실패했습니다.");
-    }
-  };
+  useEffect(() => {
+    const fetchBranches = async () => {
+      AxiosGet("/branches")
+        .then((res) => {
+          setBranches(res.data);
+        })
+        .catch((err) => console.err(err));
+    };
+    fetchBranches();
+  }, [orderHistory]);
 
   // 발주 내역 수정
   const handleEditSubmit = () => {
@@ -55,15 +92,16 @@ const Purchase_order = () => {
   };
 
   // 발주 내역 확인 버튼
-  const handleDetail = (id) => {
-    console.log(id);
+  const handleDetail = (record) => {
+    console.log(record);
+    setIsModalOpen(true);
+    setHistoryPK(record.pk);
   };
 
   // 발주 이력 삭제
   const handleDelete = (id) => {
     AxiosDelete(`/products/ordering_history/${id}`)
       .then((response) => {
-        fetchOrders();
         message.success("발주 이력이 성공적으로 삭제되었습니다.");
       })
       .catch((error) => {
@@ -86,11 +124,19 @@ const Purchase_order = () => {
     },
     {
       title: "지점 명",
-      dataIndex: "branch_name",
-      key: "branch_name",
+
+      render: (text, record) => {
+        let branch = branches.filter(
+          (branch) => branch.id === record.branch_id
+        );
+        return <span>{branch[0]?.branch_name}</span>;
+      },
     },
     {
       title: "발주 상태",
+      dataIndex: "arrive",
+      key: "arrive",
+      render: (text) => <span>{text}</span>,
     },
     {
       title: "입고 일자",
@@ -129,6 +175,12 @@ const Purchase_order = () => {
         columns={columns}
         dataSource={orderHistory}
         pagination={{ pageSize: 10 }}
+      />
+
+      <DetailModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        historyPK={historyPK}
       />
     </div>
   );

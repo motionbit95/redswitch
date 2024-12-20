@@ -201,13 +201,28 @@ const ProductCRUD = () => {
     }
   };
 
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
+
+  // Update pagination state on change
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
+  };
+
+  const handleChange = (pagination, filters, sorter) => {
+    console.log("Various parameters", pagination, filters, sorter);
+  };
+
   // 테이블 컬럼 정의
   const columns = [
     {
       title: "No.",
-      dataIndex: "index",
-      key: "index",
-      render: (text, record, index) => index + 1,
+      render: (text, record, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
+      fixed: "left",
+      width: 50,
     },
     {
       title: "상품코드",
@@ -314,7 +329,15 @@ const ProductCRUD = () => {
         columns={columns}
         dataSource={products}
         rowKey="PK"
-        pagination={{ showSizeChanger: true }}
+        onChange={(pagination, filters, sorter) => {
+          handleTableChange(pagination);
+          handleChange(pagination, filters, sorter);
+        }}
+        pagination={{
+          ...pagination,
+          defaultPageSize: 10,
+          showSizeChanger: true,
+        }}
       />
 
       {/* 상품 추가/수정 모달 */}
