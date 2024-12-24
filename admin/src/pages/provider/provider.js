@@ -19,6 +19,7 @@ import KakaoAddressSearch from "../../components/kakao";
 import FormItem from "antd/es/form/FormItem";
 import FileUpload from "../../components/button";
 import TextArea from "antd/es/input/TextArea";
+import usePagination from "../../hook/usePagination";
 
 const ProviderModal = ({
   visible,
@@ -399,13 +400,7 @@ const Provider = () => {
     });
   };
 
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-  });
-  const handleTableChange = (pagination) => {
-    setPagination(pagination);
-  };
+  const { pagination, setPagination, handleTableChange } = usePagination(10);
 
   const handleChange = (pagination, filters, sorter) => {
     console.log("Various parameters", pagination, filters, sorter);

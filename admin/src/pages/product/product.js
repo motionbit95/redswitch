@@ -26,6 +26,7 @@ import SearchProduct from "../../components/popover/searchproduct";
 import useExportToExcel from "../../hook/useExportToExcel";
 import dayjs from "dayjs";
 import { DownloadOutlined } from "@ant-design/icons";
+import usePagination from "../../hook/usePagination";
 
 const ProductCRUD = () => {
   const [products, setProducts] = useState([]);
@@ -195,15 +196,7 @@ const ProductCRUD = () => {
     }
   };
 
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-  });
-
-  // Update pagination state on change
-  const handleTableChange = (pagination) => {
-    setPagination(pagination);
-  };
+  const { pagination, setPagination, handleTableChange } = usePagination(10); // Default page size is 10
 
   const handleChange = (pagination, filters, sorter) => {
     console.log("Various parameters", pagination, filters, sorter);
@@ -344,7 +337,6 @@ const ProductCRUD = () => {
         }}
         pagination={{
           ...pagination,
-          defaultPageSize: 10,
           showSizeChanger: true,
         }}
       />

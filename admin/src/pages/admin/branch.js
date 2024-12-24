@@ -22,6 +22,7 @@ import KakaoAddressSearch from "../../components/kakao";
 import FileUpload from "../../components/button";
 import { UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
+import usePagination from "../../hook/usePagination";
 
 const BranchModal = ({
   visible,
@@ -369,15 +370,7 @@ function Branch(props) {
     }
   };
 
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-  });
-
-  // Update pagination state on change
-  const handleTableChange = (pagination) => {
-    setPagination(pagination);
-  };
+  const { pagination, setPagination, handleTableChange } = usePagination(10);
 
   const handleChange = (pagination, filters, sorter) => {
     console.log("Various parameters", pagination, filters, sorter);

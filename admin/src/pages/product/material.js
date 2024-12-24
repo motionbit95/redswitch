@@ -21,6 +21,7 @@ import Addproduct from "../../components/material/product_add";
 import ProductCategory from "../../components/material/product_category";
 import { AxiosDelete, AxiosGet, AxiosPut } from "../../api";
 import FileUpload from "../../components/button";
+import usePagination from "../../hook/usePagination";
 
 const Material = () => {
   const [loading, setLoading] = useState(false);
@@ -121,15 +122,7 @@ const Material = () => {
     }
   };
 
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-  });
-
-  // Update pagination state on change
-  const handleTableChange = (pagination) => {
-    setPagination(pagination);
-  };
+  const { pagination, setPagination, handleTableChange } = usePagination();
 
   const handleChange = (pagination, filters, sorter) => {
     console.log("Various parameters", pagination, filters, sorter);

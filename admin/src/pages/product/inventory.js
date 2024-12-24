@@ -17,6 +17,7 @@ import SearchBranch from "../../components/popover/searchbranch";
 import { useEffect } from "react";
 import { AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import useSearchFilter from "../../hook/useSearchFilter";
+import usePagination from "../../hook/usePagination";
 
 // 발주 추가 모달
 const AddModal = (props) => {
@@ -179,10 +180,7 @@ const Inventory = () => {
   const [editRowKey, setEditRowKey] = useState(null);
   const [editedInventory, setEditedInventory] = useState({});
 
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-  });
+  const { pagination, setPagination, handleTableChange } = usePagination(10); // Default page size is 10
 
   useEffect(() => {
     fetchProducts();
@@ -278,11 +276,6 @@ const Inventory = () => {
   const handleEditInventoryCancel = () => {
     setEditRowKey(null);
     setEditedInventory({});
-  };
-
-  // 페이지 인덱스 변경
-  const handleTablePageChange = (pagination) => {
-    setPagination(pagination);
   };
 
   // 페이지 변경 이벤트
@@ -434,7 +427,7 @@ const Inventory = () => {
         dataSource={products}
         rowSelection={rowSelection}
         onChange={(pagination) => {
-          handleTablePageChange(pagination);
+          handleTableChange(pagination);
           handlePageChange(pagination);
         }}
         pagination={{
