@@ -502,7 +502,7 @@ class OrderingHistory {
       snapshot.forEach((childSnapshot) => {
         histories.push({ pk: childSnapshot.key, ...childSnapshot.val() });
       });
-      return histories;
+      return histories.reverse();
     } catch (error) {
       console.error("Error fetching ordering histories:", error);
       throw new Error("Failed to fetch ordering histories");
@@ -549,11 +549,8 @@ class OrderingProduct {
   constructor(data) {
     this.pk = data.pk || null; // 데이터베이스에서 자동 생성됨
     this.history_pk = data.history_pk;
-    this.provider_id = data.provider_id;
     this.ordered_cnt = data.ordered_cnt;
     this.material_pk = data.material_pk;
-    this.product_code = data.product_code || "A01010001"; // 기본값
-    this.provider_code = data.provider_code;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || null;
   }
@@ -562,11 +559,8 @@ class OrderingProduct {
     return {
       pk: this.pk,
       history_pk: this.history_pk,
-      provider_id: this.provider_id,
       ordered_cnt: this.ordered_cnt,
       material_pk: this.material_pk,
-      product_code: this.product_code,
-      provider_code: this.provider_code,
       created_at: this.created_at,
       updated_at: this.updated_at,
     };
@@ -614,6 +608,36 @@ class OrderingProduct {
     } catch (error) {
       console.error("Error fetching ordering products:", error);
       throw new Error("Failed to fetch ordering products");
+    }
+  }
+
+  static async getByHistoryPK(history_pk) {
+    try {
+      if (!history_pk) {
+        throw new Error("history_pk is required");
+      }
+
+      const snapshot = await orderingProductRef.once("value");
+      if (!snapshot.exists()) {
+        return [];
+      }
+
+      const filteredHistories = [];
+      snapshot.forEach((childSnapshot) => {
+        const data = childSnapshot.val();
+        console.log(data);
+        if (data.history_pk === history_pk) {
+          filteredHistories.push({ pk: childSnapshot.key, ...data });
+        }
+      });
+
+      return filteredHistories.reverse(); // 최근 순으로 정렬
+    } catch (error) {
+      console.error(
+        `Error fetching histories for history_pk (${history_pk}):`,
+        error
+      );
+      throw new Error("Failed to fetch histories by history_pk");
     }
   }
 

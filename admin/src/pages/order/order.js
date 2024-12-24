@@ -3,9 +3,11 @@ import { AxiosGet, AxiosPut } from "../../api";
 import {
   Button,
   Card,
+  Col,
   DatePicker,
   Form,
   Input,
+  Row,
   Select,
   Space,
   Table,
@@ -120,6 +122,7 @@ const Order = () => {
       title: "주문일시",
       dataIndex: "created_at",
       key: "created_at",
+      ellipsis: true,
       render: (text) => (
         <span>{dayjs(text).format("YYYY-MM-DD HH:mm:ss")}</span>
       ),
@@ -139,6 +142,7 @@ const Order = () => {
       title: "배송메세지",
       dataIndex: "delivery_message",
       key: "delivery_message",
+      ellipsis: true,
       ...getColumnSearchProps("delivery_message"),
     },
     {
@@ -150,6 +154,7 @@ const Order = () => {
     },
     {
       title: "지점명",
+      ellipsis: true,
       render: (text, record) => {
         let branch = branches.filter(
           (branch) => branch.id === record.branch_pk
@@ -161,6 +166,7 @@ const Order = () => {
       title: "주소",
       dataIndex: "customer_address",
       key: "customer_address",
+      ellipsis: true,
       render: (text) => <span>{text}호</span>,
       ...getColumnSearchProps("customer_address"),
     },
@@ -201,6 +207,7 @@ const Order = () => {
       title: "동작",
       dataIndex: "action",
       key: "action",
+      width: 120,
       render: (text, record) => {
         let data = payments.filter(
           (payment) => payment.ordNo === record.order_code
@@ -299,15 +306,12 @@ const Order = () => {
 
   // 필터링
   const onSubmit = (values) => {
-    // 필터링 함수 만들기
-    console.log(values);
-
-    console.log(orders);
+    console.log("필터링 값:", values);
   };
 
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
-      {/* <OrderFilter onSubmit={onSubmit} /> */}
+      <OrderFilter onSubmit={onSubmit} />
       <Table
         size="small"
         columns={columns}
@@ -349,59 +353,77 @@ const OrderFilter = (props) => {
   const [form] = Form.useForm();
   const { onSubmit } = props;
 
+  // 폼 제출 시 호출되는 함수
   const onFinish = (values) => {
-    onSubmit(values);
+    onSubmit(values); // 부모 컴포넌트로 필터링된 값 전달
   };
+
   return (
     <Card>
       <Form
         layout="inline"
+        form={form}
+        onFinish={onFinish}
         style={{
           display: "flex",
-          width: "100%",
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: 16,
         }}
-        form={form}
-        onFinish={onFinish}
       >
-        <div style={{ display: "flex" }}>
-          {/* Form.Item에서 defaultValue로 한 달 전부터 오늘까지 설정 */}
-          <Form.Item name="order_date" label="주문날짜">
-            <DatePicker.RangePicker
-              defaultValue={[dayjs().subtract(1, "month"), dayjs()]}
-            />
-          </Form.Item>
-          <Form.Item name="order_status" label="주문상태">
-            <Select defaultValue="전체" style={{ width: 120 }}>
-              <Select.Option value="1">주문완료</Select.Option>
-              <Select.Option value="2">결제취소</Select.Option>
-              <Select.Option value="2">배송완료</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="search_option" label="검색조건">
-            <Select defaultValue="---선택---" style={{ width: 120 }}>
-              <Select.Option value="product_code">상품코드</Select.Option>
-              <Select.Option value="branch">지점별</Select.Option>
-              <Select.Option value="region">지역별</Select.Option>
-              <Select.Option value="provider">거래처별</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="search_keyword">
-            <Input />
-          </Form.Item>
-        </div>
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            iconPosition="end"
-            icon={<SearchOutlined />}
+        <Row gutter={[16, 16]}>
+          <Col span={24}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              {/* 주문 날짜 */}
+              <Form.Item name="order_date" label="주문날짜">
+                <DatePicker.RangePicker />
+              </Form.Item>
+              {/* 주문 상태 */}
+              <Form.Item name="order_status" label="주문상태">
+                <Select defaultValue="전체" style={{ width: 120 }}>
+                  <Select.Option value="전체">전체</Select.Option>
+                  <Select.Option value="1">주문완료</Select.Option>
+                  <Select.Option value="2">결제취소</Select.Option>
+                  <Select.Option value="3">배송완료</Select.Option>
+                </Select>
+              </Form.Item>
+            </div>
+          </Col>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
           >
-            검색
-          </Button>
-        </Form.Item>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              {/* 검색 조건 */}
+              <Form.Item name="search_option" label="검색조건">
+                <Select defaultValue="---선택---" style={{ width: 120 }}>
+                  <Select.Option value="product_code">상품코드</Select.Option>
+                  <Select.Option value="branch">지점별</Select.Option>
+                  <Select.Option value="region">지역별</Select.Option>
+                  <Select.Option value="provider">거래처별</Select.Option>
+                </Select>
+              </Form.Item>
+              {/* 검색 키워드 */}
+              <Form.Item name="search_keyword">
+                <Input placeholder="검색어 입력" />
+              </Form.Item>
+            </div>
+            {/* 검색 버튼 */}
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                iconPosition="end"
+                icon={<SearchOutlined />}
+              >
+                검색
+              </Button>
+            </Form.Item>
+          </div>
+        </Row>
       </Form>
     </Card>
   );

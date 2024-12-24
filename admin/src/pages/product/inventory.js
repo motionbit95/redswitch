@@ -65,27 +65,23 @@ const AddModal = (props) => {
       message.error("지점을 선택해주세요.");
       return;
     }
+
+    // ordering_history (발주내역) 생성 시 발주상품 생성하도록 수정 - 20241224
     try {
       const response = await AxiosPost("/products/ordering_history", {
         branch_id: selectedBranch.id,
+        products,
       });
       if (response.status === 201) {
-        // 여기에 상품을 담아서 저정하는 것을 구현
+        console.log("발주 상품 등록 완료 > ", response.data);
+        setIsModalOpen(false);
+        onComplete();
       } else {
-        message.error("발주 생성 실패.");
+        message.error("발주 상품 생성 실패");
       }
     } catch (error) {
       console.log(error);
     }
-
-    console.log(
-      products.map((item) => ({
-        product_pk: item.PK,
-        ordered_cnt: item.ordered_cnt,
-      }))
-    );
-    // setIsModalOpen(false);
-    // onComplete();
   };
 
   const columns = [

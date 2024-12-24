@@ -133,10 +133,7 @@ const App = () => {
     if (alarms.length > 0) {
       const latestAlarm = alarms[alarms.length - 1]; // 가장 최근 알림
       setSelectedAlarm(latestAlarm); // 최신 알림 설정
-      setIsModalVisible(true); // 모달 표시
-
-      const audio = new Audio(soundFile);
-      // playSound(); // 알림 소리 재생
+      // setIsModalVisible(true); // 모달 표시
     }
   }, [alarms]); // alarms 배열이 변경될 때마다 실행
 

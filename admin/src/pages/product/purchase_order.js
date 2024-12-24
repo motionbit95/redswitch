@@ -26,17 +26,22 @@ import dayjs from "dayjs";
 const DetailModal = ({ isModalOpen, setIsModalOpen, historyPK }) => {
   useEffect(() => {
     const fetchPurchaseOrder = async () => {
+      console.log(historyPK);
       try {
         const response = await AxiosGet(
-          `/products/ordering_product/${historyPK}`
+          `/products/ordering-products/history/${historyPK}`
         );
         console.log(response.data);
       } catch (error) {
         message.error("발주 내역을 불러오는 데 실패했습니다.");
       }
     };
+
+    if (!historyPK) {
+      return;
+    }
     fetchPurchaseOrder();
-  });
+  }, [historyPK]);
 
   return (
     <Modal
@@ -57,7 +62,7 @@ const Purchase_order = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orderHistory, setOrderHistory] = useState([]);
   const [branches, setBranches] = useState([]);
-  const [historyPK, setHistoryPK] = useState([]);
+  const [historyPK, setHistoryPK] = useState(null);
 
   // 발주 이력 가져오기 (본사 기준)
   useEffect(() => {

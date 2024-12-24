@@ -720,7 +720,7 @@ router.delete("/materials/:pk", async (req, res) => {
  */
 router.post("/ordering_history", async (req, res) => {
   try {
-    const { branch_id, arrive } = req.body;
+    const { branch_id, arrive, products } = req.body;
 
     if (!branch_id) {
       return res.status(400).json({ message: "필수 필드가 누락되었습니다." });
@@ -728,6 +728,17 @@ router.post("/ordering_history", async (req, res) => {
 
     const history = new OrderingHistory(req.body);
     const createdHistory = await history.create();
+
+    for (const product of products) {
+      const productHistory = new OrderingProduct({
+        history_pk: createdHistory.pk,
+        ordered_cnt: product.ordered_cnt,
+        material_pk: product.material_id,
+      });
+      await productHistory.create();
+      console.log("productHistory: ", productHistory);
+    }
+
     res.status(201).json(createdHistory);
   } catch (error) {
     console.error("발주 이력 생성 오류:", error);
@@ -996,6 +1007,7 @@ router.post("/ordering_product", async (req, res) => {
 router.get("/ordering_product/:pk", async (req, res) => {
   try {
     const { pk } = req.params;
+    console.log("pk: ", pk);
     const product = await OrderingProduct.getByPK(pk);
     res.status(200).json(product);
   } catch (error) {
@@ -1064,8 +1076,10 @@ router.get("/ordering-products/history/:history_pk", async (req, res) => {
   try {
     const { history_pk } = req.params;
 
+    console.log("history_pk: ", history_pk);
+
     // 모든 데이터 조회 후 history_pk로 필터링
-    const allProducts = await OrderingProduct.getAll();
+    const allProducts = await OrderingProduct.getByHistoryPK(history_pk);
     const filteredProducts = allProducts.filter(
       (product) => product.history_pk === history_pk
     );
