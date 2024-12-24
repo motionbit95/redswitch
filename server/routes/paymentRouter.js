@@ -216,6 +216,75 @@ router.get("/payCancel", (req, res) => {
     });
 });
 
+router.get("/admin/payCancel", (req, res) => {
+  const encData = encryptSHA256(
+    merchantID + req.query.ediDate + req.query.canAmt + merchantKey
+  );
+
+  console.log(encData);
+
+  let data = {
+    tid: req.query.tid,
+    ordNo: req.query.ordNo,
+    canAmt: req.query.canAmt,
+    ediDate: req.query.ediDate,
+  };
+
+  axios
+    .post(
+      "https://api.payster.co.kr/payment.cancel",
+      {
+        tid: data.tid,
+        ordNo: data.ordNo,
+        canAmt: data.canAmt,
+        canMsg: "지점사정", // 취소사유
+        partCanFlg: "0",
+        encData: encData,
+        ediDate: data.ediDate,
+      },
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Charset: "UTF-8",
+        },
+      }
+    )
+    .then(async (response) => {
+      axios
+        .post("http://localhost:8080/payments", response.data)
+        .then(() => {})
+        .catch((error) => {
+          console.log(error);
+        });
+
+      // order 상태 변경
+      const order = await Orders.getByOrderCode(data.ordNo);
+      console.log(order);
+      Object.assign(order, { order_status: 2 }); // 결제 취소 플래그
+      const updatedOrder = await new Orders(order).update();
+
+      // 재고 수량 변경(재고 감소)
+      for (let i = 0; i < updatedOrder.select_products.length; i++) {
+        let product = updatedOrder.select_products[i];
+        // 재고 데이터 가지고 오기
+        try {
+          const inventory = await Inventory.getByPK(product.PK);
+          // 있는거만 수정하자
+          Object.assign(inventory, {
+            inventory_cnt: inventory.inventory_cnt - product.count || 0,
+          });
+
+          const newInventory = await new Inventory(inventory).update();
+        } catch (error) {
+          continue;
+        }
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
 router.post("/sendResponse", async (req, res) => {
   console.log(req.body);
 

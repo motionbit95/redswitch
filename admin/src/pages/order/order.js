@@ -7,6 +7,7 @@ import {
   DatePicker,
   Form,
   Input,
+  message,
   Row,
   Select,
   Space,
@@ -112,6 +113,38 @@ const Order = () => {
     }
   };
 
+  // 주문취소
+  const cancelPayment = async (items) => {
+    console.log(items);
+    // 해당 order code의 payment data를 가지고 옴
+    const payment = payments.filter(
+      (payment) =>
+        payment.ordNo === items.order_code && payment.cancelYN === "N" // 취소되지 않은
+    );
+
+    // payment data가 있으면 취소
+    if (payment.length > 0) {
+      console.log(payment[0]);
+
+      const queryParams = {
+        tid: payment[0].tid,
+        ordNo: payment[0].ordNo,
+        amt: payment[0].goodsAmt,
+        ediDate: payment[0].ediDate,
+      };
+
+      if (items.order_status < 2) {
+        window.location.replace(
+          `${process.env.REACT_APP_SERVER_URL}/payments/admin/payCancel?tid=${queryParams?.tid}&ordNo=${queryParams?.ordNo}&canAmt=${queryParams?.amt}&ediDate=${queryParams?.ediDate}`
+        );
+      } else if (items.order_status === 2) {
+        message.error("이미 취소된 주문입니다.");
+      } else {
+        message.error("취소 불가 주문입니다.");
+      }
+    }
+  };
+
   // 메인 테이블 컬럼 속성
   const columns = [
     {
@@ -186,7 +219,7 @@ const Order = () => {
               ? "결제대기"
               : data.length === 1
               ? "주문완료"
-              : "결제취소"}
+              : "주문취소"}
           </Tag>
         );
       },
@@ -194,7 +227,7 @@ const Order = () => {
       filters: [
         { text: "결제대기", value: 0 },
         { text: "주문완료", value: 1 },
-        { text: "결제취소", value: 2 },
+        { text: "주문취소", value: 2 },
       ],
       onFilter: (value, record) => {
         let data = payments.filter(
@@ -214,9 +247,11 @@ const Order = () => {
         );
         return (
           <span style={{ display: "flex", gap: "10px" }}>
-            {/* {record.order_status !== 0 && <a>결제취소</a>} */}
+            {/* {record.order_status !== 0 && <a>주문취소</a>} */}
             <a>삭제</a>
-            {data.length === 1 && <a>결제취소</a>}
+            {data.length === 1 && (
+              <a onClick={() => cancelPayment(record)}>주문취소</a>
+            )}
           </span>
         );
       },
@@ -383,7 +418,7 @@ const OrderFilter = (props) => {
                 <Select defaultValue="전체" style={{ width: 120 }}>
                   <Select.Option value="전체">전체</Select.Option>
                   <Select.Option value="1">주문완료</Select.Option>
-                  <Select.Option value="2">결제취소</Select.Option>
+                  <Select.Option value="2">주문취소</Select.Option>
                   <Select.Option value="3">배송완료</Select.Option>
                 </Select>
               </Form.Item>

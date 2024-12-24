@@ -46,7 +46,7 @@ import Order from "./pages/order/order";
 import BDSMStatistics from "./pages/bdsm/bdsm_statistics";
 import Material from "./pages/product/material";
 import Salse from "./pages/sales/salse";
-import Settlement from "./pages/sales/settlement";
+import Settlement from "./pages/sales/branch";
 import BDSMAdvertise from "./pages/bdsm/bdsm_advertise";
 import NoticeBoard from "./pages/post/post";
 import InquiryBoard from "./pages/post/inquiry";
@@ -55,6 +55,7 @@ import useFirebase from "./hook/useFilrebase";
 import Spot from "./pages/admin/spot";
 import soundFile from "./assets/VoicesAI_1724058982121.mp3";
 import TabPane from "antd/es/tabs/TabPane";
+import PaymentSummary from "./pages/sales/salse";
 
 const { Header, Content, Sider } = Layout;
 
@@ -189,15 +190,15 @@ const App = () => {
     {
       key: "sales",
       icon: React.createElement(DollarOutlined),
-      label: "매출관리",
+      label: "매출분석",
       children: [
         {
           key: "/sales/sales",
-          label: <Link to="/sales/sales">매출관리</Link>,
+          label: <Link to="/sales/sales">기간별 조회</Link>,
         },
         {
-          key: "/sales/settlement",
-          label: <Link to="/sales/settlement">정산관리</Link>,
+          key: "/sales/branch",
+          label: <Link to="/sales/branch">매장별 조회</Link>,
         },
       ],
     },
@@ -542,8 +543,8 @@ const App = () => {
                 <Route path="/post/notification" element={<NoticeBoard />} />
                 <Route path="/post/inquiry" element={<InquiryBoard />} />
 
-                <Route path="/sales/sales" element={<Salse />} />
-                <Route path="/sales/settlement" element={<Settlement />} />
+                <Route path="/sales/sales" element={<PaymentSummary />} />
+                <Route path="/sales/branch" element={<Settlement />} />
               </Routes>
             </Content>
             <Footer
