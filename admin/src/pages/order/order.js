@@ -17,6 +17,8 @@ import {
 import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
 import useSearchFilter from "../../hook/useSearchFilter";
+import useExportToExcel from "../../hook/useExportToExcel";
+import { DownloadOutlined } from "@ant-design/icons";
 
 const Order = () => {
   const [orders, setOrders] = useState([]);
@@ -24,6 +26,7 @@ const Order = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [branches, setBranches] = useState([]);
   const [materials, setMaterials] = useState([]);
+  const [expandedRowData, setExpandedRowData] = useState([]);
 
   const { getColumnSearchProps } = useSearchFilter();
 
@@ -49,6 +52,16 @@ const Order = () => {
             return a.checked === b.checked ? 0 : a.checked === 0 ? -1 : 1;
           });
 
+          sortedOrders.forEach((order) => {
+            console.log(order.branch_pk);
+            const branch = branches.find(
+              (branch) => branch.id === order.branch_pk
+            );
+            if (branch) {
+              order.branch_name = branch.branch_name;
+            }
+          });
+
           console.log(sortedOrders);
 
           setOrders(sortedOrders);
@@ -57,7 +70,7 @@ const Order = () => {
     };
 
     fetchOrders();
-  }, []);
+  }, [branches]);
 
   // 지점 정보 - 주문 지점 및 지역을 표시하기 위함
   useEffect(() => {
@@ -69,7 +82,7 @@ const Order = () => {
         .catch((err) => console.err(err));
     };
     fetchBranches();
-  }, [orders]);
+  }, []);
 
   // 결제 정보 - 결제 취소 위함
   useEffect(() => {
@@ -188,12 +201,8 @@ const Order = () => {
     {
       title: "지점명",
       ellipsis: true,
-      render: (text, record) => {
-        let branch = branches.filter(
-          (branch) => branch.id === record.branch_pk
-        );
-        return <span>{branch[0]?.branch_name}</span>;
-      },
+      dataIndex: "branch_name",
+      key: "branch_name",
     },
     {
       title: "주소",
@@ -344,9 +353,23 @@ const Order = () => {
     console.log("필터링 값:", values);
   };
 
+  // 엑셀 내보내기
+  const exportToExcel = useExportToExcel(
+    filteredOrders, // 필터된 주문 데이터
+    columns.slice(1, columns.length - 1), // 주문 컬럼
+    "주문관리_" + dayjs().format("YYYYMMDD")
+  );
+
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
-      <OrderFilter onSubmit={onSubmit} />
+      {/* <OrderFilter onSubmit={onSubmit} /> */}
+      <Button
+        style={{ float: "right" }}
+        icon={<DownloadOutlined />}
+        onClick={exportToExcel}
+      >
+        엑셀 다운로드
+      </Button>
       <Table
         size="small"
         columns={columns}

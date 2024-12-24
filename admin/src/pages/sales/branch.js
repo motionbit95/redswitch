@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Table, DatePicker, Space, Typography } from "antd";
+import { Table, DatePicker, Space, Typography, Button } from "antd";
 import dayjs from "dayjs";
 import { AxiosGet } from "../../api";
 import useSearchFilter from "../../hook/useSearchFilter";
+import useExportToExcel from "../../hook/useExportToExcel";
+import { DownloadOutlined } from "@ant-design/icons";
 
 const { RangePicker } = DatePicker;
 
@@ -102,6 +104,16 @@ const PaymentSummaryByBranch = () => {
         (branch) => branch.id === branchId
       )?.branch_name;
 
+      const startDate = dayjs(selectedRange[0])
+        ? dayjs(selectedRange[0])
+        : dayjs();
+      const endDate = dayjs(selectedRange[1])
+        ? dayjs(selectedRange[1])
+        : dayjs();
+      const dateRange = `${startDate.format("YYYY-MM-DD")} ~ ${endDate.format(
+        "YYYY-MM-DD"
+      )}`;
+
       if (!acc[branchId]) {
         acc[branchId] = {
           branchId,
@@ -109,8 +121,9 @@ const PaymentSummaryByBranch = () => {
           totalTransactions: 0,
           refundTransactions: 0,
           refundAmount: 0,
-          branchAddress: branchAddress,
-          branchName: branchName,
+          branchAddress,
+          branchName,
+          dateRange,
         };
       }
 
@@ -148,6 +161,7 @@ const PaymentSummaryByBranch = () => {
         branchData.branchAddress.split(" ")[0] +
         " " +
         branchData.branchAddress.split(" ")[1],
+      dateRange: branchData.dateRange,
     };
   });
 
@@ -157,18 +171,6 @@ const PaymentSummaryByBranch = () => {
       title: "기간",
       dataIndex: "dateRange",
       key: "dateRange",
-
-      render: () => {
-        const startDate = dayjs(selectedRange[0])
-          ? dayjs(selectedRange[0])
-          : dayjs();
-        const endDate = dayjs(selectedRange[1])
-          ? dayjs(selectedRange[1])
-          : dayjs();
-        return `${startDate.format("YYYY-MM-DD")} ~ ${endDate.format(
-          "YYYY-MM-DD"
-        )}`;
-      },
     },
     {
       title: "지점명",
@@ -223,6 +225,14 @@ const PaymentSummaryByBranch = () => {
     },
   ];
 
+  // Use the custom hook to export data to Excel
+  const exportToExcel = useExportToExcel(
+    dataSource,
+    columns,
+    [],
+    "매출분석_지점별조회_" + dayjs().format("YYYYMMDD")
+  );
+
   return (
     <Space direction="vertical" style={{ width: "100%" }} size={16}>
       <Space direction="horizontal" size={8}>
@@ -237,6 +247,13 @@ const PaymentSummaryByBranch = () => {
       >
         지점별 조회
       </Typography.Title>
+      <Button
+        style={{ float: "right" }}
+        icon={<DownloadOutlined />}
+        onClick={exportToExcel}
+      >
+        엑셀 다운로드
+      </Button>
       <Table
         columns={columns}
         dataSource={dataSource}

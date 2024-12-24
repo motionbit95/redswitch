@@ -6,32 +6,26 @@ import {
   Form,
   Input,
   InputNumber,
-  Upload,
   message,
   Row,
   Col,
   Descriptions,
   Space,
-  Typography,
   Switch,
   Popconfirm,
   Image,
 } from "antd";
-import {
-  PlusOutlined,
-  MinusCircleOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import SearchBranch from "../../components/popover/searchbranch";
 import ToastEditor from "../../components/toasteditor";
 import FileUpload from "../../components/button";
-import Material from "./material";
 import useSearchFilter from "../../hook/useSearchFilter";
 import SearchMaterial from "../../components/popover/searchmaterial";
 import SearchProduct from "../../components/popover/searchproduct";
+import useExportToExcel from "../../hook/useExportToExcel";
+import dayjs from "dayjs";
+import { DownloadOutlined } from "@ant-design/icons";
 
 const ProductCRUD = () => {
   const [products, setProducts] = useState([]);
@@ -297,6 +291,12 @@ const ProductCRUD = () => {
     },
   ];
 
+  const exportToExcel = useExportToExcel(
+    products, // 필터된 주문 데이터
+    columns.slice(1, columns.length - 2),
+    "판매상품관리" + dayjs().format("YYYYMMDD")
+  );
+
   return (
     <div>
       <Row
@@ -316,13 +316,22 @@ const ProductCRUD = () => {
           }}
           multiple={false}
         />
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => showModal()}
-        >
-          상품 추가
-        </Button>
+        <Space>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => showModal()}
+          >
+            상품 추가
+          </Button>
+          <Button
+            style={{ float: "right" }}
+            icon={<DownloadOutlined />}
+            onClick={exportToExcel}
+          >
+            엑셀 다운로드
+          </Button>
+        </Space>
       </Row>
       <Table
         size="small"

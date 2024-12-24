@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Table, DatePicker, Space, Row, Col, Card, Typography } from "antd";
+import {
+  Table,
+  DatePicker,
+  Space,
+  Row,
+  Col,
+  Card,
+  Typography,
+  Button,
+} from "antd";
 import dayjs from "dayjs";
 import { AxiosGet } from "../../api";
 import SearchBranch from "../../components/popover/searchbranch";
+import { DownloadOutlined } from "@ant-design/icons";
+import useExportToExcel from "../../hook/useExportToExcel";
 
 const { RangePicker } = DatePicker;
 
@@ -242,6 +253,14 @@ const PaymentSummary = () => {
     },
   ];
 
+  // Use the custom hook to export data to Excel
+  const exportToExcel = useExportToExcel(
+    dataSource,
+    columns,
+    [],
+    "매출분석_기간별조회_" + dayjs().format("YYYYMMDD")
+  );
+
   return (
     <Space direction="vertical" style={{ width: "100%" }} size={16}>
       <Space direction="horizontal" size={8}>
@@ -336,6 +355,13 @@ const PaymentSummary = () => {
           </Row>
         )}
       </div>
+      <Button
+        style={{ float: "right" }}
+        icon={<DownloadOutlined />}
+        onClick={exportToExcel}
+      >
+        엑셀 다운로드
+      </Button>
       <Table
         columns={columns}
         dataSource={dataSource}
