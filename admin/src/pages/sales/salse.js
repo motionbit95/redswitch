@@ -8,12 +8,15 @@ import {
   Card,
   Typography,
   Button,
+  Modal,
 } from "antd";
 import dayjs from "dayjs";
 import { AxiosGet } from "../../api";
 import SearchBranch from "../../components/popover/searchbranch";
-import { DownloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
 import useExportToExcel from "../../hook/useExportToExcel";
+import usePagination from "../../hook/usePagination";
+import { render } from "@testing-library/react";
 
 const { RangePicker } = DatePicker;
 
@@ -32,6 +35,10 @@ const PaymentSummary = () => {
   const [selectedBranch, setSelectedBranch] = useState(null);
 
   const [dailySales, setDailySales] = useState({ today: 0, yesterday: 0 });
+
+  // detail modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
     const calculateDailySales = () => {
@@ -158,9 +165,7 @@ const PaymentSummary = () => {
     });
 
     // 데이터 계산
-    const totalTransactions = paymentsWithOrders.filter(
-      (payment) => payment.cancelYN === "N"
-    ).length; // 전체 결제건수
+    const totalTransactions = paymentsWithOrders.length; // 전체 결제건수
     const refundTransactions = paymentsWithOrders.filter(
       (payment) => payment.cancelYN === "Y"
     ).length; // 환불 건수
@@ -250,6 +255,20 @@ const PaymentSummary = () => {
       key: "refundAmount",
       render: (value) => `${value.toLocaleString("ko-KR")}원`,
       sorter: (a, b) => a.refundAmount - b.refundAmount,
+    },
+    {
+      title: "자세히보기",
+      key: "action",
+
+      render: (_, record) => (
+        <Button
+          icon={<SearchOutlined />}
+          onClick={() => {
+            setSelectedDate(record.date);
+            setIsModalOpen(true);
+          }}
+        />
+      ),
     },
   ];
 
@@ -363,12 +382,118 @@ const PaymentSummary = () => {
         엑셀 다운로드
       </Button>
       <Table
+        size="small"
         columns={columns}
         dataSource={dataSource}
         pagination={{ pageSize: 5 }}
+      />
+
+      <DetailModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        payments={groupedPayments[selectedDate]}
+        selectedDate={selectedDate}
       />
     </Space>
   );
 };
 
+const DetailModal = ({
+  isModalOpen,
+  setIsModalOpen,
+  payments,
+  selectedDate,
+}) => {
+  const { pagination, setPagination, handleTableChange } = usePagination(10);
+
+  useEffect(() => {
+    console.log(payments);
+  }, [payments]);
+
+  const columns = [
+    {
+      title: "No.",
+      render: (text, record, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
+    },
+    {
+      title: "TID",
+      dataIndex: "tid",
+      key: "tid",
+    },
+    {
+      title: "주문번호",
+      dataIndex: "ordNo",
+      key: "ordNo",
+    },
+    {
+      title: "결제(취소)일시",
+      dataIndex: "ediDate",
+      key: "ediDate",
+      render: (value) =>
+        dayjs(value, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+    },
+    {
+      title: "취소여부",
+      dataIndex: "cancelYN",
+      key: "cancelYN",
+      render: (value) => (
+        <div style={{ opacity: value === "N" ? 1 : 0.5 }}>
+          {value === "N" ? "결제완료" : "취소완료"}
+        </div>
+      ),
+    },
+    {
+      title: "매출",
+      dataIndex: "goodsAmt",
+      key: "goodsAmt",
+      render: (value, record) => (
+        <div style={{ opacity: record.cancelYN === "N" ? 1 : 0.5 }}>
+          {`${record.cancelYN === "N" ? "+" : "-"}${value.toLocaleString(
+            "ko-KR"
+          )}원`}
+        </div>
+      ),
+    },
+  ];
+
+  const exportToExcel = useExportToExcel(
+    payments,
+    columns.slice(1),
+    [],
+    "결제내역_" + selectedDate
+  );
+
+  return (
+    <Modal
+      open={isModalOpen}
+      onCancel={() => setIsModalOpen(false)}
+      width={1000}
+      footer={[
+        <Button
+          key="submit"
+          // type="primary"
+          icon={<DownloadOutlined />}
+          onClick={exportToExcel}
+        >
+          엑셀 다운로드
+        </Button>,
+        <Button key="back" onClick={() => setIsModalOpen(false)}>
+          취소
+        </Button>,
+      ]}
+    >
+      <Table
+        size="small"
+        dataSource={payments}
+        columns={columns}
+        pagination={{
+          ...pagination,
+          showSizeChanger: true,
+        }}
+        onChange={handleTableChange}
+      />
+    </Modal>
+  );
+};
 export default PaymentSummary;

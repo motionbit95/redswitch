@@ -255,6 +255,7 @@ const PaymentSummaryByBranch = () => {
         엑셀 다운로드
       </Button>
       <Table
+        size="small"
         columns={columns}
         dataSource={dataSource}
         pagination={{ pageSize: 5 }}

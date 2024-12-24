@@ -71,7 +71,7 @@ class Payment {
       });
 
       console.log("payment!!!", payments);
-      return payments;
+      return payments.reverse();
     } catch (error) {
       console.error("Error fetching payments:", error);
       throw new Error("Failed to fetch payments");
