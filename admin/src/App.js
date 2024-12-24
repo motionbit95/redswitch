@@ -45,8 +45,6 @@ import Purchase_order from "./pages/product/purchase_order";
 import Order from "./pages/order/order";
 import BDSMStatistics from "./pages/bdsm/bdsm_statistics";
 import Material from "./pages/product/material";
-import Salse from "./pages/sales/salse";
-import Settlement from "./pages/sales/branch";
 import BDSMAdvertise from "./pages/bdsm/bdsm_advertise";
 import NoticeBoard from "./pages/post/post";
 import InquiryBoard from "./pages/post/inquiry";
@@ -56,6 +54,7 @@ import Spot from "./pages/admin/spot";
 import soundFile from "./assets/VoicesAI_1724058982121.mp3";
 import TabPane from "antd/es/tabs/TabPane";
 import PaymentSummary from "./pages/sales/salse";
+import PaymentSummaryByBranch from "./pages/sales/branch";
 
 const { Header, Content, Sider } = Layout;
 
@@ -198,7 +197,7 @@ const App = () => {
         },
         {
           key: "/sales/branch",
-          label: <Link to="/sales/branch">매장별 조회</Link>,
+          label: <Link to="/sales/branch">지점별 조회</Link>,
         },
       ],
     },
@@ -544,7 +543,10 @@ const App = () => {
                 <Route path="/post/inquiry" element={<InquiryBoard />} />
 
                 <Route path="/sales/sales" element={<PaymentSummary />} />
-                <Route path="/sales/branch" element={<Settlement />} />
+                <Route
+                  path="/sales/branch"
+                  element={<PaymentSummaryByBranch />}
+                />
               </Routes>
             </Content>
             <Footer
