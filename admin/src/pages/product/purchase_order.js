@@ -10,6 +10,7 @@ import {
   Row,
   Space,
   Table,
+  Descriptions,
 } from "antd";
 import {
   PlusOutlined,
@@ -23,7 +24,16 @@ import { useNavigate } from "react-router-dom";
 import { AxiosDelete, AxiosGet, AxiosPost } from "../../api";
 import dayjs from "dayjs";
 
-const DetailModal = ({ isModalOpen, setIsModalOpen, historyPK }) => {
+const DetailModal = ({
+  isModalOpen,
+  setIsModalOpen,
+  historyPK,
+  selectedBranch,
+}) => {
+  const [orderDetails, setOrderDetails] = useState([]); // 발주 상세 데이터 상태 관리
+  const [materials, setMaterials] = useState([]);
+
+  // 발주 내역 불러오기
   useEffect(() => {
     const fetchPurchaseOrder = async () => {
       console.log(historyPK);
@@ -31,7 +41,7 @@ const DetailModal = ({ isModalOpen, setIsModalOpen, historyPK }) => {
         const response = await AxiosGet(
           `/products/ordering-products/history/${historyPK}`
         );
-        console.log(response.data);
+        setOrderDetails(response.data);
       } catch (error) {
         message.error("발주 내역을 불러오는 데 실패했습니다.");
       }
@@ -43,6 +53,45 @@ const DetailModal = ({ isModalOpen, setIsModalOpen, historyPK }) => {
     fetchPurchaseOrder();
   }, [historyPK]);
 
+  // 물자 정보 불러오기
+  useEffect(() => {
+    const fetchMaterials = async () => {
+      AxiosGet("/products/materials")
+        .then((res) => {
+          setMaterials(res.data);
+        })
+        .catch((err) => console.log(err));
+    };
+    fetchMaterials();
+  }, []);
+
+  const columns = [
+    {
+      title: "상품명",
+      render: (text, record) => {
+        let material = materials.filter(
+          (material) => material.pk === record.material_pk
+        );
+
+        return <span>{material[0]?.product_name}</span>;
+      },
+    },
+    {
+      title: "상품코드",
+      render: (text, record) => {
+        let material = materials.filter(
+          (material) => material.pk === record.material_pk
+        );
+        return <span>{material[0]?.product_code}</span>;
+      },
+    },
+    {
+      title: "수량",
+      dataIndex: "ordered_cnt",
+      key: "ordered_cnt",
+    },
+  ];
+
   return (
     <Modal
       title="발주 내역"
@@ -50,7 +99,18 @@ const DetailModal = ({ isModalOpen, setIsModalOpen, historyPK }) => {
       onCancel={() => setIsModalOpen(false)}
       footer={null}
     >
-      <p>id: {historyPK}</p>
+      <Descriptions
+        size="small"
+        bordered
+        column={2}
+        style={{ marginBottom: 16 }}
+      >
+        <Descriptions.Item label="발주지점">{selectedBranch}</Descriptions.Item>
+        <Descriptions.Item label="발주 일자">
+          {dayjs(orderDetails[0]?.ordering_date).format("YYYY-MM-DD")}
+        </Descriptions.Item>
+      </Descriptions>
+      <Table size="small" columns={columns} dataSource={orderDetails} />
     </Modal>
   );
 };
@@ -63,6 +123,7 @@ const Purchase_order = () => {
   const [orderHistory, setOrderHistory] = useState([]);
   const [branches, setBranches] = useState([]);
   const [historyPK, setHistoryPK] = useState(null);
+  const [selectedBranch, setSelectedBranch] = useState(null);
 
   // 발주 이력 가져오기 (본사 기준)
   useEffect(() => {
@@ -101,6 +162,11 @@ const Purchase_order = () => {
     console.log(record);
     setIsModalOpen(true);
     setHistoryPK(record.pk);
+
+    const branch = branches.find((branch) => branch.id === record.branch_id);
+    const branchName = branch ? branch.branch_name : null;
+
+    setSelectedBranch(branchName); // branch_name 저장
   };
 
   // 발주 이력 삭제
@@ -186,6 +252,7 @@ const Purchase_order = () => {
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         historyPK={historyPK}
+        selectedBranch={selectedBranch}
       />
     </div>
   );

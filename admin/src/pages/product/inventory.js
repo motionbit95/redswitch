@@ -28,7 +28,7 @@ const AddModal = (props) => {
 
   useEffect(() => {
     setProducts(data);
-    console.log(selectedBranch);
+    console.log("요기!!!!!", selectedBranch, products);
   }, [data]);
 
   // 발주 수량 변경
@@ -69,9 +69,14 @@ const AddModal = (props) => {
 
     // ordering_history (발주내역) 생성 시 발주상품 생성하도록 수정 - 20241224
     try {
+      const formattedProducts = products.map((product) => ({
+        material_id: product.material_id, // 서버에서 사용되는 상품 식별자
+        ordered_cnt: product.ordered_cnt, // 발주 수량
+      }));
+
       const response = await AxiosPost("/products/ordering_history", {
         branch_id: selectedBranch.id,
-        products,
+        products: formattedProducts,
       });
       if (response.status === 201) {
         console.log("발주 상품 등록 완료 > ", response.data);

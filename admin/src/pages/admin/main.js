@@ -19,7 +19,14 @@ const Main = () => {
           alignItems: "flex-end",
         }}
       >
-        <div style={{ width: 300 }}>
+        <div
+          style={{
+            width: 300,
+            border: "1px solid #d9d9d9",
+            borderRadius: "10px",
+            overflow: "hidden",
+          }}
+        >
           <Calendar
             fullscreen={false}
             onSelect={onSelect}

@@ -366,19 +366,20 @@ export function Customer(props) {
         flex: 1,
         paddingTop: "80px",
         paddingInline:
-          size === "mobile" ? "20px" : size === "tablet" ? "48px" : "72px",
+          size === "mobile" ? "0px" : size === "tablet" ? "48px" : "72px",
       }}
     >
       <Col
         span={24}
         style={{
-          padding: "20px",
-          marginBottom: "60px",
+          padding: size === "mobile" ? "0px" : "20px",
+          marginBottom: size === "mobile" ? "0px" : "60px",
         }}
       >
         <Image
           preview={false}
           style={{
+            marginTop: size === "mobile" ? "80px" : "0px",
             marginBottom:
               size === "mobile"
                 ? "200px"
@@ -437,6 +438,7 @@ export function Customer(props) {
                         width: size === "mobile" ? "80px" : "120px",
                         height: size === "mobile" ? "80px" : "120px",
                         backgroundColor: "#f1f1f1",
+                        borderRadius: "20%",
                       }}
                     ></div>
                   );
