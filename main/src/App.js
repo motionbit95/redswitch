@@ -13,6 +13,9 @@ import Header from "./component/Header";
 import BottomNavbar from "./component/BottomNavbar";
 import OrderList from "./page/OrderList";
 
+import Eziok from "./eziok/eziok_react_index";
+import EziokStdRedirect from "./eziok/eziok_react_redirect";
+
 const darkTheme = {
   components: {
     Button: {
@@ -232,6 +235,8 @@ function App() {
           </Row>
           <BrowserRouter>
             <Routes>
+              <Route path="/" element={<Eziok />} />
+              <Route exact path="/redirect" element={<EziokStdRedirect />} />
               <Route
                 path="/spot/*"
                 element={<MainPage branch={branch} theme={theme} />}
