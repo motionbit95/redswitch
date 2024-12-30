@@ -1,41 +1,54 @@
-import { Button, Calendar, Space } from "antd";
+import { Button, Calendar, Card, Col, List, Row, Space } from "antd";
 import React from "react";
+import RCalendar from "../../components/calendar";
+import NoticeList from "../../components/list/notice";
 
 const Main = () => {
-  const onSelect = (date) => {
-    console.log("Selected date:", date.format("YYYY-MM-DD"));
-  };
-
-  const onPanelChange = (value, mode) => {
-    console.log(value.format("YYYY-MM-DD"), mode);
-  };
   return (
-    <div style={{ display: "flex", width: "100%", justifyContent: "flex-end" }}>
-      <Space
-        direction="vertical"
-        size={"large"}
-        style={{
-          display: "flex",
-          alignItems: "flex-end",
-        }}
-      >
-        <div
-          style={{
-            width: 300,
-            border: "1px solid #d9d9d9",
-            borderRadius: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Calendar
-            fullscreen={false}
-            onSelect={onSelect}
-            onPanelChange={onPanelChange}
-          />
-        </div>
-        <Button>메뉴얼</Button>
-      </Space>
-    </div>
+    <Row gutter={[16, 16]}>
+      <Col span={12}>
+        <Row gutter={[16, 16]}>
+          <Col span={12}>
+            <Card title="월누적매출"></Card>
+          </Col>
+          <Col span={12}>
+            <Card title="전일매출"></Card>
+          </Col>
+          <Col span={24}>
+            <Card title="공지사항">
+              <NoticeList />
+            </Card>
+          </Col>
+          <Col span={24}>
+            <Card title="게시판">
+              <List></List>
+            </Card>
+          </Col>
+          <Col span={24}>
+            <Card title="가맹점신청">
+              <List></List>
+            </Card>
+          </Col>
+        </Row>
+      </Col>
+      <Col span={12}>
+        <Row gutter={[16, 16]}>
+          <Col span={24}>
+            <RCalendar />
+          </Col>
+          <Col span={12}>
+            <Card title="메뉴얼">
+              <List></List>
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Card title="영상바로가기">
+              <List></List>
+            </Card>
+          </Col>
+        </Row>
+      </Col>
+    </Row>
   );
 };
 

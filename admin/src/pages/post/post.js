@@ -431,7 +431,7 @@ const NoticeBoard = () => {
   );
 };
 
-const NoticeDetailModal = ({
+export const NoticeDetailModal = ({
   isDetailModalVisible,
   setIsDetailModalVisible,
   currentNotice,

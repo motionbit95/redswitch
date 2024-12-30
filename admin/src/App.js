@@ -12,6 +12,7 @@ import {
   SolutionOutlined,
   NotificationOutlined,
   CloseOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import {
   Breadcrumb,
@@ -88,7 +89,7 @@ const App = () => {
     { id: 2, message: "배송이 시작되었습니다." },
   ];
 
-  const defaultOpenKeys = window.location.pathname.split("/")[1];
+  const defaultOpenKeys = window.location.pathname.split("/")[1] || "dashboard";
   const defaultSelectedKeys = window.location.pathname;
 
   const token = localStorage.getItem("authToken");
@@ -187,6 +188,11 @@ const App = () => {
   // 메뉴 항목
   const items = [
     {
+      key: "/dashboard",
+      icon: React.createElement(HomeOutlined),
+      label: <Link to="/dashboard">홈</Link>,
+    },
+    {
       key: "sales",
       icon: React.createElement(DollarOutlined),
       label: "매출분석",
@@ -202,7 +208,7 @@ const App = () => {
       ],
     },
     {
-      key: "order",
+      key: "/order",
       icon: React.createElement(TruckOutlined),
       label: <Link to="/order">주문관리</Link>,
       // children: [
@@ -515,7 +521,7 @@ const App = () => {
             >
               {/* 페이지 라우팅 */}
               <Routes>
-                <Route path="/admin" element={<Main />} />
+                <Route path="/dashboard" element={<Main />} />
                 <Route path="/admin/account" element={<Account />} />
                 <Route path="/admin/spot" element={<Spot />} />
 
