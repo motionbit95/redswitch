@@ -285,7 +285,7 @@ class Franchise {
       snapshot.forEach((child) => {
         posts.push({ pk: child.key, ...child.val() });
       });
-      return posts;
+      return posts.reverse();
     } catch (error) {
       console.error("Error fetching advertisements:", error);
       throw new Error("Failed to fetch advertisements");

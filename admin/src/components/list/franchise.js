@@ -1,28 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Avatar, Button, List, Skeleton } from "antd";
 import { AxiosGet } from "../../api";
-import { NoticeDetailModal } from "../../pages/post/post";
-const count = 5;
-const fakeDataUrl = `https://randomuser.me/api/?results=${count}&inc=name,gender,email,nat,picture&noinfo`;
+import { List, Skeleton, Button } from "antd";
+import { PostDetailModal } from "../../pages/provider/franchise_post";
 
-// 현재 로그인 사용자 (더미 데이터)
-const currentUser = {
-  id: "-OCRwtnmaTllsx2c3OWM", // -OCRwmUYTeUtxH-auNvx
-  user_id: "krystal", // redswitch
-  user_name: "박수정",
-  permission: "2", // 1
-};
+function FranchiseList(props) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [currentPost, setCurrentPost] = useState(null); // For post
+  const [franchise_post, setFranchisePost] = useState([]);
 
-const NoticeList = () => {
-  const [notices, setNotices] = useState([]);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
-  const [currentNotice, setCurrentNotice] = useState(null);
 
   useEffect(() => {
-    AxiosGet("/posts")
+    AxiosGet("/posts/franchises")
       .then((res) => {
         console.log(res.data);
-        setNotices(res.data);
+        setFranchisePost(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -30,10 +23,10 @@ const NoticeList = () => {
   }, []);
 
   const onLoadMore = () => {
-    window.location.replace("/post/notification");
+    window.location.replace("/provider/post");
   };
   const loadMore =
-    notices.length > 0 ? (
+    franchise_post.length > 0 ? (
       <div
         style={{
           textAlign: "center",
@@ -45,13 +38,14 @@ const NoticeList = () => {
         <Button onClick={onLoadMore}>더보기</Button>
       </div>
     ) : null;
+
   return (
     <>
       <List
         className="demo-loadmore-list"
         itemLayout="horizontal"
         loadMore={loadMore}
-        dataSource={notices}
+        dataSource={franchise_post}
         renderItem={(item) => (
           <List.Item>
             <Skeleton title={false} loading={item.loading} active>
@@ -66,15 +60,15 @@ const NoticeList = () => {
                   <a
                     style={{ color: "black", fontWeight: "bold" }}
                     onClick={() => {
-                      setCurrentNotice(item);
+                      setCurrentPost(item);
                       setIsDetailModalVisible(true);
                     }}
                   >
-                    {item.title}
+                    {item.franchise_name}
                   </a>
 
                   <div style={{ color: "gray" }}>
-                    {item.createdAt.split("T")[0]}
+                    {item.created_at.split("T")[0]}
                   </div>
                 </div>
               </List.Item>
@@ -82,16 +76,14 @@ const NoticeList = () => {
           </List.Item>
         )}
       />
-      <NoticeDetailModal
-        isDetailModalVisible={isDetailModalVisible}
-        setIsDetailModalVisible={setIsDetailModalVisible}
-        currentNotice={currentNotice}
-        setCurrentNotice={setCurrentNotice}
-        setNotices={setNotices}
-        currentUser={currentUser}
-        notices={notices}
+      <PostDetailModal
+        isModalOpen={isDetailModalVisible}
+        setIsModalOpen={setIsDetailModalVisible}
+        currentPost={currentPost}
+        // handleOk={handleOk}
       />
     </>
   );
-};
-export default NoticeList;
+}
+
+export default FranchiseList;

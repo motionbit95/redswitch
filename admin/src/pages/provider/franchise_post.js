@@ -35,7 +35,7 @@ const FranchisePost = () => {
         console.log(res.data);
         setFranchisePost(res.data);
       })
-      .then((err) => {
+      .catch((err) => {
         console.log(err);
       });
   }, []);
@@ -197,7 +197,7 @@ const FranchisePost = () => {
   );
 };
 
-const PostDetailModal = ({
+export const PostDetailModal = ({
   isModalOpen,
   setIsModalOpen,
   currentPost,

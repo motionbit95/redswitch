@@ -2,17 +2,17 @@ import { Button, Calendar, Card, Col, List, Row, Space } from "antd";
 import React from "react";
 import RCalendar from "../../components/calendar";
 import NoticeList from "../../components/list/notice";
+import FranchiseList from "../../components/list/franchise";
+import SalesList from "../../components/list/sales";
 
 const Main = () => {
+  const [dateRange, setDateRange] = React.useState(null);
   return (
     <Row gutter={[16, 16]}>
       <Col span={12}>
         <Row gutter={[16, 16]}>
-          <Col span={12}>
-            <Card title="월누적매출"></Card>
-          </Col>
-          <Col span={12}>
-            <Card title="전일매출"></Card>
+          <Col span={24}>
+            <SalesList dateRange={dateRange} />
           </Col>
           <Col span={24}>
             <Card title="공지사항">
@@ -26,7 +26,7 @@ const Main = () => {
           </Col>
           <Col span={24}>
             <Card title="가맹점신청">
-              <List></List>
+              <FranchiseList />
             </Card>
           </Col>
         </Row>
@@ -34,7 +34,7 @@ const Main = () => {
       <Col span={12}>
         <Row gutter={[16, 16]}>
           <Col span={24}>
-            <RCalendar />
+            <RCalendar setDateRange={setDateRange} />
           </Col>
           <Col span={12}>
             <Card title="메뉴얼">
