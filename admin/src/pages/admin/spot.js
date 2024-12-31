@@ -1,15 +1,39 @@
-import { Button, Col, Form, Input, Modal, Row, Table } from "antd";
-import React, { useState } from "react";
+import {
+  Button,
+  Col,
+  Descriptions,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Table,
+} from "antd";
+import React, { useEffect, useState } from "react";
 import FileUpload from "../../components/button";
+import SearchBranch from "../../components/popover/searchbranch";
 
-const AddModal = ({ isModalOpen, setIsModalOpen, data, onSubmit }) => {
+const AddModal = ({ isModalOpen, setIsModalOpen, data }) => {
   const [form] = Form.useForm();
+  const [selectedBranch, setSelectedBranch] = useState(null);
+
+  useEffect(() => {
+    console.log(selectedBranch);
+  }, []);
+
+  const handlesubmit = async (values) => {
+    console.log(values);
+    try {
+    } catch {}
+  };
+
   return (
     <Modal
       open={isModalOpen}
+      width={600}
       title="설치지점 등록"
       onCancel={() => {
         form.resetFields();
+        setSelectedBranch(null);
         setIsModalOpen(false);
       }}
       footer={[
@@ -17,12 +41,13 @@ const AddModal = ({ isModalOpen, setIsModalOpen, data, onSubmit }) => {
           key="back"
           onClick={() => {
             form.resetFields();
+            setSelectedBranch(null);
             setIsModalOpen(false);
           }}
         >
           취소
         </Button>,
-        <Button key="submit" type="primary" onClick={() => form.submit}>
+        <Button key="submit" type="primary" onClick={() => form.submit()}>
           등록
         </Button>,
       ]}
@@ -31,34 +56,49 @@ const AddModal = ({ isModalOpen, setIsModalOpen, data, onSubmit }) => {
       <Form
         form={form}
         layout="vertical"
-        onFinish={onSubmit}
+        onFinish={handlesubmit}
         initialValues={data}
       >
-        <Form.Item
-          name="spot_name"
-          label="설치지점명"
-          rules={[{ required: true, message: "설치지점명을 입력해주세요." }]}
-        >
-          <Input />
-        </Form.Item>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="spot_logo" label="설치지점 로고">
+        <Descriptions column={2} size="small" bordered>
+          <Descriptions.Item
+            label="설치지점"
+            span={2}
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item name="spot_name" style={{ marginBottom: 0 }}>
+              <SearchBranch
+                selectedBranch={selectedBranch}
+                setSelectedBranch={(branches) => {
+                  setSelectedBranch(branches[0]);
+                }}
+                multiple={false}
+              />
+            </Form.Item>
+          </Descriptions.Item>
+
+          <Descriptions.Item
+            label="설치지점 로고"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item name="spot_logo" style={{ marginBottom: 0 }}>
               <FileUpload
                 url={form.getFieldValue("spot_logo")}
                 setUrl={(url) => form.setFieldsValue({ spot_logo: url })}
               />
             </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="spot_image" label="설치지점 이미지">
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="설치지점 이미지"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item name="spot_image" style={{ marginBottom: 0 }}>
               <FileUpload
                 url={form.getFieldValue("spot_image")}
                 setUrl={(url) => form.setFieldsValue({ spot_image: url })}
               />
             </Form.Item>
-          </Col>
-        </Row>
+          </Descriptions.Item>
+        </Descriptions>
       </Form>
     </Modal>
   );
@@ -68,13 +108,24 @@ const Spot = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
 
-  const handleSubmit = (values) => {
-    console.log(values);
-  };
-
   const columns = [
     {
       title: "No",
+    },
+    {
+      title: "설치지점명",
+      dataIndex: "spot_name",
+      key: "spot_name",
+    },
+    {
+      title: "설치지점 로고",
+      dataIndex: "spot_logo",
+      key: "spot_logo",
+    },
+    {
+      title: "설치지점 이미지",
+      dataIndex: "spot_image",
+      key: "spot_image",
     },
   ];
 
@@ -99,7 +150,6 @@ const Spot = () => {
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         data={[]}
-        onSubmit={handleSubmit}
       />
     </div>
   );

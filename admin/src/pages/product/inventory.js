@@ -367,6 +367,12 @@ const Inventory = () => {
         ),
     },
     {
+      title: "입고가",
+    },
+    {
+      title: "판매가",
+    },
+    {
       title: "동작",
       key: "action",
       width: 150,

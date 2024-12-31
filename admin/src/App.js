@@ -376,7 +376,7 @@ const App = () => {
               fontWeight: "bold",
             }}
             onClick={() => {
-              window.location.href = "/admin";
+              window.location.href = "/dashboard";
             }}
           >
             Redswitch

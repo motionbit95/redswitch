@@ -11,11 +11,13 @@ import {
   Space,
   Table,
   Descriptions,
+  Tag,
 } from "antd";
 import {
   PlusOutlined,
   SearchOutlined,
   DeleteOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import SearchProvider from "../../components/popover/searchprovider";
@@ -23,6 +25,8 @@ import SearchMaterial from "../../components/popover/searchmaterial";
 import { useNavigate } from "react-router-dom";
 import { AxiosDelete, AxiosGet, AxiosPost } from "../../api";
 import dayjs from "dayjs";
+import usePagination from "../../hook/usePagination";
+import useExportToExcel from "../../hook/useExportToExcel";
 
 const DetailModal = ({
   isModalOpen,
@@ -90,7 +94,24 @@ const DetailModal = ({
       dataIndex: "ordered_cnt",
       key: "ordered_cnt",
     },
+    {
+      title: "거래처 명",
+      render: (text, record) => {
+        let provider = materials.filter(
+          (provider) => provider.pk === record.material_pk
+        );
+        return <span>{provider[0]?.provider_name}</span>;
+      },
+    },
   ];
+
+  // Use the custom hook to export data to Excel
+  const exportToExcel = useExportToExcel(
+    orderDetails,
+    columns,
+    [],
+    "발주 내역" + dayjs().format("YYYYMMDD")
+  );
 
   return (
     <Modal
@@ -110,6 +131,13 @@ const DetailModal = ({
           {dayjs(orderDetails[0]?.ordering_date).format("YYYY-MM-DD")}
         </Descriptions.Item>
       </Descriptions>
+      <Button
+        style={{ float: "right" }}
+        icon={<DownloadOutlined />}
+        onClick={exportToExcel}
+      >
+        엑셀 다운로드
+      </Button>
       <Table size="small" columns={columns} dataSource={orderDetails} />
     </Modal>
   );
@@ -181,7 +209,20 @@ const Purchase_order = () => {
       });
   };
 
+  const { pagination, setPagination, handleTableChange } = usePagination();
+
+  const handleChange = (pagination, filters, sorter) => {
+    console.log("Various parameters", pagination, filters, sorter);
+  };
+
   const columns = [
+    {
+      title: "No.",
+      render: (text, record, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
+      fixed: "left",
+      width: 50,
+    },
     {
       title: "발주 일자",
       dataIndex: "created_at",
@@ -207,7 +248,17 @@ const Purchase_order = () => {
       title: "발주 상태",
       dataIndex: "arrive",
       key: "arrive",
-      render: (text) => <span>{text}</span>,
+      render(text) {
+        return text === "0" ? (
+          <Tag color="red">발주 신청</Tag>
+        ) : text === "1" ? (
+          <Tag color="blue">발주 확인</Tag>
+        ) : text === "2" ? (
+          <Tag color="green">배송 중</Tag>
+        ) : (
+          <Tag color="orange">수령 완료</Tag>
+        );
+      },
     },
     {
       title: "입고 일자",
@@ -245,7 +296,15 @@ const Purchase_order = () => {
         size="small"
         columns={columns}
         dataSource={orderHistory}
-        pagination={{ pageSize: 10 }}
+        onChange={(pagination, filters, sorter) => {
+          handleTableChange(pagination);
+          handleChange(pagination, filters, sorter);
+        }}
+        pagination={{
+          ...pagination,
+          defaultPageSize: 10,
+          showSizeChanger: true,
+        }}
       />
 
       <DetailModal
