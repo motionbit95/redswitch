@@ -37,12 +37,12 @@ class ezioK_react_index extends Component {
     return (
       <main>
         {/* react-helmet 이용 시 주석해제 */}
-        {/* <Helmet> */}
-        {/* 운영 */}
-        {/* <script src="https://cert.ez-iok.com/stdauth/ds_auth_ptb/asset/js/ptb_ezauth_proc.js"></script> */}
-        {/* 개발 */}
-        <script src="https://scert.ez-iok.com/stdauth/ds_auth_ptb/asset/js/ptb_ezauth_proc.js"></script>
-        {/* </Helmet> */}
+        <Helmet>
+          {/* 운영 */}
+          {/* <script src="https://cert.ez-iok.com/stdauth/ds_auth_ptb/asset/js/ptb_ezauth_proc.js"></script> */}
+          {/* 개발 */}
+          <script src="https://scert.ez-iok.com/stdauth/ds_auth_ptb/asset/js/ptb_ezauth_proc.js"></script>
+        </Helmet>
 
         <button onClick={this.eziok}>인증_팝업</button>
         <textarea cols="100" rows="50" id="result"></textarea>
