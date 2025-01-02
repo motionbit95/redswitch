@@ -6,7 +6,7 @@ import { Helmet } from "react-helmet";
 class ezioK_react_index extends Component {
   eziok() {
     window.eziok_std_process(
-      `${process.env.REACT_APP_SERVER_URL}/eziok/eziok_std_request`,
+      "https://port-0-redswitch-lxwmkqxz2d25ae69.sel5.cloudtype.app/eziok/eziok_std_request",
       "WB",
       "printResult"
     ); // callback 방식 사용

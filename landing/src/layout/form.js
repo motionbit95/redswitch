@@ -28,7 +28,7 @@ const CenteredForm = (props) => {
     try {
       // 서버로 POST 요청
       const response = await axios.post(
-        "https://port-0-redswitch-server-17xco2nlszge3vt.sel5.cloudtype.app/posts/franchises",
+        "https://port-0-redswitch-lxwmkqxz2d25ae69.sel5.cloudtype.app/posts/franchises",
         values
       );
       console.log("Response:", response.data);

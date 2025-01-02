@@ -382,11 +382,11 @@ const App = () => {
             Redswitch
           </div>
           <Space size={50}>
-            <div style={{ color: "white" }}>{currentUser.user_id}</div>
+            <div style={{ color: "white" }}>{currentUser.user_id} 님</div>
             <Space size={"large"}>
               {isLoggedIn ? (
                 <Space>
-                  <Button onClick={handleLogout}>Logout</Button>
+                  <Button onClick={handleLogout}>로그아웃</Button>
                 </Space>
               ) : (
                 <LoginForm
