@@ -46,7 +46,7 @@ const InquiryBoard = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    AxiosGet("/posts")
+    AxiosGet("/posts/inquiries")
       .then((res) => {
         console.log(res.data);
         setInquiries(res.data);
@@ -121,7 +121,7 @@ const InquiryBoard = () => {
         if (currentInquiry) {
           // 수정
 
-          AxiosPut(`/posts/${currentInquiry.id}`, {
+          AxiosPut(`/posts/inquiries/${currentInquiry.id}`, {
             ...values,
             allowedUsers: finalAllowedUsers,
             updatedAt: new Date().toISOString(),
@@ -155,7 +155,7 @@ const InquiryBoard = () => {
           };
 
           // 호출
-          AxiosPost("/posts", newInquiry)
+          AxiosPost("/posts/inquiries", newInquiry)
             .then((response) => {
               console.log(response.data);
               setInquiries([...inquiries, newInquiry]);
@@ -174,7 +174,7 @@ const InquiryBoard = () => {
 
   // 게시판 삭제 처리
   const handleDelete = (id) => {
-    AxiosDelete(`/posts/${id}`)
+    AxiosDelete(`/posts/inquiries/${id}`)
       .then((response) => {
         setInquiries(inquiries.filter((inquiry) => inquiry.id !== id));
         console.log(response.data);
@@ -453,10 +453,13 @@ const InquiryDetailModal = ({
     }
 
     try {
-      const response = await AxiosPost(`/posts/${currentInquiry.id}/comments`, {
-        user: currentUser.user_id,
-        content: commentContent,
-      });
+      const response = await AxiosPost(
+        `/posts/inquiries/${currentInquiry.id}/comments`,
+        {
+          user: currentUser.user_id,
+          content: commentContent,
+        }
+      );
 
       const newComment = response.data;
 
@@ -491,8 +494,12 @@ const InquiryDetailModal = ({
   // Handle deleting a comment
   const handleDeleteComment = async (commentId) => {
     try {
-      console.log(`/posts/${currentInquiry.id}/comments/${commentId}`);
-      await AxiosDelete(`/posts/${currentInquiry.id}/comments/${commentId}`);
+      console.log(
+        `/posts/inquiries/${currentInquiry.id}/comments/${commentId}`
+      );
+      await AxiosDelete(
+        `/posts/inquiries/${currentInquiry.id}/comments/${commentId}`
+      );
 
       // Update the local state to remove the deleted comment
       setCurrentInquiry({
@@ -535,7 +542,7 @@ const InquiryDetailModal = ({
 
     try {
       const response = await AxiosPut(
-        `/posts/${currentInquiry.id}/comments/${editingCommentId}`,
+        `/posts/inquiries/${currentInquiry.id}/comments/${editingCommentId}`,
         {
           content: editedContent,
         }

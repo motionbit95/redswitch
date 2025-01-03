@@ -2,6 +2,7 @@ const admin = require("firebase-admin");
 const database = admin.database();
 const postsRef = database.ref("posts"); // 'posts' 경로 참조
 const franchisesRef = database.ref("franchises"); // 'franchises' 경로 참조
+const inquiryRef = database.ref("inquiries"); // 'inquiries' 경로 참조
 
 class Post {
   constructor(data) {
@@ -109,6 +110,142 @@ class Post {
     } catch (error) {
       console.error("Error deleting post:", error);
       throw new Error("Failed to delete post");
+    }
+  }
+
+  // 댓글 추가
+  addComment(comment) {
+    // comments가 배열이 아니면 빈 배열로 초기화
+    if (!Array.isArray(this.comments)) {
+      this.comments = [];
+    }
+    this.comments.push(comment); // 이제 안전하게 push 사용 가능
+  }
+
+  // 댓글 삭제
+  deleteComment(commentId) {
+    if (this.comments && this.comments.length > 0) {
+      this.comments = this.comments.filter(
+        (comment) => comment.id !== commentId
+      );
+    }
+  }
+
+  // 댓글 업데이트
+  updateComment(commentId, newContent) {
+    const comment = this.comments.find((c) => c.id === commentId);
+    if (comment) {
+      comment.content = newContent;
+    }
+  }
+}
+
+class Inquiry {
+  constructor(data) {
+    this.id = data.id || null; // 데이터베이스에서 자동 생성됨
+    this.title = data.title;
+    this.content = data.content;
+    this.author = data.author;
+    this.createdAt = data.createdAt || new Date().toISOString();
+    this.updatedAt = data.updatedAt || new Date().toISOString();
+    this.allowedUsers = data.allowedUsers || [];
+    this.groups = data.groups || [];
+    this.sticky = data.sticky || false;
+    this.comments = data.comments || [];
+  }
+
+  toJSON() {
+    return {
+      title: this.title,
+      content: this.content,
+      author: this.author,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      comments: this.comments,
+      allowedUsers: this.allowedUsers,
+      groups: this.groups,
+      sticky: this.sticky,
+      id: this.id,
+    };
+  }
+
+  // Create a new inquiry
+  async create() {
+    try {
+      const newInquiryRef = await inquiryRef.push(this.toJSON());
+      this.id = newInquiryRef.key;
+      await newInquiryRef.update({ id: this.id });
+      return this;
+    } catch (error) {
+      console.error("Error creating inquiry:", error);
+      throw new Error("Failed to create inquiry");
+    }
+  }
+
+  // Get a post by ID, and return an instance of Inquiry
+  static async getById(id) {
+    try {
+      const snapshot = await inquiryRef.child(id).once("value");
+      if (!snapshot.exists()) {
+        throw new Error("Post not found");
+      }
+      const inquiryData = snapshot.val();
+      const inquiry = new Inquiry(inquiryData); // Inquiry의 인스턴스로 변환
+      inquiry.id = id; // id 필드 추가
+      return inquiry;
+    } catch (error) {
+      console.error("Error fetching inquiry:", error);
+      throw new Error("Failed to fetch inquiry");
+    }
+  }
+
+  // Get all inquiries
+  static async getAll() {
+    try {
+      const snapshot = await inquiryRef.once("value");
+      if (!snapshot.exists()) {
+        return [];
+      }
+      const inquiries = [];
+      snapshot.forEach((child) => {
+        inquiries.push({ id: child.key, ...child.val() });
+      });
+      return inquiries;
+    } catch (error) {
+      console.error("Error fetching inquiries:", error);
+      throw new Error("Failed to fetch inquiries");
+    }
+  }
+
+  // Update inquiries
+  async update() {
+    try {
+      if (!this.id) {
+        throw new Error("Post ID is required for update");
+      }
+      this.updatedAt = new Date().toISOString(); // 최신 업데이트 시간
+
+      const inquiryData = this.toJSON(); // 객체 데이터를 JSON으로 변환
+      await inquiryRef.child(this.id).update(inquiryData); // 데이터베이스 업데이트
+      return this;
+    } catch (error) {
+      console.error("Error updating inquiry:", error);
+      throw new Error("Failed to update inquiry");
+    }
+  }
+
+  // Delete a post by ID
+  static async deleteById(id) {
+    try {
+      const snapshot = await inquiryRef.child(id).once("value");
+      if (!snapshot.exists()) {
+        throw new Error("Post not found");
+      }
+      await inquiryRef.child(id).remove();
+      return { message: "Post deleted successfully" };
+    } catch (error) {
+      console.error("Error deleting inquiry:", error);
+      throw new Error("Failed to delete inquiry");
     }
   }
 
@@ -293,4 +430,4 @@ class Franchise {
   }
 }
 
-module.exports = { Post, Franchise };
+module.exports = { Post, Inquiry, Franchise };
