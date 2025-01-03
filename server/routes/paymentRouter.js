@@ -60,7 +60,7 @@ router.get("/callPopup", (req, res) => {
     ordNm: "레드스위치", // 주문자 성함
     ordTel: "01000000000", // 주문자 번호
     ordNo: req.query.order_id,
-    returnUrl: "http://localhost:8080/payments/payResult",
+    returnUrl: `${process.env.SERVER_URL}/payments/payResult`,
     ediDate,
     encData,
   });
@@ -89,11 +89,31 @@ router.post("/payResult", (req, res) => {
       console.log("응답결과:", response.data, req.body.ordNo);
       // 위에 응답결과를 저장
       axios
-        .post("http://localhost:8080/payments", response.data)
-        .then(() => {
+        .post(`${process.env.SERVER_URL}/payments`, response.data)
+        .then(async () => {
+          // order 상태 변경
+          const order = await Orders.getByOrderCode(response.data.ordNo);
+          Object.assign(order, { order_status: 1 }); // 결제완료 플래그
+          const updatedOrder = await new Orders(order).update();
+
+          // 재고 수량 변경(재고 감소)
+
+          console.log(updatedOrder);
+
+          // 알람 생성
+          const alarm = new OrderAlarm({
+            alarm_title: order.customer_address + "호실 주문이 접수되었습니다.",
+            alarm_content: order.goods_name,
+            branch_pk: order.branch_pk,
+            order_pk: order.id,
+          });
+
+          let newAlarm = await alarm.create();
+          console.log(newAlarm);
+
           // Assuming `response.data` is your response object
           res.redirect(
-            "http://localhost:3000/payment/result?data=" +
+            `${process.env.CLIENT_URL}/payment/result?data=` +
               encodeURIComponent("{" + qs.stringify(response.data) + "}")
           );
         })
@@ -178,7 +198,7 @@ router.get("/payCancel", (req, res) => {
     )
     .then(async (response) => {
       axios
-        .post("http://localhost:8080/payments", response.data)
+        .post(`${process.env.SERVER_URL}/payments`, response.data)
         .then(async () => {
           // order 상태 변경
           const order = await Orders.getByOrderCode(data.ordNo);
@@ -186,22 +206,18 @@ router.get("/payCancel", (req, res) => {
           Object.assign(order, { order_status: 2 }); // 결제 취소 플래그
           const updatedOrder = await new Orders(order).update();
 
-          // 재고 수량 변경(재고 감소)
-          for (let i = 0; i < updatedOrder.select_products.length; i++) {
-            let product = updatedOrder.select_products[i];
-            // 재고 데이터 가지고 오기
-            try {
-              const inventory = await Inventory.getByPK(product.PK);
-              // 있는거만 수정하자
-              Object.assign(inventory, {
-                inventory_cnt: inventory.inventory_cnt - product.count || 0,
-              });
+          // 재고 수량 변경(재고 증가)
 
-              const newInventory = await new Inventory(inventory).update();
-            } catch (error) {
-              continue;
-            }
-          }
+          // 알람 생성
+          const alarm = new OrderAlarm({
+            alarm_title: order.customer_address + "호실 주문이 취소되었습니다.",
+            alarm_content: order.goods_name,
+            branch_pk: order.branch_pk,
+            order_pk: order.id,
+          });
+
+          let newAlarm = await alarm.create();
+          console.log(newAlarm);
         })
         .catch((error) => {
           // 걀제 취소 실패
@@ -209,7 +225,7 @@ router.get("/payCancel", (req, res) => {
         });
 
       res.redirect(
-        "http://localhost:3000/payment/cancel?data=" +
+        `${process.env.CLIENT_URL}/payment/cancel?data=` +
           encodeURIComponent("{" + qs.stringify(response.data) + "}")
       );
     })
@@ -253,7 +269,7 @@ router.get("/admin/payCancel", (req, res) => {
     )
     .then(async (response) => {
       axios
-        .post("http://localhost:8080/payments", response.data)
+        .post(`${process.env.SERVER_URL}/payments`, response.data)
         .then(() => {})
         .catch((error) => {
           console.log(error);
@@ -265,22 +281,7 @@ router.get("/admin/payCancel", (req, res) => {
       Object.assign(order, { order_status: 2 }); // 결제 취소 플래그
       const updatedOrder = await new Orders(order).update();
 
-      // 재고 수량 변경(재고 감소)
-      for (let i = 0; i < updatedOrder.select_products.length; i++) {
-        let product = updatedOrder.select_products[i];
-        // 재고 데이터 가지고 오기
-        try {
-          const inventory = await Inventory.getByPK(product.PK);
-          // 있는거만 수정하자
-          Object.assign(inventory, {
-            inventory_cnt: inventory.inventory_cnt - product.count || 0,
-          });
-
-          const newInventory = await new Inventory(inventory).update();
-        } catch (error) {
-          continue;
-        }
-      }
+      // 재고 수량 변경(재고 증가)
     })
     .catch((error) => {
       console.log(error);
@@ -348,39 +349,6 @@ router.post("/", async (req, res) => {
     console.log("결제 데이터", paymentData);
     const payment = new Payment(paymentData);
     const newPayment = await payment.create();
-
-    // order 상태 변경
-    const order = await Orders.getByOrderCode(paymentData.ordNo);
-    Object.assign(order, { order_status: 1 }); // 결제완료 플래그
-    const updatedOrder = await new Orders(order).update();
-
-    // 재고 수량 변경(재고 감소)
-    for (let i = 0; i < updatedOrder.select_products.length; i++) {
-      let product = updatedOrder.select_products[i];
-      // 재고 데이터 가지고 오기
-      try {
-        const inventory = await Inventory.getByPK(product.PK);
-        // 있는거만 수정하자
-        Object.assign(inventory, {
-          inventory_cnt: inventory.inventory_cnt - product.count || 0,
-        });
-
-        const newInventory = await new Inventory(inventory).update();
-      } catch (error) {
-        continue;
-      }
-    }
-
-    // 알람 생성
-    const alarm = new OrderAlarm({
-      alarm_title: "주문",
-      alarm_content: "주문이 접수되었습니다.",
-      branch_pk: order.branch_pk,
-      order_pk: order.pk,
-    });
-
-    let newAlarm = await alarm.create();
-    console.log(newAlarm);
 
     res.status(201).json(newPayment);
   } catch (error) {

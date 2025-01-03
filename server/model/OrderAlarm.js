@@ -28,13 +28,13 @@ class OrderAlarm {
   toJSON() {
     return {
       id: this.id,
-      alarm_type: this.alarm_type,
+      alarm_type: this.alarm_type || "order",
       alarm_title: this.alarm_title,
       alarm_content: this.alarm_content,
       branch_pk: this.branch_pk,
       order_pk: this.order_pk,
-      alarm_status: this.alarm_status,
-      created_at: this.created_at,
+      alarm_status: this.alarm_status || 0,
+      created_at: this.created_at || new Date().toISOString(),
     };
   }
 

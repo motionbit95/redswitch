@@ -78,8 +78,7 @@ const Payment = () => {
       order_code: order.ordNo, // 주문번호
       customer_id: localStorage.getItem("token"), // 유저 토큰
       customer_phone: values.customer_phone || "", // 유저 전화번호
-      customer_address:
-        branchInfo?.branch_address + " " + values.room_number || "", // 주문 주소 및 호실
+      customer_address: values.room_number || "", // 주문 주소 및 호실
       select_products: order.products, // 상품 정보
       order_status: 0, // 결제 대기
       order_amount: order.amt, // 주문금액
