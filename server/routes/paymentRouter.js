@@ -179,33 +179,35 @@ router.get("/payCancel", (req, res) => {
     .then(async (response) => {
       axios
         .post("http://localhost:8080/payments", response.data)
-        .then(() => {})
+        .then(async () => {
+          // order 상태 변경
+          const order = await Orders.getByOrderCode(data.ordNo);
+          console.log(order);
+          Object.assign(order, { order_status: 2 }); // 결제 취소 플래그
+          const updatedOrder = await new Orders(order).update();
+
+          // 재고 수량 변경(재고 감소)
+          for (let i = 0; i < updatedOrder.select_products.length; i++) {
+            let product = updatedOrder.select_products[i];
+            // 재고 데이터 가지고 오기
+            try {
+              const inventory = await Inventory.getByPK(product.PK);
+              // 있는거만 수정하자
+              Object.assign(inventory, {
+                inventory_cnt: inventory.inventory_cnt - product.count || 0,
+              });
+
+              const newInventory = await new Inventory(inventory).update();
+            } catch (error) {
+              continue;
+            }
+          }
+        })
         .catch((error) => {
+          // 걀제 취소 실패
           console.log(error);
         });
 
-      // order 상태 변경
-      const order = await Orders.getByOrderCode(data.ordNo);
-      console.log(order);
-      Object.assign(order, { order_status: 2 }); // 결제 취소 플래그
-      const updatedOrder = await new Orders(order).update();
-
-      // 재고 수량 변경(재고 감소)
-      for (let i = 0; i < updatedOrder.select_products.length; i++) {
-        let product = updatedOrder.select_products[i];
-        // 재고 데이터 가지고 오기
-        try {
-          const inventory = await Inventory.getByPK(product.PK);
-          // 있는거만 수정하자
-          Object.assign(inventory, {
-            inventory_cnt: inventory.inventory_cnt - product.count || 0,
-          });
-
-          const newInventory = await new Inventory(inventory).update();
-        } catch (error) {
-          continue;
-        }
-      }
       res.redirect(
         "http://localhost:3000/payment/cancel?data=" +
           encodeURIComponent("{" + qs.stringify(response.data) + "}")

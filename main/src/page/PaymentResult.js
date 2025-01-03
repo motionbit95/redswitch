@@ -2,10 +2,11 @@ import { Button, Card, Col, Divider, Image, message, Row, Space } from "antd";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Footer } from "../component/Footer";
-import { CopyOutlined } from "@ant-design/icons";
-import { useLocation } from "react-router-dom";
+import { CopyOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function PaymentResult(props) {
+  const navigate = useNavigate();
   const [queryParams, setQueryParams] = useState({}); // 결제 데이터
   const [order, setOrder] = useState({}); // 주문 데이터
   const [branch, setBranch] = useState({}); // 지점 데이터
@@ -100,6 +101,7 @@ function PaymentResult(props) {
         )
         .then((res) => {
           setQueryParams({ ...res.data[0], amt: res.data[0].goodsAmt });
+          console.log(res.data);
           setOrderStatus(res.data.length);
         })
         .catch((err) => {
@@ -123,6 +125,11 @@ function PaymentResult(props) {
 
   // 주문 취소
   const cancelPayment = async () => {
+    if (!queryParams) {
+      message.error("취소할 결제 데이터가 없습니다.");
+      return;
+    }
+
     console.log(queryParams);
     if (orderStatus < 2) {
       window.location.replace(
@@ -145,7 +152,12 @@ function PaymentResult(props) {
             완료되었습니다.
           </h1>
         )}
-        <h3>주문상세</h3>
+        <Space>
+          {!queryParams && (
+            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
+          )}
+          <h3>주문상세</h3>
+        </Space>
         <div
           style={{
             opacity: "0.5",
@@ -237,9 +249,9 @@ function PaymentResult(props) {
                 fontSize: "large",
               }}
             >
-              {orderStatus === 0
+              {order.order_status === 0
                 ? "결제대기"
-                : orderStatus === 1
+                : order.order_status === 1
                 ? "결제완료"
                 : "주문취소"}
             </div>

@@ -156,7 +156,13 @@ const Payment = () => {
             {order.products.map((item) => (
               <>
                 <Col span={6}>
-                  <Image src={item.blurred_image || item.original_image} />
+                  <Image
+                    src={
+                      item.blurred_image ||
+                      item.original_image ||
+                      "https://via.placeholder.com/120"
+                    }
+                  />
                 </Col>
                 <Col span={18}>
                   <div>{item?.product_name}</div>

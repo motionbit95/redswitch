@@ -35,14 +35,15 @@ function OrderList(props) {
     };
 
     const fetchOrderList = async () => {
+      console.log(localStorage.getItem("token"));
       const response = await fetch(
         `${
           process.env.REACT_APP_SERVER_URL
         }/orders/token/${localStorage.getItem("token")}`
       );
       const data = await response.json();
-      console.log(data);
-      setOrderList(data);
+      console.log(data.filter((item) => item.order_status > 0));
+      setOrderList(data.filter((item) => item.order_status > 0)); // 결제대기는 제외
     };
 
     fetchOrderList();
@@ -52,7 +53,12 @@ function OrderList(props) {
   }, []);
 
   return (
-    <div style={{ padding: "20px", paddingBottom: "80px" }}>
+    <div
+      style={{
+        padding: "20px",
+        paddingBottom: "80px",
+      }}
+    >
       <Space direction="vertical" style={{ width: "100%" }}>
         {orderList && orderList.length > 0 ? (
           orderList.map((order) => (
@@ -62,10 +68,17 @@ function OrderList(props) {
             >
               <Space direction="vertical" style={{ width: "100%" }}>
                 <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
                 >
                   <Tag>
-                    {order.order_status === 0 ? "결제대기" : "결제완료"}
+                    {order.order_status === 0
+                      ? "결제대기"
+                      : order.order_status === 1
+                      ? "결제완료"
+                      : "주문취소"}
                   </Tag>
                   <div style={{ fontWeight: "bold" }}>
                     {new Date(order.created_at).toLocaleDateString()}
@@ -82,7 +95,7 @@ function OrderList(props) {
                         src={
                           materialList?.find(
                             (material) => material.pk === product.material_id
-                          ).original_image
+                          ).original_image || "https://via.placeholder.com/120"
                         }
                         width={70}
                         height={70}
@@ -98,7 +111,10 @@ function OrderList(props) {
                           }}
                         >
                           <div
-                            style={{ fontWeight: "bold", fontSize: "large" }}
+                            style={{
+                              fontWeight: "bold",
+                              fontSize: "large",
+                            }}
                           >
                             {parseInt(order.order_amount).toLocaleString()}
                           </div>

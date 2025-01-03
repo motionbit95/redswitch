@@ -28,7 +28,7 @@ function BottomNavbar(props) {
     <div
       style={{
         display: "flex",
-        position: "fixed",
+        position: "sticky",
         bottom: "0",
         left: "0",
         right: "0",

@@ -7,12 +7,19 @@ function Header(props) {
     <div
       style={{
         width: "100%",
-        padding: "10px",
+        paddingBlock: "10px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        position: "relative",
+        position: "sticky",
+        top: 0,
+        left: 0,
+        width: "100%",
+        zIndex: 1000,
+        backgroundColor: props.theme === "dark" ? "#1e1e1e" : "white",
+        borderBottom: "1px solid",
+        borderColor: props.theme === "dark" ? "#3a3a3a" : "#f0f0f0",
       }}
     >
       <Space

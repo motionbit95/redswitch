@@ -63,7 +63,7 @@ function TestResult(props) {
       direction="vertical"
       className="center"
       size="large"
-      style={{ minHeight: "100vh", width: "100%", maxWidth: "780px" }}
+      style={{ minHeight: "100vh", width: "100%", maxWidth: "770px" }}
     >
       <div>
         <Typography.Title level={2}>BDSM TEST 결과</Typography.Title>

@@ -162,7 +162,7 @@ function Product({ branch, theme }) {
                 >
                   장바구니에 추가
                 </Button>
-                <Button
+                {/* <Button
                   size="large"
                   type="primary"
                   danger
@@ -170,7 +170,7 @@ function Product({ branch, theme }) {
                   style={buyButtonStyle}
                 >
                   바로 구매하기
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
@@ -181,7 +181,8 @@ function Product({ branch, theme }) {
       <div
         style={{
           width: "100%",
-          maxWidth: "800px",
+          maxWidth: "770px",
+          minHeight: "100vh",
           margin: "0 auto",
           overflow: "hidden",
         }}
@@ -296,7 +297,7 @@ function Product({ branch, theme }) {
             >
               장바구니에 추가
             </Button>
-            <Button
+            {/* <Button
               size="large"
               type="primary"
               danger
@@ -304,7 +305,7 @@ function Product({ branch, theme }) {
               style={{ width: "100%" }}
             >
               바로 구매하기
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

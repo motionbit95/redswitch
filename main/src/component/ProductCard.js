@@ -47,12 +47,11 @@ const ProductCard = React.memo(({ product, theme, isCertified }) => {
         ) : null}
 
         <Image
-          src={productImage}
+          src={productImage || "https://via.placeholder.com/150"}
           alt={product.name}
           preview={false}
           style={{
             ...productCardStyles.image,
-            display: imageState.loading || imageState.error ? "none" : "block",
           }}
           onLoad={handleImageLoad}
           onError={handleImageError}

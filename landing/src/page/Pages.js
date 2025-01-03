@@ -360,7 +360,7 @@ export function Customer(props) {
       style={{
         overflow: "hidden",
         height: "100vh",
-        maxWidth: "780px",
+        maxWidth: "770px",
         justifyContent: "center",
         display: "flex",
         flex: 1,

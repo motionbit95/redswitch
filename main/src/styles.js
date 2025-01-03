@@ -204,7 +204,7 @@ export const cartStyles = {
     display: "flex",
     flexDirection: "column",
     gap: "20px",
-    paddingBottom: "130px",
+    // paddingBottom: "130px",
   },
 
   cartContainer: {
@@ -280,6 +280,7 @@ export const cartStyles = {
   relatedProducts: {
     backgroundColor: "white",
     padding: "20px",
+    minHeight: "100vh",
   },
 
   relatedProductsText: {
@@ -288,7 +289,7 @@ export const cartStyles = {
   },
 
   footer: {
-    position: "fixed",
+    position: "sticky",
     bottom: "60px",
     left: "0",
     right: "0",
@@ -340,7 +341,11 @@ export const imageStyle = (isLarge, materialData) => ({
   height: isLarge ? "300px" : "auto",
   aspectRatio: "1/1",
   maxWidth: "300px",
-  backgroundImage: `url(${materialData?.original_image})`,
+  backgroundImage: `url(${
+    materialData?.original_image
+      ? materialData?.original_image
+      : "https://via.placeholder.com/150"
+  })`,
   backgroundSize: "cover",
   backgroundPosition: "center",
   borderRadius: "10px",
@@ -380,7 +385,7 @@ export const addToCartButtonStyle = {
 };
 
 export const fixedBottomStyle = (theme) => ({
-  position: "fixed",
+  position: "sticky",
   bottom: "60px",
   right: "0",
   left: "0",
