@@ -45,6 +45,8 @@ const InquiryBoard = () => {
 
   const [users, setUsers] = useState([]);
 
+  const [branches, setBranches] = useState([]);
+
   useEffect(() => {
     AxiosGet("/posts/inquiries")
       .then((res) => {
@@ -59,6 +61,15 @@ const InquiryBoard = () => {
       .then((res) => {
         console.log(res.data);
         setUsers(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    AxiosGet("/branches")
+      .then((res) => {
+        console.log(res.data);
+        setBranches(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -342,65 +353,26 @@ const InquiryBoard = () => {
               </Col>
             )}
           </Row>
-          <Form.Item
-            label="열람 권한 그룹"
-            name="groups"
-            rules={[{ required: true, message: "권한 그룹을 선택해주세요" }]}
-            tooltip="해당 권한의 사용자는 열람이 가능합니다."
-          >
-            <Checkbox.Group
-              options={[
-                { label: "본사관리자", value: "본사관리자" },
-                { label: "지사관리자", value: "지사관리자" },
-                { label: "지점관리자", value: "지점관리자" },
-                {
-                  label: "직접설정",
-                  value: "직접설정",
-                  disabled: currentUser.permission !== "1", // 직접 설정은 권한이 1(최고관리자)인 사용자만 가능
-                },
-              ]}
-              onChange={(checkedValues) => {
-                if (checkedValues.includes("직접설정")) {
-                  setGroupType("직접설정");
-                } else {
-                  setGroupType("");
-                }
-              }}
-            />
-          </Form.Item>
-          {groupType === "직접설정" && (
-            <Form.Item
-              label="열람 권한 사용자 선택"
-              name="allowedUsers"
-              rules={[{ required: true, message: "사용자를 선택해주세요" }]}
-              tooltip="특정 사용자에게만 열람 권한을 부여할 경우 사용자를 선택해주세요."
+          {/* <Form.Item>
+            <div>{currentUser.branch_id[0]}</div>
+          </Form.Item> */}
+          <Form.Item label="지점 선택" name="branch">
+            <Select
+              showSearch
+              placeholder="지점 선택"
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
             >
-              <Select
-                mode="multiple"
-                placeholder="사용자를 선택하세요"
-                optionLabelProp="label"
-                showSearch
-                filterOption={(input, option) =>
-                  option?.label?.toLowerCase().includes(input.toLowerCase())
-                }
-              >
-                {users.map((user) => (
-                  <Option
-                    key={user.id}
-                    value={user.id}
-                    label={`${user.user_id} (${user.user_name})`}
-                  >
-                    {user.user_id} ({user.user_name}) -{" "}
-                    {user.permission === "1"
-                      ? "최고관리자"
-                      : user.permission === "2"
-                      ? "지사관리자"
-                      : "지점관리자"}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          )}
+              {branches.map((branch) => (
+                <Select.Option key={branch.id} value={branch.id}>
+                  {branch.branch_name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
           <Form.Item
             label="제목"
             name="title"

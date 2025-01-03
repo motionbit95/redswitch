@@ -59,7 +59,7 @@ const AddModal = ({ isModalOpen, setIsModalOpen, data }) => {
         onFinish={handlesubmit}
         initialValues={data}
       >
-        <Descriptions column={2} size="small" bordered>
+        <Descriptions column={3} size="small" bordered>
           <Descriptions.Item
             label="설치지점"
             span={2}
@@ -75,6 +75,18 @@ const AddModal = ({ isModalOpen, setIsModalOpen, data }) => {
               />
             </Form.Item>
           </Descriptions.Item>
+          <Descriptions.Item label="설치 여부">
+            {selectedBranch && (
+              <div>
+                {selectedBranch?.install_flag === "0" ? "설치완료" : "미설치"}
+              </div>
+            )}
+          </Descriptions.Item>
+          {selectedBranch && (
+            <Descriptions.Item label="주소" span={3}>
+              {selectedBranch && <div>{selectedBranch?.branch_address}</div>}
+            </Descriptions.Item>
+          )}
 
           <Descriptions.Item
             label="설치지점 로고"
