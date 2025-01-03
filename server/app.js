@@ -111,7 +111,9 @@ const clientPrefix = "EZIOK"; //  8자이내 영대소문자,숫자 (예) EZIOK,
 app.post(requestUri, (req, res) => {
   const serviceId = eziok.getServiceId();
 
-  console.log(req.session);
+  console.log("serviceId", serviceId);
+
+  console.log(req);
 
   /* 2. 간편인증-표준창 거래정보 생성 */
   // - 요청 생성 시간 + "|" + 거래ID(유일한 거래정보)
