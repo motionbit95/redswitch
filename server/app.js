@@ -97,8 +97,7 @@ eziok.keyInit(eziok_path, password);
 const requestUri = "/eziok/eziok_std_request"; // 인증요청 전 이용기관 처리 URI
 const resultUri = "/eziok/eziok_std_result"; // 결과요청 응답값 이용기관 처리 URI
 
-const resultUrl =
-  "https://redswitch-customer.netlify.app/eziok/eziok_std_result"; // 결과 수신 후 전달 URL 설정, "https://" 포함한 URL 입력
+const resultUrl = "https://redswitch-customer.netlify.app/"; // 결과 수신 후 전달 URL 설정, "https://" 포함한 URL 입력 - 테스트
 
 // 간편인증-표준창 인증결과 keyToken API 요청 URL
 // const hubTokenTargetUrl = 'https://cert.ez-iok.com/agent/auth-verify';  // 운영
