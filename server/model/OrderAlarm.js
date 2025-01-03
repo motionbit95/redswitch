@@ -86,7 +86,7 @@ class OrderAlarm {
       snapshot.forEach((child) => {
         alarms.push({ id: child.key, ...child.val() });
       });
-      return alarms;
+      return alarms.reverse();
     } catch (error) {
       console.error("알림 목록 조회 오류:", error);
       throw new Error("알림 목록 조회 실패");

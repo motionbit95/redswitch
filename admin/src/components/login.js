@@ -50,7 +50,7 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
         message.success("로그인 성공");
         setIsLoggedIn(true);
         setOpen(false);
-        navigate("/admin");
+        navigate("/dashboard"); // 로그인 성공 후 대시보드(홈)으로 이동
       } else if (response.status === 404) {
         message.error(response.data.message);
       }

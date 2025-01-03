@@ -29,6 +29,7 @@ import {
   Tabs,
   Row,
   Col,
+  Popconfirm,
 } from "antd";
 import { Footer } from "antd/es/layout/layout";
 import BDSMQuestions from "./pages/bdsm/bdsm_questions";
@@ -49,7 +50,7 @@ import Material from "./pages/product/material";
 import BDSMAdvertise from "./pages/bdsm/bdsm_advertise";
 import NoticeBoard from "./pages/post/post";
 import InquiryBoard from "./pages/post/inquiry";
-import { AxiosGet } from "./api";
+import { AxiosGet, AxiosPut } from "./api";
 import useFirebase from "./hook/useFilrebase";
 import Spot from "./pages/admin/spot";
 import soundFile from "./assets/VoicesAI_1724058982121.mp3";
@@ -106,6 +107,7 @@ const App = () => {
 
   // useFirebase 훅을 사용하여 알림 데이터를 가져옴
   const { alarms, loading } = useFirebase(branchPks);
+  const [openPopover, setOpenPopover] = useState(false);
 
   // branchPks 변경 시 호출되는 함수
   const handleBranchChange = (value) => {
@@ -115,6 +117,7 @@ const App = () => {
   // 알림 항목을 클릭할 때 호출되는 함수
   const handleAlarmClick = (alarm) => {
     setSelectedAlarm(alarm); // 클릭한 알림 데이터를 설정
+    setOpenPopover(false);
     setIsModalVisible(true); // 모달을 표시
   };
 
@@ -129,14 +132,45 @@ const App = () => {
     }
   };
 
-  // 알림이 추가되면 자동으로 모달을 띄우기 위한 useEffect
+  const [isFirstLoad, setIsFirstLoad] = useState(true); // 첫 로드 여부
+  const [shouldCheckAlarms, setShouldCheckAlarms] = useState(false); // 특정 함수 이후에 알림 확인 여부
+
+  const isEffectExecuted = useRef(false); // useEffect 중복 실행 방지
+
+  // 알림 확인 로직
   useEffect(() => {
-    if (alarms.length > 0) {
-      const latestAlarm = alarms[alarms.length - 1]; // 가장 최근 알림
-      setSelectedAlarm(latestAlarm); // 최신 알림 설정
-      // setIsModalVisible(true); // 모달 표시
+    console.log("alarms2222: ", alarms, isFirstLoad, shouldCheckAlarms);
+
+    if ((isFirstLoad || shouldCheckAlarms) && alarms.length > 0) {
+      if (isEffectExecuted.current) return;
+      isEffectExecuted.current = true;
+
+      const latestUnseenAlarm = alarms.find(
+        (alarm) => alarm.alarm_status === 0
+      );
+      if (latestUnseenAlarm) {
+        setSelectedAlarm(latestUnseenAlarm);
+        setIsModalVisible(true);
+      }
+
+      if (isFirstLoad) setIsFirstLoad(false);
+      if (shouldCheckAlarms) setShouldCheckAlarms(false);
+
+      setTimeout(() => {
+        isEffectExecuted.current = false; // 일정 시간 후 다시 실행 가능하도록 초기화
+      }, 100); // 필요에 따라 조정
     }
-  }, [alarms]); // alarms 배열이 변경될 때마다 실행
+  }, [isFirstLoad, shouldCheckAlarms, alarms]);
+
+  // alarms 변경 시 실행
+  useEffect(() => {
+    if (isFirstLoad || alarms.length === 0) return; // 첫 로드나 비어있는 알림은 무시
+
+    if (!isEffectExecuted.current) {
+      setShouldCheckAlarms(true);
+    }
+    console.log("alarms111: ", alarms, isFirstLoad, shouldCheckAlarms);
+  }, [alarms]);
 
   const playSound = () => {
     if (audioRef.current) {
@@ -335,7 +369,42 @@ const App = () => {
         title={selectedAlarm?.alarm_title}
         visible={isModalVisible}
         onCancel={handleCloseModal}
-        footer={null}
+        footer={
+          <>
+            <Popconfirm
+              title="주문을 취소하시겠습니까?"
+              onConfirm={() => {
+                console.log("주문 취소");
+                AxiosPut(`/alarms/${selectedAlarm.id}`, { alarm_status: 1 })
+                  .then((res) => {
+                    console.log(res.data);
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                  });
+
+                handleCloseModal();
+              }}
+            >
+              <Button>주문 취소</Button>
+            </Popconfirm>
+            <Button
+              type="primary"
+              onClick={() => {
+                AxiosPut(`/alarms/${selectedAlarm.id}`, { alarm_status: 1 })
+                  .then((res) => {
+                    console.log(res.data);
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                  });
+                handleCloseModal();
+              }}
+            >
+              주문 확인
+            </Button>
+          </>
+        }
         width={600}
         closable={false} // X 버튼을 없애기 위해 추가
       >
@@ -396,6 +465,7 @@ const App = () => {
               )}
               <Space style={{ marginTop: "5px" }}>
                 <Popover
+                  open={openPopover}
                   overlayStyle={{ width: 400 }}
                   placement="bottomRight"
                   title={
@@ -431,9 +501,17 @@ const App = () => {
                       </TabPane>
                       <TabPane tab="주문" key="2">
                         <List
-                          dataSource={dumiorders}
+                          dataSource={alarms.slice(0, 5)}
                           renderItem={(item) => (
-                            <List.Item>
+                            <List.Item
+                              onClick={() => handleAlarmClick(item)}
+                              style={{
+                                backgroundColor:
+                                  item.alarm_status === 0
+                                    ? "lightred"
+                                    : "white",
+                              }}
+                            >
                               <Row
                                 style={{
                                   width: "100%",
@@ -442,11 +520,29 @@ const App = () => {
                                 }}
                                 gutter={6}
                               >
-                                <Col>{`${item.id}. ${item.message}`}</Col>
-                                <Button
-                                  style={{ border: "none" }}
-                                  icon={<CloseOutlined />}
-                                />
+                                <Col span={16}>
+                                  <div style={{ fontWeight: "bold" }}>
+                                    {item.alarm_title}
+                                  </div>
+                                  <div
+                                    style={{ fontSize: "12px", opacity: "0.7" }}
+                                  >
+                                    {item.alarm_content}
+                                  </div>
+                                </Col>
+                                <Col span={8} style={{ textAlign: "right" }}>
+                                  <Space>
+                                    <div style={{ opacity: "0.7" }}>
+                                      {new Date(
+                                        item.created_at
+                                      ).toLocaleTimeString()}
+                                    </div>
+                                    {/* <Button
+                                      style={{ border: "none" }}
+                                      icon={<CloseOutlined />}
+                                    /> */}
+                                  </Space>
+                                </Col>
                               </Row>
                             </List.Item>
                           )}
@@ -456,7 +552,11 @@ const App = () => {
                   }
                   trigger="click"
                 >
-                  <Badge count={5} size="small">
+                  <Badge
+                    count={5}
+                    size="small"
+                    onClick={() => setOpenPopover(true)}
+                  >
                     <NotificationOutlined
                       style={{
                         fontSize: "20px",

@@ -11,6 +11,29 @@ const OrderAlarm = require("../model/OrderAlarm"); // OrderAlarm 클래스 가�
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     OrderAlarm:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         alarm_title:
+ *           type: string
+ *         alarm_content:
+ *           type: string
+ *         alarm_status:
+ *           type: string
+ *         branch_pk:
+ *           type: string
+ *         order_pk:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
  * /alarms:
  *   post:
  *     summary: 새로운 알림 생성
@@ -129,7 +152,7 @@ router.get("/:id", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const alarms = await OrderAlarm.getAll();
-    res.status(200).json({ data: alarms });
+    res.status(200).json(alarms);
   } catch (error) {
     console.error("알림 목록 조회 오류:", error);
     res.status(500).json({ error: "알림 목록 조회 중 문제가 발생했습니다." });

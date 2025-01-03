@@ -16,6 +16,13 @@ const fetchAlarms = (db, branchPks, setAlarms, setLoading) => {
         .map((key) => data[key])
         .filter((alarm) => branchPks.includes(alarm.branch_pk)); // 여러 branch_pk를 체크
 
+      // 알림 데이터를 정렬
+      filteredAlarms.sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return dateB - dateA;
+      });
+
       setAlarms(filteredAlarms);
     } else {
       setAlarms([]);
