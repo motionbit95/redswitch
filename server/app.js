@@ -276,26 +276,20 @@ function uuid() {
 }
 
 function getCurrentDate() {
-  let newDate = new Date();
-  // newDate.toLocaleString("ko-kr");
+  const newDate = new Date();
 
-  let year = newDate.getFullYear();
-  let mon = newDate.getMonth() + 1;
-  let date = newDate.getDate();
+  // UTC 시간에 9시간을 더하여 한국 시간으로 변환
+  const localTime = new Date(newDate.getTime() + 9 * 60 * 60 * 1000); // 9시간을 밀리초 단위로 더함
 
-  let hour = newDate.getHours();
-  let min = newDate.getMinutes();
-  let sec = newDate.getSeconds();
+  const year = localTime.getFullYear();
+  const mon = String(localTime.getMonth() + 1).padStart(2, "0");
+  const date = String(localTime.getDate()).padStart(2, "0");
 
-  mon = mon < 10 ? `0${mon}` : `${mon}`;
-  date = date < 10 ? `0${date}` : `${date}`;
-  hour = hour < 10 ? `0${hour}` : `${hour}`;
-  min = min < 10 ? `0${min}` : `${min}`;
-  sec = sec < 10 ? `0${sec}` : `${sec}`;
+  const hour = String(localTime.getHours()).padStart(2, "0");
+  const min = String(localTime.getMinutes()).padStart(2, "0");
+  const sec = String(localTime.getSeconds()).padStart(2, "0");
 
-  const reqDate = year + mon + date + hour + min + sec;
-
-  return reqDate;
+  return `${year}${mon}${date}${hour}${min}${sec}`;
 }
 
 async function sendPost(targetUrl, keyToken) {
