@@ -277,7 +277,7 @@ function uuid() {
 
 function getCurrentDate() {
   let newDate = new Date();
-  newDate.toLocaleString("ko-kr");
+  // newDate.toLocaleString("ko-kr");
 
   let year = newDate.getFullYear();
   let mon = newDate.getMonth() + 1;
