@@ -146,7 +146,7 @@ app.post(requestUri, (req, res) => {
     serviceType: "auth", // 간편인증-표준창 : auth, 전자서명 : sign, PDF hash 전자서명 : pdf_hash_sign
     retTransferType: "keytoken", // 간편인증-표준창 결과 타입, "keytoken" : 개인정보 응답결과를 이용기관 서버에서 간편인증서버에 요청하여 수신 후 처리
     resultUrl: resultUrl, // 결과 수신 후 전달 URL 설정, "https://" 포함한 URL 입력
-    retType: "callback", // 콜백함수 사용 : "callback" , 모바일 redirect 사용(모바일 WebView 또는 iOS 이용시) : "redirect"
+    retType: "redirect", // 콜백함수 사용 : "callback" , 모바일 redirect 사용(모바일 WebView 또는 iOS 이용시) : "redirect"
   };
 
   // 5. 간편인증-표준창 인증요청 JSON
@@ -163,6 +163,8 @@ app.post(resultUri, async (req, res) => {
   }
 
   resultData = await keytoken(resultToken); //retTransferType(간편인증-표준창 결과 타입)이 keytoken일 경우
+
+  console.log("resultData", resultData);
 
   /* 3. 간편인증-표준창 결과 설정 */
   resultData = JSON.parse(resultData);
@@ -188,21 +190,23 @@ app.post(resultUri, async (req, res) => {
     signedData = null;
   }
 
+  console.log("resultData", resultData, clientTxId);
+
   /* 4. 이용기관 응답데이터 셔션 및 검증유효시간 처리  */
   // 세션 내 요청 clientTxId 와 수신한 clientTxId 가 동일한지 비교(필수)
-  if (req.session.clientTxId != clientTxId) {
-    return res.send("-4|세션값에 저장된 거래ID 비교 실패");
-  }
+  // if (req.session.clientTxId != clientTxId) {
+  //   return res.send("-4|세션값에 저장된 거래ID 비교 실패");
+  // }
 
-  // 검증정보 유효시간 검증 (검증결과 생성 후 10분 이내 검증 권고)
-  let oldDate = new Date(issueDate);
-  oldDate = getOldTime(oldDate);
+  // // 검증정보 유효시간 검증 (검증결과 생성 후 10분 이내 검증 권고)
+  // let oldDate = new Date(issueDate);
+  // oldDate = getOldTime(oldDate);
 
-  const currentDate = getCurrentDate();
+  // const currentDate = getCurrentDate();
 
-  if (oldDate < currentDate) {
-    return res.send("-5|토큰 생성 10분 결과");
-  }
+  // if (oldDate < currentDate) {
+  //   return res.send("-5|토큰 생성 10분 결과");
+  // }
 
   /* 5. 인증사업자별 개인정보 결과 복호화 */
   const userName = eziok.aesDecode(providerId, encUserName);

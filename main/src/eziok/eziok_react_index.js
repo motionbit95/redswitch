@@ -5,12 +5,16 @@ import { Helmet } from "react-helmet";
 
 class ezioK_react_index extends Component {
   eziok() {
+    // window.eziok_std_process(
+    //   "https://port-0-redswitch-lxwmkqxz2d25ae69.sel5.cloudtype.app/eziok/eziok_std_request",
+    //   "WB",
+    //   "printResult"
+    // ); // callback 방식 사용
     window.eziok_std_process(
       "https://port-0-redswitch-lxwmkqxz2d25ae69.sel5.cloudtype.app/eziok/eziok_std_request",
-      "WB",
-      "printResult"
-    ); // callback 방식 사용
-    //window.eziok_std_process("https://이용기관 간편인증-표준창 요청 (Node.js)URL/eziok/eziok_std_request", "MB", ""); // redirect 방식 사용
+      "MB",
+      ""
+    ); // redirect 방식 사용
 
     // 인증결과 콜백함수 정의
     const script = document.createElement("script");
