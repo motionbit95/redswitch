@@ -97,7 +97,7 @@ eziok.keyInit(eziok_path, password);
 const requestUri = "/eziok/eziok_std_request"; // 인증요청 전 이용기관 처리 URI
 const resultUri = "/eziok/eziok_std_result"; // 결과요청 응답값 이용기관 처리 URI
 
-const resultUrl = "https://redswitch-customer.netlify.app/"; // 결과 수신 후 전달 URL 설정, "https://" 포함한 URL 입력 - 테스트
+const resultUrl = `${process.env.SERVER_URL}/eziok/eziok_std_result`; // 결과 수신 후 전달 URL 설정, "https://" 포함한 URL 입력
 
 // 간편인증-표준창 인증결과 keyToken API 요청 URL
 // const hubTokenTargetUrl = 'https://cert.ez-iok.com/agent/auth-verify';  // 운영
@@ -156,6 +156,8 @@ app.post(requestUri, (req, res) => {
 app.post(resultUri, async (req, res) => {
   // 결과 Token 수신
   const resultToken = req.body; //retType이 callback 방식일 경우
+  console.log("resultToken", resultToken);
+
   // const resultToken = req.body.hubToken; //retType이 redirect 방식일 경우
   if (resultToken == "" || resultToken == null) {
     return res.send("-9|간편인증 resultToken 인증결과 응답이 없습니다.");
