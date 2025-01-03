@@ -166,6 +166,10 @@ app.post(resultUri, async (req, res) => {
 
   resultData = await keytoken(resultToken); //retTransferType(간편인증-표준창 결과 타입)이 keytoken일 경우
 
+  if (resultData.errorMessage) {
+    return res.send(resultData.errorMessage);
+  }
+
   /* 3. 간편인증-표준창 결과 설정 */
   resultData = JSON.parse(resultData);
   const clientTxId = resultData.clientTxId;
@@ -254,8 +258,12 @@ async function keytoken(token) {
   // axios의 동작방식이 비동기식으로 진행되는데, 변수에 수신하기 전 데이터가 들어가져 await키워드 사용
 
   const hubToken = await sendPost(hubTokenTargetUrl, token);
+
+  console.log("hubToken", hubToken);
   if (hubToken == null || hubToken == "") {
-    return res.send("-1|간편인증 hubtoken 인증결과 응답이 없습니다.");
+    return {
+      errorMessage: "-1|간편인증 hubtoken 인증결과 응답이 없습니다.",
+    };
   }
 
   /* 2. 간편인증-표준창 HUBToken 처리 결과 복호화 */
@@ -263,7 +271,9 @@ async function keytoken(token) {
   try {
     resultData = eziok.getResult(hubToken);
   } catch (error) {
-    return res.send("-2|간편인증 결과 복호화 오류");
+    return {
+      errorMessage: "-2|간편인증 결과 복호화 오류",
+    };
   }
   return resultData;
 }
