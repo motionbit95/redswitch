@@ -15,9 +15,9 @@ const Main = () => {
             <SalesList dateRange={dateRange} />
           </Col>
           <Col span={24}>
-            <Card title="공지사항">
+            {/* <Card title="공지사항">
               <NoticeList />
-            </Card>
+            </Card> */}
           </Col>
           <Col span={24}>
             <Card title="게시판">
@@ -36,7 +36,7 @@ const Main = () => {
           <Col span={24}>
             <RCalendar setDateRange={setDateRange} />
           </Col>
-          <Col span={12}>
+          {/* <Col span={12}>
             <Card title="메뉴얼">
               <List></List>
             </Card>
@@ -45,8 +45,18 @@ const Main = () => {
             <Card title="영상바로가기">
               <List></List>
             </Card>
-          </Col>
+          </Col> */}
         </Row>
+      </Col>
+      <Col span={12}>
+        <Card title="메뉴얼">
+          <List></List>
+        </Card>
+      </Col>
+      <Col span={12}>
+        <Card title="영상바로가기">
+          <List></List>
+        </Card>
       </Col>
     </Row>
   );

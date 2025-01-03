@@ -57,6 +57,7 @@ import soundFile from "./assets/VoicesAI_1724058982121.mp3";
 import TabPane from "antd/es/tabs/TabPane";
 import PaymentSummary from "./pages/sales/salse";
 import PaymentSummaryByBranch from "./pages/sales/branch";
+import NoticeList from "./components/list/notice";
 
 const { Header, Content, Sider } = Layout;
 
@@ -139,8 +140,6 @@ const App = () => {
 
   // 알림 확인 로직
   useEffect(() => {
-    console.log("alarms2222: ", alarms, isFirstLoad, shouldCheckAlarms);
-
     if ((isFirstLoad || shouldCheckAlarms) && alarms.length > 0) {
       if (isEffectExecuted.current) return;
       isEffectExecuted.current = true;
@@ -169,7 +168,6 @@ const App = () => {
     if (!isEffectExecuted.current) {
       setShouldCheckAlarms(true);
     }
-    console.log("alarms111: ", alarms, isFirstLoad, shouldCheckAlarms);
   }, [alarms]);
 
   const playSound = () => {
@@ -469,16 +467,29 @@ const App = () => {
                   overlayStyle={{ width: 400 }}
                   placement="bottomRight"
                   title={
-                    <Typography.Text
-                      style={{ fontSize: "18px", fontWeight: "bold" }}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
                     >
-                      알림
-                    </Typography.Text>
+                      <Typography.Text
+                        style={{ fontSize: "18px", fontWeight: "bold" }}
+                      >
+                        알림
+                      </Typography.Text>
+                      <Button
+                        type="text"
+                        icon={<CloseOutlined />}
+                        onClick={() => setOpenPopover(false)}
+                      />
+                    </div>
                   }
                   content={
                     <Tabs defaultActiveKey="1" centered>
                       <TabPane tab="공지사항" key="1">
-                        <List
+                        <NoticeList />
+                        {/* <List
                           dataSource={duminotifications}
                           renderItem={(item) => (
                             <List.Item>
@@ -497,7 +508,7 @@ const App = () => {
                               </Row>
                             </List.Item>
                           )}
-                        />
+                        /> */}
                       </TabPane>
                       <TabPane tab="주문" key="2">
                         <List
