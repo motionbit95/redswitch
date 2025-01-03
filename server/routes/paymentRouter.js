@@ -97,6 +97,21 @@ router.post("/payResult", (req, res) => {
           const updatedOrder = await new Orders(order).update();
 
           // 재고 수량 변경(재고 감소)
+          for (let i = 0; i < updatedOrder.select_products.length; i++) {
+            let product = updatedOrder.select_products[i];
+            // 재고 데이터 가지고 오기
+            try {
+              const inventory = await Inventory.getByPK(product.PK);
+              // 있는거만 수정하자
+              Object.assign(inventory, {
+                inventory_cnt: inventory.inventory_cnt - product.count || 0,
+              });
+
+              const newInventory = await new Inventory(inventory).update();
+            } catch (error) {
+              continue;
+            }
+          }
 
           console.log(updatedOrder);
 
@@ -163,10 +178,20 @@ router.post("/payResult", (req, res) => {
  *       200:
  *         description: PayCancel
  */
-router.get("/payCancel", (req, res) => {
+router.get("/payCancel", async (req, res) => {
   const encData = encryptSHA256(
     merchantID + req.query.ediDate + req.query.canAmt + merchantKey
   );
+
+  // 이미 취소된 주문인지 확인
+  const payment = await Payment.getByOrdNo(req.query.ordNo);
+
+  const isCanceled = payment.some((payment) => payment.cancelYN === "Y");
+
+  if (isCanceled) {
+    res.status(500).json("이미 취소된 주문입니다.");
+    return;
+  }
 
   console.log(encData);
 
@@ -207,6 +232,21 @@ router.get("/payCancel", (req, res) => {
           const updatedOrder = await new Orders(order).update();
 
           // 재고 수량 변경(재고 증가)
+          for (let i = 0; i < updatedOrder.select_products.length; i++) {
+            let product = updatedOrder.select_products[i];
+            // 재고 데이터 가지고 오기
+            try {
+              const inventory = await Inventory.getByPK(product.PK);
+              // 있는거만 수정하자
+              Object.assign(inventory, {
+                inventory_cnt: inventory.inventory_cnt + product.count || 0,
+              });
+
+              const newInventory = await new Inventory(inventory).update();
+            } catch (error) {
+              continue;
+            }
+          }
 
           // 알람 생성
           const alarm = new OrderAlarm({
@@ -282,6 +322,21 @@ router.get("/admin/payCancel", (req, res) => {
       const updatedOrder = await new Orders(order).update();
 
       // 재고 수량 변경(재고 증가)
+      for (let i = 0; i < updatedOrder.select_products.length; i++) {
+        let product = updatedOrder.select_products[i];
+        // 재고 데이터 가지고 오기
+        try {
+          const inventory = await Inventory.getByPK(product.PK);
+          // 있는거만 수정하자
+          Object.assign(inventory, {
+            inventory_cnt: inventory.inventory_cnt + product.count || 0,
+          });
+
+          const newInventory = await new Inventory(inventory).update();
+        } catch (error) {
+          continue;
+        }
+      }
     })
     .catch((error) => {
       console.log(error);
