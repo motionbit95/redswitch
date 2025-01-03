@@ -90,6 +90,7 @@ app.use("/alarms", require("./routes/alarmRouter"));
 /*1. 간편인증 서비스 API 설정*/
 /* 키파일은 반드시 서버의 안전한 로컬경로에 별도 저장. 웹URL 경로에 파일이 있을경우 키파일이 외부에 노출될 수 있음 주의 */
 const eziok = require("./eziok_Key_Manager_v1.0.3"); // eziok_Key_Manager.js가 있는 폴더 위치
+const { default: axios } = require("axios");
 const eziok_path = "./lib/eziok_keyInfo_redswitch.kr_241219.dat";
 const password = "dream";
 eziok.keyInit(eziok_path, password);
