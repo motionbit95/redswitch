@@ -111,10 +111,6 @@ const clientPrefix = "EZIOK"; //  8자이내 영대소문자,숫자 (예) EZIOK,
 app.post(requestUri, (req, res) => {
   const serviceId = eziok.getServiceId();
 
-  console.log("serviceId", serviceId);
-
-  console.log(req);
-
   /* 2. 간편인증-표준창 거래정보 생성 */
   // - 요청 생성 시간 + "|" + 거래ID(유일한 거래정보)
   // 2.1. 간편인증-표준창 요청시간(한국시간 기준) 생성
@@ -128,13 +124,18 @@ app.post(requestUri, (req, res) => {
   let clientTxId = clientPrefix + uuid();
   /* 2.3 인증 결과 검증을 위한 이용기관 거래ID 세션 저장 (필수) */
   // 동일한 세션내 요청과 결과가 동일한지 확인 및 인증결과 재사용 방지처리
-  req.session.clientTxId = clientTxId; // <- 여기서 버그 생김
+  // req.session.clientTxId = clientTxId; // <- 여기서 버그 생김
   // 2.4. 간편인증-표준창 거래정보 생성
   // - 간편인증-표준창 인증요청 정보 생성날짜 5분이 초과한 경우 거래정보 유효시간 오류 발생
-  clientTxId = dateTime + "|" + clientTxId;
+  // clientTxId = dateTime + "|" + clientTxId;
+
+  const newClientTxId = dateTime + "|" + clientTxId;
+  console.log("clientTxId", clientTxId, "newClientTxId", newClientTxId);
+
+  console.log(newClientTxId);
 
   /* 3. 간편인증-표준창 거래정보 암호화 */
-  const encClientTxId = eziok.RSAEncrypt(clientTxId);
+  const encClientTxId = eziok.RSAEncrypt(newClientTxId);
 
   // 4. 간편 인증 인증요청 정보 생성
   const sendData = {
