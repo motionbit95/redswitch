@@ -105,7 +105,7 @@ const resultUrl =
 const hubTokenTargetUrl = "https://scert.ez-iok.com/agent/auth-verify"; // 개발
 
 // 이용기관 거래ID생성시 이용기관별 유일성 보장을 위해 설정, 이용기관식별자는 이용기관코드 영문자로 반드시 수정
-const clientPrefix = "REDSWITCH"; //  8자이내 영대소문자,숫자 (예) EZIOK, TESTCOKR
+const clientPrefix = "SWITCH"; //  8자이내 영대소문자,숫자 (예) EZIOK, TESTCOKR
 
 // eziok_std_request mapping
 app.post(requestUri, (req, res) => {
