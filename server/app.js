@@ -246,6 +246,7 @@ app.post(resultUri, async (req, res) => {
 
   /* 8.1 callback 함수 사용시 응답결과 전달 */
   let data = { errorCode: "2000", data: userName };
+  console.log("data", data);
   res.send("0|" + JSON.stringify(data)); //retType이 callback 방식일 경우
 
   /* 8.2 redirect 함수 사용시 응답결과 전달 */

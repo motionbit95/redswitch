@@ -117,157 +117,116 @@ const Payment = () => {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#f1f1f1",
-        paddingBottom: "100px",
-        overflow: "hidden",
-      }}
-    >
-      <Row
-        gutter={16}
-        style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
+    <div>
+      <div
+        style={{
+          backgroundColor: "#f1f1f1",
+          // paddingBottom: "100px",
+          overflow: "hidden",
+        }}
       >
-        <Col span={24}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div style={{ fontSize: "large", fontWeight: "bold" }}>
-              주문상품 총 {order.products.length}개
-            </div>
-            <Button
-              type="link"
-              style={{ color: "black" }}
-              icon={viewProduct ? <UpOutlined /> : <DownOutlined />}
-              onClick={() => setViewProduct(!viewProduct)}
-            />
-          </div>
-        </Col>
-        {viewProduct && (
-          <Row
-            gutter={[16, 16]}
-            style={{ padding: 16, backgroundColor: "white" }}
-          >
-            {order.products.map((item) => (
-              <>
-                <Col span={6}>
-                  <Image
-                    src={
-                      item.blurred_image ||
-                      item.original_image ||
-                      "https://via.placeholder.com/120"
-                    }
-                  />
-                </Col>
-                <Col span={18}>
-                  <div>{item?.product_name}</div>
-                  <Space>
-                    <div style={{ fontWeight: "bold", fontSize: "medium" }}>
-                      {item?.amount}원
-                    </div>
-                    <div style={{ opacity: 0.5 }}>{item?.count}개</div>
-                  </Space>
-                  {item?.option?.map((option) => (
-                    <div style={{ opacity: 0.5 }}>
-                      {option?.optionName} : {option?.optionPrice}원
-                    </div>
-                  ))}
-                </Col>
-              </>
-            ))}
-          </Row>
-        )}
-      </Row>
-
-      <Row
-        gutter={16}
-        style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
-      >
-        <Col span={24}>
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: "large", fontWeight: "bold" }}>
-              {branchInfo?.branch_name}
-            </div>
-            <div style={{ fontSize: "small", opacity: 0.5 }}>
-              {branchInfo?.branch_address}
-            </div>
-          </div>
-        </Col>
-        <Col span={24}>
-          <Form
-            form={form}
-            layout="vertical"
-            style={{ width: "100%" }}
-            onFinish={callPayPopup}
-          >
-            <Form.Item
-              label="호실"
-              name="room_number"
-              rules={[{ required: true, message: "호실을 입력해주세요." }]}
+        <Row
+          gutter={16}
+          style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
+        >
+          <Col span={24}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              <Input placeholder="호실을 입력해주세요." />
-            </Form.Item>
-            <Form.Item label="배송 메세지" name="delivery_message">
-              <Input placeholder="배송시 요청사항을 입력해주세요." />
-            </Form.Item>
-            <Form.Item label="연락처" name="customer_phone">
-              <Input placeholder="연락처를 입력해주세요.(선택)" />
-            </Form.Item>
-
-            {/* 버튼 그룹 */}
-            <div style={fixedBottomStyle(theme)}>
+              <div style={{ fontSize: "large", fontWeight: "bold" }}>
+                주문상품 총 {order.products.length}개
+              </div>
               <Button
-                size="large"
-                type="primary"
-                danger
-                style={{ width: "100%" }}
-                htmlType="submit"
+                type="link"
+                style={{ color: "black" }}
+                icon={viewProduct ? <UpOutlined /> : <DownOutlined />}
+                onClick={() => setViewProduct(!viewProduct)}
+              />
+            </div>
+          </Col>
+          {viewProduct && (
+            <Row
+              gutter={[16, 16]}
+              style={{ padding: 16, backgroundColor: "white" }}
+            >
+              {order.products.map((item) => (
+                <>
+                  <Col span={6}>
+                    <Image
+                      src={
+                        item.blurred_image ||
+                        item.original_image ||
+                        "https://via.placeholder.com/120"
+                      }
+                    />
+                  </Col>
+                  <Col span={18}>
+                    <div>{item?.product_name}</div>
+                    <Space>
+                      <div style={{ fontWeight: "bold", fontSize: "medium" }}>
+                        {item?.amount}원
+                      </div>
+                      <div style={{ opacity: 0.5 }}>{item?.count}개</div>
+                    </Space>
+                    {item?.option?.map((option) => (
+                      <div style={{ opacity: 0.5 }}>
+                        {option?.optionName} : {option?.optionPrice}원
+                      </div>
+                    ))}
+                  </Col>
+                </>
+              ))}
+            </Row>
+          )}
+        </Row>
+
+        <Row
+          gutter={16}
+          style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
+        >
+          <Col span={24}>
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: "large", fontWeight: "bold" }}>
+                {branchInfo?.branch_name}
+              </div>
+              <div style={{ fontSize: "small", opacity: 0.5 }}>
+                {branchInfo?.branch_address}
+              </div>
+            </div>
+          </Col>
+          <Col span={24}>
+            <Form
+              form={form}
+              layout="vertical"
+              style={{ width: "100%" }}
+              // onFinish={callPayPopup}
+            >
+              <Form.Item
+                label="호실"
+                name="room_number"
+                rules={[{ required: true, message: "호실을 입력해주세요." }]}
               >
-                {parseInt(order.amt).toLocaleString()}원 결제하기
-              </Button>
-            </div>
-          </Form>
-        </Col>
-      </Row>
+                <Input placeholder="호실을 입력해주세요." />
+              </Form.Item>
+              <Form.Item label="배송 메세지" name="delivery_message">
+                <Input placeholder="배송시 요청사항을 입력해주세요." />
+              </Form.Item>
+              <Form.Item label="연락처" name="customer_phone">
+                <Input placeholder="연락처를 입력해주세요.(선택)" />
+              </Form.Item>
+            </Form>
+          </Col>
+        </Row>
 
-      <Row
-        gutter={16}
-        style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
-      >
-        <Col span={24}>
-          <div
-            style={{
-              fontSize: "large",
-              fontWeight: "bold",
-              marginBottom: 16,
-            }}
-          >
-            결제수단
-          </div>
-        </Col>
-        <Col span={24}>
-          <Button type="primary" danger>
-            카드
-          </Button>
-        </Col>
-      </Row>
-
-      <Row
-        gutter={16}
-        style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
-      >
-        <Col span={24}>
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
+        <Row
+          gutter={16}
+          style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
+        >
+          <Col span={24}>
             <div
               style={{
                 fontSize: "large",
@@ -275,24 +234,75 @@ const Payment = () => {
                 marginBottom: 16,
               }}
             >
-              총 결제금액
+              결제수단
             </div>
+          </Col>
+          <Col span={24}>
+            <Button type="primary" danger>
+              카드
+            </Button>
+          </Col>
+        </Row>
+
+        <Row
+          gutter={16}
+          style={{ padding: 16, backgroundColor: "white", marginBottom: 8 }}
+        >
+          <Col span={24}>
             <div
               style={{
-                fontSize: "large",
-                fontWeight: "bold",
-                marginBottom: 16,
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
               }}
             >
-              {parseInt(order.amt).toLocaleString()}원
+              <div
+                style={{
+                  fontSize: "large",
+                  fontWeight: "bold",
+                  marginBottom: 16,
+                }}
+              >
+                총 결제금액
+              </div>
+              <div
+                style={{
+                  fontSize: "large",
+                  fontWeight: "bold",
+                  marginBottom: 16,
+                }}
+              >
+                {parseInt(order.amt).toLocaleString()}원
+              </div>
             </div>
-          </div>
-        </Col>
-      </Row>
-      <div style={{ padding: 16, fontSize: "small", opacity: 0.5 }}>
-        레드스위치는 통신판매중개자이며, 통신판매의 당사자가 아닙니다. 따라서
-        레드스위치는 상품, 거래정보 및 거래에 대하여 책임을 지지않습니다.
-        <br /> 위 내용을 확인하였으며 결제에 동의합니다.
+          </Col>
+        </Row>
+        <div
+          style={{
+            padding: 16,
+            fontSize: "small",
+            opacity: 0.5,
+            minHeight: 100,
+          }}
+        >
+          레드스위치는 통신판매중개자이며, 통신판매의 당사자가 아닙니다. 따라서
+          레드스위치는 상품, 거래정보 및 거래에 대하여 책임을 지지않습니다.
+          <br /> 위 내용을 확인하였으며 결제에 동의합니다.
+        </div>
+      </div>
+
+      {/* 버튼 그룹 */}
+      <div style={fixedBottomStyle(theme)}>
+        <Button
+          size="large"
+          type="primary"
+          danger
+          style={{ width: "100%" }}
+          // htmlType="submit"
+          onClick={() => callPayPopup(form.getFieldsValue())}
+        >
+          {parseInt(order.amt).toLocaleString()}원 결제하기
+        </Button>
       </div>
     </div>
   );

@@ -162,7 +162,7 @@ function Product({ branch, theme }) {
                 >
                   장바구니에 추가
                 </Button>
-                {/* <Button
+                <Button
                   size="large"
                   type="primary"
                   danger
@@ -170,7 +170,7 @@ function Product({ branch, theme }) {
                   style={buyButtonStyle}
                 >
                   바로 구매하기
-                </Button> */}
+                </Button>
               </div>
             </div>
           </div>
@@ -207,7 +207,7 @@ function Product({ branch, theme }) {
       `}</style>
 
       {/* 하단 고정 버튼 및 옵션 선택 */}
-      <div style={fixedBottomStyle(theme)}>
+      <div>
         <div
           style={{
             display: "flex",
@@ -297,7 +297,7 @@ function Product({ branch, theme }) {
             >
               장바구니에 추가
             </Button>
-            {/* <Button
+            <Button
               size="large"
               type="primary"
               danger
@@ -305,7 +305,7 @@ function Product({ branch, theme }) {
               style={{ width: "100%" }}
             >
               바로 구매하기
-            </Button> */}
+            </Button>
           </div>
         </div>
       </div>
