@@ -28,7 +28,8 @@ import dayjs from "dayjs";
 import { DownloadOutlined } from "@ant-design/icons";
 import usePagination from "../../hook/usePagination";
 
-const ProductCRUD = () => {
+const ProductCRUD = (props) => {
+  const { currentUser } = props;
   const [products, setProducts] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
@@ -49,6 +50,7 @@ const ProductCRUD = () => {
 
   // 상품 목록 불러오기
   const fetchProducts = async () => {
+    console.log("selectedBranch >>>>", selectedBranch.id);
     try {
       const response = await AxiosGet(`/products/search/${selectedBranch.id}`);
       setProducts(response.data);
@@ -59,7 +61,7 @@ const ProductCRUD = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [selectedBranch]);
 
   // 상품 추가/수정 모달 열기
   const showModal = (product = null) => {
@@ -308,6 +310,7 @@ const ProductCRUD = () => {
             localStorage.setItem("selectedBranch", JSON.stringify(branches[0]));
           }}
           multiple={false}
+          currentUser={currentUser}
         />
         <Space>
           <Button

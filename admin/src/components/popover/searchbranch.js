@@ -6,6 +6,7 @@ import useSearchFilter from "../../hook/useSearchFilter";
 const SearchBranch = ({
   selectedBranch,
   setSelectedBranch,
+  currentUser = null,
   multiple = false,
 }) => {
   const [form] = Form.useForm();
@@ -14,21 +15,39 @@ const SearchBranch = ({
   const [popoverVisible, setPopoverVisible] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
+  const [managableBranches, setManagableBranches] = useState([]);
+
   const { getColumnSearchProps } = useSearchFilter();
 
   useEffect(() => {
-    fetchBranches();
-  }, []);
+    if (popoverVisible) {
+      fetchBranches();
+    }
+  }, [popoverVisible]);
+
+  useEffect(() => {
+    if (currentUser) {
+      console.log("검색창에서 가지고온 유저 정보", currentUser.branch_id);
+    }
+  }, [currentUser]);
 
   const fetchBranches = async (search = "") => {
+    // console.log(currentUser.branch_id);
     try {
       const response = await AxiosGet("/branches"); // Replace with your endpoint
-      setBranches(
-        response.data
-          .map((item) => item)
-          .filter((item) => item.branch_name.includes(search))
-          .map((item) => ({ key: item.id, ...item }))
-      );
+      const branchData = response.data
+        .map((item) => item)
+        .filter((item) => item.branch_name.includes(search))
+        .map((item) => ({ key: item.id, ...item }));
+      setBranches(branchData);
+      console.log(branchData, currentUser.branch_id);
+      if (currentUser && currentUser.branch_id) {
+        let usersBranches = branchData.filter(
+          (branch) => currentUser.branch_id.some((id) => id === branch.id) // 배열 비교를 위한 수정
+        );
+
+        setManagableBranches(usersBranches);
+      }
     } catch (error) {
       message.error("지점 데이터를 가져오는 데 실패했습니다.");
     } finally {
@@ -127,7 +146,7 @@ const SearchBranch = ({
         size="small"
         rowSelection={rowSelection}
         columns={columns}
-        dataSource={branches}
+        dataSource={currentUser?.branch_id ? managableBranches : branches}
         loading={loading}
         pagination={{ pageSize: 5 }}
       />

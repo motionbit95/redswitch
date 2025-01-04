@@ -5,6 +5,7 @@ import {
   Descriptions,
   Form,
   Input,
+  InputNumber,
   Modal,
   Popconfirm,
   Row,
@@ -42,7 +43,7 @@ const BranchModal = ({
     <Modal
       title={isEditMode ? "지점 수정" : "지점 추가"}
       visible={visible}
-      width={900}
+      width={950}
       onCancel={() => {
         onCancel();
         form.resetFields();
@@ -241,6 +242,15 @@ const BranchModal = ({
               />
             </Form.Item>
           </Descriptions.Item>
+          <Descriptions.Item
+            label=" 지점 배달료"
+            labelStyle={{ whiteSpace: "nowrap" }}
+            span={1}
+          >
+            <Form.Item name="delivery_fee" style={{ marginBottom: 0 }}>
+              <Input type="number" addonAfter="원" />
+            </Form.Item>
+          </Descriptions.Item>
 
           <Descriptions.Item
             label="특이사항"
@@ -406,12 +416,6 @@ function Branch(props) {
       title: "담당자 전화번호",
       dataIndex: "branch_manager_phone",
       key: "branch_manager_phone",
-    },
-    {
-      title: "관리자",
-    },
-    {
-      title: "관리자 전화번호",
     },
     {
       title: "객실 수",

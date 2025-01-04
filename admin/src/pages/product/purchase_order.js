@@ -90,7 +90,7 @@ const DetailModal = ({
       },
     },
     {
-      title: "수량",
+      title: "발주 수량",
       dataIndex: "ordered_cnt",
       key: "ordered_cnt",
     },

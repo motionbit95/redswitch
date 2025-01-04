@@ -32,16 +32,9 @@ import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 const { Option } = Select;
 const { Title } = Typography;
 
-// 현재 로그인 사용자 (더미 데이터)
-const currentUser = {
-  id: "-OCRwtnmaTllsx2c3OWM", // -OCRwmUYTeUtxH-auNvx
-  user_id: "krystal", // redswitch
-  user_name: "박수정",
-  permission: "2", // 1
-};
-
-const NoticeBoard = () => {
+const NoticeBoard = (props) => {
   // 더미 데이터 - 게시판 목록
+  const { currentUser } = props;
   const [notices, setNotices] = useState([]);
 
   const [users, setUsers] = useState([]);
@@ -64,6 +57,8 @@ const NoticeBoard = () => {
       .catch((err) => {
         console.log(err);
       });
+
+    console.log(currentUser);
   }, []);
 
   // sticky 필드가 true인 항목들을 최상단에 배치

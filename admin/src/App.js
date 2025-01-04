@@ -243,22 +243,21 @@ const App = () => {
       key: "/order",
       icon: React.createElement(TruckOutlined),
       label: <Link to="/order">주문관리</Link>,
-      // children: [
-      //   {
-      //     key: "/order/order",
-      //     label: <Link to="/order/order">주문관리</Link>,
-      //   },
-      // ],
     },
     {
       key: "product",
       icon: React.createElement(InboxOutlined),
       label: "상품관리",
       children: [
+        // ...(currentUser.permission === "1"
+        //   ? [
         {
           key: "/product/material",
           label: <Link to="/product/material">물자등록</Link>,
         },
+        ,
+        //   ]
+        // : [])
         {
           key: "/product/product",
           label: <Link to="/product/product">판매상품관리</Link>,
@@ -295,24 +294,12 @@ const App = () => {
     {
       key: "provider",
       icon: React.createElement(TeamOutlined),
-      label: "거래처관리",
-      children: [
-        {
-          key: "/provider/provider",
-          label: <Link to="/provider/provider">거래처관리</Link>,
-        },
-      ],
+      label: <Link to="/provider/provider">거래처관리</Link>,
     },
     {
       key: "branch",
       icon: React.createElement(ShopOutlined),
-      label: "지점관리",
-      children: [
-        {
-          key: "/branch/branch",
-          label: <Link to="/branch/branch">지점관리</Link>,
-        },
-      ],
+      label: <Link to="/branch/branch">지점관리</Link>,
     },
     {
       key: "admin",
@@ -325,13 +312,7 @@ const App = () => {
         },
         {
           key: "homepage",
-          label: "홈페이지관리",
-          children: [
-            {
-              key: "/admin/spot",
-              label: <Link to="/admin/spot">설치지점관리</Link>,
-            },
-          ],
+          label: <Link to="/admin/spot">홈페이지관리</Link>,
         },
         {
           key: "bdsm",
@@ -647,8 +628,14 @@ const App = () => {
                 <Route path="/bdsm/trend" element={<BDSMStatistics />} />
 
                 <Route path="/product/material" element={<Material />} />
-                <Route path="/product/product" element={<Product />} />
-                <Route path="/product/inventory" element={<Inventory />} />
+                <Route
+                  path="/product/product"
+                  element={<Product currentUser={currentUser} />}
+                />
+                <Route
+                  path="/product/inventory"
+                  element={<Inventory currentUser={currentUser} />}
+                />
                 <Route
                   path="/product/purchase_order"
                   element={<Purchase_order />}
@@ -656,8 +643,14 @@ const App = () => {
 
                 <Route path="/order" element={<Order />} />
 
-                <Route path="/post/notification" element={<NoticeBoard />} />
-                <Route path="/post/inquiry" element={<InquiryBoard />} />
+                <Route
+                  path="/post/notification"
+                  element={<NoticeBoard currentUser={currentUser} />}
+                />
+                <Route
+                  path="/post/inquiry"
+                  element={<InquiryBoard currentUser={currentUser} />}
+                />
 
                 <Route path="/sales/sales" element={<PaymentSummary />} />
                 <Route

@@ -166,8 +166,9 @@ const AddModal = (props) => {
   );
 };
 
-const Inventory = () => {
+const Inventory = (props) => {
   const [form] = Form.useForm();
+  const { currentUser } = props;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { getColumnSearchProps } = useSearchFilter();
 
@@ -418,6 +419,7 @@ const Inventory = () => {
         }}
       >
         <SearchBranch
+          currentUser={currentUser}
           selectedBranch={selectedBranch}
           setSelectedBranch={(branches) => {
             setSelectedBranch(branches[0]);

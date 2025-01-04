@@ -22,6 +22,7 @@ class Branch {
     this.branch_sido = data.branch_sido || null;
     this.branch_sigungu = data.branch_sigungu || null;
     this.branch_description = data.branch_description || null;
+    this.delivery_fee = data.delivery_fee || 0;
   }
 
   toJSON() {
@@ -43,6 +44,7 @@ class Branch {
       branch_sido: this.branch_sido,
       branch_sigungu: this.branch_sigungu,
       branch_description: this.branch_description,
+      delivery_fee: this.delivery_fee,
     };
   }
 

@@ -28,24 +28,21 @@ import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import TextArea from "antd/es/input/TextArea";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
+import SearchBranch from "../../components/popover/searchbranch";
 
 const { Option } = Select;
 const { Title } = Typography;
 
-// 현재 로그인 사용자 (더미 데이터)
-const currentUser = {
-  id: "-OCRwtnmaTllsx2c3OWM", // -OCRwmUYTeUtxH-auNvx
-  user_id: "krystal", // redswitch
-  user_name: "박수정",
-  permission: "2", // 1
-};
-
-const InquiryBoard = () => {
+const InquiryBoard = (props) => {
   const [inquiries, setInquiries] = useState([]);
 
   const [users, setUsers] = useState([]);
 
   const [branches, setBranches] = useState([]);
+
+  const [selectedBranch, setSelectedBranch] = useState(null);
+
+  const { currentUser } = props;
 
   useEffect(() => {
     AxiosGet("/posts/inquiries")
@@ -338,8 +335,9 @@ const InquiryBoard = () => {
                 <Input readOnly />
               </Form.Item>
             </Col>
+
             {currentUser.permission === "1" && (
-              <Col span={12}>
+              <Col span={6}>
                 {/* 상단 고정 체크박스 - 관리자만 가능 */}
                 <Form.Item
                   label="상단 고정 여부"
@@ -354,25 +352,36 @@ const InquiryBoard = () => {
                 </Form.Item>
               </Col>
             )}
+            <Col span={6}>
+              <Form.Item label="지점 선택" name="branch">
+                <SearchBranch
+                  currentUser={currentUser}
+                  selectedBranch={selectedBranch}
+                  setSelectedBranch={(branches) => {
+                    setSelectedBranch(branches[0]);
+                  }}
+                  multiple={false}
+                />
+                {/* <Select
+                style={{ width: "100%" }}
+                showSearch
+                placeholder="지점 선택"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  option.children
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+              >
+                {branches.map((branch) => (
+                  <Select.Option key={branch.id} value={branch.id}>
+                    {branch.branch_name}
+                  </Select.Option>
+                ))}
+              </Select> */}
+              </Form.Item>
+            </Col>
           </Row>
-
-          <Form.Item label="지점 선택" name="branch">
-            <Select
-              style={{ width: "30%" }}
-              showSearch
-              placeholder="지점 선택"
-              optionFilterProp="children"
-              filterOption={(input, option) =>
-                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }
-            >
-              {branches.map((branch) => (
-                <Select.Option key={branch.id} value={branch.id}>
-                  {branch.branch_name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
 
           <Form.Item
             label="제목"
