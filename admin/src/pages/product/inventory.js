@@ -185,6 +185,8 @@ const Inventory = () => {
   const [editRowKey, setEditRowKey] = useState(null);
   const [editedInventory, setEditedInventory] = useState({});
 
+  const [users, setUsers] = useState([]);
+
   const { pagination, setPagination, handleTableChange } = usePagination(10); // Default page size is 10
 
   useEffect(() => {
@@ -366,12 +368,12 @@ const Inventory = () => {
           0
         ),
     },
-    {
-      title: "입고가",
-    },
-    {
-      title: "판매가",
-    },
+    // {
+    //   title: "입고가",
+    // },
+    // {
+    //   title: "판매가",
+    // },
     {
       title: "동작",
       key: "action",

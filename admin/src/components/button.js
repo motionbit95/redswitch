@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Upload, Button } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { Upload, Button, Tooltip } from "antd";
+import { DeleteFilled, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 const FileUpload = (props) => {
@@ -66,10 +66,54 @@ const FileUpload = (props) => {
 
       return false; // 자동 업로드 방지
     },
+    onRemove: () => {
+      setFileList([]); // 파일 리스트 초기화
+      setUrl(""); // URL 초기화
+    },
+  };
+
+  const truncateFileName = (name, maxLength = 14) => {
+    if (name.length <= maxLength) return name;
+    const extension = name.split(".").pop();
+    const baseName = name.substring(0, maxLength - extension.length - 3);
+    return `${baseName}...${extension}`;
   };
 
   return (
-    <Upload fileList={fileList} {...uploadProps}>
+    <Upload
+      fileList={fileList}
+      itemRender={(originNode, file) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <Tooltip title={file.name}>
+            <div
+              style={{
+                maxWidth: "200px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+                color: "#1890ff",
+              }}
+              onClick={() => {
+                window.open(file.url, "_blank");
+              }}
+            >
+              {truncateFileName(file.name)}
+            </div>
+          </Tooltip>
+          <Button
+            type="text"
+            size="small"
+            icon={<DeleteFilled />}
+            onClick={() => {
+              setFileList([]);
+              setUrl("");
+            }}
+          />
+        </div>
+      )}
+      {...uploadProps}
+    >
       <Button loading={loading} icon={<UploadOutlined />}>
         파일 업로드
       </Button>

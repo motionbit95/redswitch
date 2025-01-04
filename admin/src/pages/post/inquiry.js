@@ -102,7 +102,7 @@ const InquiryBoard = () => {
   // 게시판 상세보기 모달 열기
   const showDetailModal = (inquiry) => {
     const hasAccess =
-      inquiry.allowedUsers.includes(currentUser.id) ||
+      (inquiry.allowedUsers && inquiry.allowedUsers.includes(currentUser.id)) ||
       inquiry.author === currentUser.user_id;
     if (!hasAccess) {
       message.error("열람 권한이 없습니다.");
@@ -221,7 +221,9 @@ const InquiryBoard = () => {
         // record.author === currentUser.user_id;
         return hasAccess ? (
           <Link
-            onClick={() => showDetailModal(record)}
+            onClick={() => {
+              showDetailModal(record);
+            }}
             style={{
               color: record.sticky ? "#1890ff" : "#000",
               fontWeight: record.sticky ? "bold" : "normal", // sticky일 경우 강조
@@ -353,11 +355,10 @@ const InquiryBoard = () => {
               </Col>
             )}
           </Row>
-          {/* <Form.Item>
-            <div>{currentUser.branch_id[0]}</div>
-          </Form.Item> */}
+
           <Form.Item label="지점 선택" name="branch">
             <Select
+              style={{ width: "30%" }}
               showSearch
               placeholder="지점 선택"
               optionFilterProp="children"

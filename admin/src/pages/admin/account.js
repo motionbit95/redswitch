@@ -44,6 +44,9 @@ const Account = () => {
     try {
       const response = await AxiosGet("/accounts"); // Replace with your endpoint
       setAccounts(response.data);
+      console.log(accounts);
+      setSelectedBranch(accounts.branch_id ? accounts.branch_id : []);
+      setSelectedProvider(accounts.provider_id ? accounts.provider_id : []);
     } catch (error) {
       message.error("계정 데이터를 가져오는 데 실패했습니다.");
     } finally {
@@ -102,6 +105,7 @@ const Account = () => {
   const handleUpdate = async (values) => {
     const provider_id = selectedProvider?.map((provider) => provider.id);
     const branch_id = selectedBranch?.map((branch) => branch.id);
+    console.log(provider_id, branch_id);
 
     try {
       await AxiosPut(`/accounts/${currentAccount.id}`, {
