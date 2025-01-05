@@ -86,6 +86,7 @@ app.use("/posts", require("./routes/postRouters"));
 app.use("/bdsm", require("./routes/bdsmRouter"));
 app.use("/advertisements", require("./routes/advertisementRouter"));
 app.use("/alarms", require("./routes/alarmRouter"));
+app.use("/spots", require("./routes/spotRouter"));
 
 /*1. 간편인증 서비스 API 설정*/
 /* 키파일은 반드시 서버의 안전한 로컬경로에 별도 저장. 웹URL 경로에 파일이 있을경우 키파일이 외부에 노출될 수 있음 주의 */
