@@ -18,44 +18,51 @@ import SearchBranch from "../../components/popover/searchbranch";
 import { AxiosDelete, AxiosGet, AxiosPost } from "../../api";
 import usePagination from "../../hook/usePagination";
 
-const AddModal = ({ isModalOpen, setIsModalOpen, data }) => {
+const AddModal = ({
+  isModalOpen,
+  setIsModalOpen,
+  data,
+  onComplete,
+  isEditMode,
+  currentSpot,
+}) => {
   const [form] = Form.useForm();
   const [selectedBranch, setSelectedBranch] = useState(null);
 
   const handlesubmit = async (values) => {
-    const spot_name = selectedBranch.branch_name;
-    const branch_address = selectedBranch.branch_address;
-    const install_flag = selectedBranch.install_flag;
+    const spot_name = selectedBranch?.branch_name;
+    const branch_address = selectedBranch?.branch_address;
+    const install_flag = selectedBranch?.install_flag;
 
     const spot_image = values.spot_image;
     const spot_logo = values.spot_logo;
 
-    console.log("values", values);
     try {
-      let spotData = { ...values };
+      let spotData = { ...values, spot_name, branch_address, install_flag };
 
-      console.log(spotData);
-      const response = await AxiosPost("/spots", {
-        ...values,
-        spot_name,
-        branch_address,
-        install_flag,
-      });
-      if (response.status === 201) {
-        console.log(response.data);
-        message.success("설치지점 등록 성공");
+      const response = isEditMode
+        ? await AxiosPost(`/spots/${currentSpot.id}`, spotData) // 수정 API 호출
+        : await AxiosPost("/spots", spotData); // 신규 등록 API 호출
+
+      if (response.status === 201 || response.status === 200) {
+        message.success(
+          isEditMode ? "설치지점 수정 성공" : "설치지점 등록 성공"
+        );
         setIsModalOpen(false);
+        onComplete();
       } else {
-        message.error("설치지점 등록 중 오류가 발생했습니다.");
+        message.error("설치지점 처리 중 오류가 발생했습니다.");
       }
-    } catch {}
+    } catch (err) {
+      message.error("오류가 발생했습니다.");
+    }
   };
 
   return (
     <Modal
       open={isModalOpen}
       width={620}
-      title="설치지점 등록"
+      title={isEditMode ? "설치지점 수정" : "설치지점 등록"} // 수정/등록 구분
       onCancel={() => {
         form.resetFields();
         setSelectedBranch(null);
@@ -73,7 +80,7 @@ const AddModal = ({ isModalOpen, setIsModalOpen, data }) => {
           취소
         </Button>,
         <Button key="submit" type="primary" onClick={() => form.submit()}>
-          등록
+          {isEditMode ? "수정" : "등록"}
         </Button>,
       ]}
       centered
@@ -85,36 +92,80 @@ const AddModal = ({ isModalOpen, setIsModalOpen, data }) => {
         initialValues={data}
       >
         <Descriptions column={3} size="small" bordered>
-          <Descriptions.Item
-            label="설치지점"
-            span={2}
-            labelStyle={{ whiteSpace: "nowrap" }}
-          >
-            <Form.Item name="spot_name" style={{ marginBottom: 0 }}>
-              <SearchBranch
-                selectedBranch={selectedBranch}
-                setSelectedBranch={(branches) => {
-                  setSelectedBranch(branches[0]);
-                }}
-                multiple={false}
-              />
-            </Form.Item>
-          </Descriptions.Item>
-          <Descriptions.Item label="설치 여부">
-            {selectedBranch && (
-              <div>
-                {selectedBranch?.install_flag === "0" ? "미설치" : "설치완료"}
-              </div>
-            )}
-          </Descriptions.Item>
-          {selectedBranch && (
-            <Descriptions.Item label="주소" span={3}>
-              {selectedBranch && <div>{selectedBranch?.branch_address}</div>}
-            </Descriptions.Item>
+          {isEditMode ? (
+            <>
+              <Descriptions.Item
+                label="설치지점"
+                labelStyle={{ whiteSpace: "nowrap" }}
+                span={2}
+              >
+                {data?.spot_name}
+              </Descriptions.Item>
+              <Descriptions.Item
+                label="설치여부"
+                labelStyle={{ whiteSpace: "nowrap" }}
+              >
+                {data?.install_flag === "0" ? "미설치" : "설치완료"}
+              </Descriptions.Item>
+              <Descriptions.Item
+                label="주소"
+                labelStyle={{ whiteSpace: "nowrap" }}
+                span={3}
+              >
+                {data?.branch_address}
+              </Descriptions.Item>
+            </>
+          ) : (
+            <>
+              <Descriptions.Item
+                label="설치지점"
+                span={2}
+                labelStyle={{ whiteSpace: "nowrap" }}
+              >
+                <Form.Item name="spot_name" style={{ marginBottom: 0 }}>
+                  <SearchBranch
+                    selectedBranch={selectedBranch}
+                    setSelectedBranch={(branches) => {
+                      setSelectedBranch(branches[0]);
+                    }}
+                    multiple={false}
+                  />
+                </Form.Item>
+              </Descriptions.Item>
+              <Descriptions.Item label="설치 여부">
+                {selectedBranch && (
+                  <div>
+                    {selectedBranch?.install_flag === "0"
+                      ? "미설치"
+                      : "설치완료"}
+                  </div>
+                )}
+              </Descriptions.Item>
+              {selectedBranch && (
+                <Descriptions.Item label="주소" span={3}>
+                  {selectedBranch && (
+                    <div>{selectedBranch?.branch_address}</div>
+                  )}
+                </Descriptions.Item>
+              )}
+            </>
           )}
 
           <Descriptions.Item
-            label="설치지점 로고"
+            label={
+              <div>
+                설치지점 로고
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#FF8A8A",
+                    marginTop: "4px",
+                  }}
+                >
+                  jpg, jpeg, png
+                </div>
+              </div>
+            }
             labelStyle={{ whiteSpace: "nowrap" }}
           >
             <Form.Item name="spot_logo" style={{ marginBottom: 0 }}>
@@ -125,7 +176,20 @@ const AddModal = ({ isModalOpen, setIsModalOpen, data }) => {
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item
-            label="설치지점 이미지"
+            label={
+              <div>
+                설치지점 이미지
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#FF8A8A",
+                    marginTop: "4px",
+                  }}
+                >
+                  jpg, jpeg, png
+                </div>
+              </div>
+            }
             labelStyle={{ whiteSpace: "nowrap" }}
           >
             <Form.Item name="spot_image" style={{ marginBottom: 0 }}>
@@ -143,28 +207,35 @@ const AddModal = ({ isModalOpen, setIsModalOpen, data }) => {
 
 const Spot = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [form] = Form.useForm();
 
   const [spots, setSpots] = useState([]);
   const [currentSpot, setCurrentSpot] = useState(null);
 
   useEffect(() => {
-    AxiosGet("/spots")
-      .then((res) => {
-        console.log(res.data);
-        setSpots(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    fetchSpots();
+    console.log(spots);
   }, []);
 
+  const fetchSpots = async () => {
+    try {
+      const response = await AxiosGet("/spots");
+      setSpots(response.data);
+    } catch (err) {
+      message.error("설치지점 리스트를 가져오는 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleAdd = () => {
+    setCurrentSpot(null);
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
   const handleEdit = (spot) => {
-    console.log(spot);
     setCurrentSpot(spot);
     form.setFieldsValue(spot);
-    setIsEditModalOpen(true);
+    setIsModalOpen(true);
   };
 
   const handleDelete = (id) => {
@@ -176,10 +247,6 @@ const Spot = () => {
   };
 
   const { pagination, setPagination, handleTableChange } = usePagination();
-
-  const handleChange = (pagination, filters, sorter) => {
-    console.log("Various parameters", pagination, filters, sorter);
-  };
 
   const columns = [
     {
@@ -195,10 +262,14 @@ const Spot = () => {
       key: "spot_name",
     },
     {
+      title: "주소",
+      dataIndex: "branch_address",
+      key: "branch_address",
+    },
+    {
       title: "설치여부",
       dataIndex: "install_flag",
       key: "install_flag",
-
       render: (text) => {
         return (
           <Tag color={text === "0" ? "red" : "green"}>
@@ -211,55 +282,25 @@ const Spot = () => {
       title: "설치지점 로고",
       dataIndex: "spot_logo",
       key: "spot_logo",
-
-      render: (text) => {
-        return (
-          <>
-            {text ? (
-              <Image
-                src={text}
-                alt="spot_logo"
-                style={{ width: "40px", height: "40px" }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  backgroundColor: "#f1f1f1",
-                }}
-              ></div>
-            )}
-          </>
-        );
-      },
+      render: (text) => (
+        <Image
+          src={text || "#f1f1f1"}
+          alt="spot_logo"
+          style={{ width: "40px", height: "40px" }}
+        />
+      ),
     },
     {
       title: "설치지점 이미지",
       dataIndex: "spot_image",
       key: "spot_image",
-
-      render: (text) => {
-        return (
-          <>
-            {text ? (
-              <Image
-                src={text}
-                alt="spot_image"
-                style={{ width: "40px", height: "40px" }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  backgroundColor: "#f1f1f1",
-                }}
-              ></div>
-            )}
-          </>
-        );
-      },
+      render: (text) => (
+        <Image
+          src={text || "#f1f1f1"}
+          alt="spot_image"
+          style={{ width: "40px", height: "40px" }}
+        />
+      ),
     },
     {
       title: "동작",
@@ -270,7 +311,7 @@ const Spot = () => {
         <Space>
           <a onClick={() => handleEdit(record)}>수정</a>
           <Popconfirm
-            title="거래처를 삭제하시겠습니까?"
+            title="설치지점을 삭제하시겠습니까?"
             onConfirm={() => handleDelete(record.id)}
           >
             <a>삭제</a>
@@ -291,17 +332,17 @@ const Spot = () => {
           marginBottom: 16,
         }}
       >
-        <Button type="primary" onClick={() => setIsModalOpen(true)}>
+        <Button type="primary" onClick={handleAdd}>
           지점 등록
         </Button>
       </Row>
       <Table
         size="small"
+        rowKey="id"
         columns={columns}
         dataSource={spots}
         onChange={(pagination, filters, sorter) => {
           handleTableChange(pagination);
-          handleChange(pagination, filters, sorter);
         }}
         pagination={{
           ...pagination,
@@ -309,60 +350,15 @@ const Spot = () => {
           showSizeChanger: true,
         }}
       />
-      {/* 스팟 추가 모달 */}
-      <AddModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
-      <EditModal
-        isModalOpen={isEditModalOpen}
-        setIsModalOpen={setIsEditModalOpen}
-        data={currentSpot}
+      {/* 스팟 추가 및 수정 모달 */}
+      <AddModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        data={!currentSpot ? {} : currentSpot}
+        isEditMode={!!currentSpot}
+        onComplete={fetchSpots}
       />
     </div>
-  );
-};
-
-const EditModal = ({ isModalOpen, setIsModalOpen, data }) => {
-  const [form] = Form.useForm();
-  const onFinish = (values) => {
-    console.log(values);
-  };
-  return (
-    <Modal
-      title="지점 수정"
-      open={isModalOpen}
-      onOk={() => {
-        form
-          .validateFields()
-          .then((values) => {
-            form.resetFields();
-            onFinish(values);
-            setIsModalOpen(false);
-          })
-          .catch((info) => {
-            console.log("Validate Failed:", info);
-          });
-      }}
-      onCancel={() => setIsModalOpen(false)}
-    >
-      <Form
-        form={form}
-        name="form_in_modal"
-        layout="vertical"
-        initialValues={data}
-      >
-        <Form.Item
-          name="spot_name"
-          label="설치지점명"
-          rules={[
-            {
-              required: true,
-              message: "설치지점명을 입력해주세요.",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-      </Form>
-    </Modal>
   );
 };
 

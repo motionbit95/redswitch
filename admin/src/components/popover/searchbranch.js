@@ -32,16 +32,13 @@ const SearchBranch = ({
   }, [currentUser]);
 
   const fetchBranches = async (search = "") => {
-    // console.log(currentUser.branch_id);
     try {
       const response = await AxiosGet("/branches"); // Replace with your endpoint
       const branchData = response.data
         .map((item) => item)
         .filter((item) => item.branch_name.includes(search))
         .map((item) => ({ key: item.id, ...item }));
-      console.log(">>>", currentUser, currentUser.branch_id);
       setBranches(branchData);
-      console.log(branchData, currentUser.branch_id);
       if (currentUser && currentUser.branch_id) {
         let usersBranches = branchData.filter(
           (branch) => currentUser.branch_id.some((id) => id === branch.id) // 배열 비교를 위한 수정

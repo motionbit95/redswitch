@@ -9,7 +9,7 @@ class Spot {
     this.spot_logo = data.spot_logo || null;
     this.spot_image = data.spot_image || null;
     this.install_flag = data.install_flag || 0; // Default to 0 (not installed)
-    this.branch_adress = data.branch_adress || null;
+    this.branch_address = data.branch_address || null;
   }
 
   toJSON() {
@@ -19,7 +19,7 @@ class Spot {
       spot_logo: this.spot_logo,
       spot_image: this.spot_image,
       install_flag: this.install_flag,
-      branch_adress: this.branch_adress,
+      branch_address: this.branch_address,
     };
   }
 
