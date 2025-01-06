@@ -51,11 +51,9 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
         setIsLoggedIn(true);
         setOpen(false);
         navigate("/dashboard"); // 로그인 성공 후 대시보드(홈)으로 이동
-      } else if (response.status === 404) {
-        message.error(response.data.message);
       }
     } catch (error) {
-      message.error("로그인 실패");
+      message.error(error.response.data.error);
     }
   };
 
@@ -104,7 +102,7 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
                 rules={[
                   {
                     required: true,
-                    message: "Please input your User ID!",
+                    message: "아이디를 입력해주세요!",
                   },
                 ]}
               >
@@ -121,7 +119,7 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
                 rules={[
                   {
                     required: true,
-                    message: "Please input your Password!",
+                    message: "비밀번호를 입력해주세요!",
                   },
                 ]}
               >

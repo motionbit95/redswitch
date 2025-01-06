@@ -227,7 +227,7 @@ const App = () => {
     {
       key: "sales",
       icon: React.createElement(DollarOutlined),
-      label: "매출분석",
+      label: "매출관리",
       children: [
         {
           key: "/sales/sales",
@@ -652,7 +652,10 @@ const App = () => {
                   element={<InquiryBoard currentUser={currentUser} />}
                 />
 
-                <Route path="/sales/sales" element={<PaymentSummary />} />
+                <Route
+                  path="/sales/sales"
+                  element={<PaymentSummary currentUser={currentUser} />}
+                />
                 <Route
                   path="/sales/branch"
                   element={<PaymentSummaryByBranch />}

@@ -13,14 +13,20 @@ import {
 import dayjs from "dayjs";
 import { AxiosGet } from "../../api";
 import SearchBranch from "../../components/popover/searchbranch";
-import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  SearchOutlined,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
 import useExportToExcel from "../../hook/useExportToExcel";
 import usePagination from "../../hook/usePagination";
 import { render } from "@testing-library/react";
+import { Popover, Tooltip } from "antd/lib";
 
 const { RangePicker } = DatePicker;
 
-const PaymentSummary = () => {
+const PaymentSummary = (props) => {
+  const { currentUser } = props;
   // 한 달 전부터 오늘까지 범위로 기본값 설정
   const defaultRange = [
     dayjs().subtract(1, "month"), // 한 달 전
@@ -46,14 +52,27 @@ const PaymentSummary = () => {
       const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
 
       // 금일 매출 계산
-      const todaySales = payments
+      const todayRefunds = payments
         .filter(
           (payment) =>
             dayjs(payment.ediDate, "YYYYMMDDHHmmss").format("YYYY-MM-DD") ===
             today
         )
-        .filter((payment) => payment.cancelYN === "N")
+        .filter((payment) => payment.cancelYN === "Y")
         .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
+
+      const todaySales =
+        payments
+          .filter(
+            (payment) =>
+              dayjs(payment.ediDate, "YYYYMMDDHHmmss").format("YYYY-MM-DD") ===
+              today
+          )
+          .filter((payment) => payment.cancelYN === "N")
+          .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0) -
+        todayRefunds;
+
+      console.log(todayRefunds);
 
       // 전일 매출 계산
       const yesterdaySales = payments
@@ -165,16 +184,20 @@ const PaymentSummary = () => {
     });
 
     // 데이터 계산
-    const totalTransactions = paymentsWithOrders.length; // 전체 결제건수
+    const totalTransactions = paymentsWithOrders.filter(
+      (payment) => payment.cancelYN === "N"
+    ).length; // 전체 결제건수
     const refundTransactions = paymentsWithOrders.filter(
       (payment) => payment.cancelYN === "Y"
     ).length; // 환불 건수
-    const totalAmount = paymentsWithOrders
-      .filter((payment) => payment.cancelYN === "N")
-      .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
     const refundAmount = paymentsWithOrders
       .filter((payment) => payment.cancelYN === "Y")
       .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
+    const totalAmount =
+      paymentsWithOrders
+        .filter((payment) => payment.cancelYN === "N")
+        .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0) -
+      refundAmount;
 
     return {
       totalAmount,
@@ -205,13 +228,16 @@ const PaymentSummary = () => {
     const totalAmount = datePayments
       .filter((payment) => payment.cancelYN === "N")
       .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
-    const totalTransactions = datePayments.length;
+    const totalTransactions = datePayments.filter(
+      (payment) => payment.cancelYN === "N"
+    ).length;
     const refundTransactions = datePayments.filter(
       (payment) => payment.cancelYN === "Y"
     ).length;
     const refundAmount = datePayments
       .filter((payment) => payment.cancelYN === "Y")
       .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
+    const total = totalAmount - refundAmount;
 
     return {
       key: date,
@@ -220,6 +246,7 @@ const PaymentSummary = () => {
       totalTransactions,
       refundTransactions,
       refundAmount,
+      total,
     };
   });
 
@@ -237,24 +264,30 @@ const PaymentSummary = () => {
       sorter: (a, b) => a.totalTransactions - b.totalTransactions,
     },
     {
-      title: "총매출",
-      dataIndex: "totalAmount",
-      key: "totalAmount",
-      render: (value) => `${value.toLocaleString("ko-KR")}원`,
-      sorter: (a, b) => a.totalAmount - b.totalAmount,
-    },
-    {
       title: "환불건수",
       dataIndex: "refundTransactions",
       key: "refundTransactions",
       sorter: (a, b) => a.refundTransactions - b.refundTransactions,
     },
     {
-      title: "환불금액",
+      title: "총 결제금액",
+      dataIndex: "totalAmount",
+      key: "totalAmount",
+      render: (value) => `${value.toLocaleString("ko-KR")}원`,
+      sorter: (a, b) => a.totalAmount - b.totalAmount,
+    },
+    {
+      title: "총 환불금액",
       dataIndex: "refundAmount",
       key: "refundAmount",
       render: (value) => `${value.toLocaleString("ko-KR")}원`,
       sorter: (a, b) => a.refundAmount - b.refundAmount,
+    },
+    {
+      title: "총 매출금액",
+      dataIndex: "total",
+      key: "total",
+      render: (value, record) => `${value.toLocaleString("ko-KR")}원`,
     },
     {
       title: "자세히보기",
@@ -277,7 +310,7 @@ const PaymentSummary = () => {
     dataSource,
     columns,
     [],
-    "매출분석_기간별조회_" + dayjs().format("YYYYMMDD")
+    "매출관리_기간별조회_" + dayjs().format("YYYYMMDD")
   );
 
   return (
@@ -289,6 +322,7 @@ const PaymentSummary = () => {
             setSelectedBranch(branches[0]);
           }}
           multiple={false}
+          currentUser={currentUser}
         />
         <RangePicker
           onChange={handleDateChange}
@@ -327,7 +361,7 @@ const PaymentSummary = () => {
             <Col span={6}>
               <Card
                 size="small"
-                title="총 매출"
+                title="총 매출금액"
                 bordered={false}
                 style={{ height: "100%" }}
                 bodyStyle={{
@@ -336,7 +370,28 @@ const PaymentSummary = () => {
                   justifyContent: "center",
                 }}
               >
-                <h3>{stats.totalAmount.toLocaleString("ko-KR")}원</h3>
+                <Space>
+                  <h3>{stats.totalAmount.toLocaleString("ko-KR")}원</h3>
+                  <Tooltip
+                    placement="topLeft"
+                    title={
+                      <div>
+                        <div style={{ opacity: 0.5 }}>
+                          결제 :{" "}
+                          {(
+                            stats.totalAmount + stats.refundAmount
+                          ).toLocaleString("ko-KR")}
+                          원
+                        </div>
+                        <div style={{ opacity: 0.5 }}>
+                          환불 : {stats.refundAmount.toLocaleString("ko-KR")}원
+                        </div>
+                      </div>
+                    }
+                  >
+                    <QuestionCircleOutlined />
+                  </Tooltip>
+                </Space>
               </Card>
             </Col>
             <Col span={6}>
@@ -359,7 +414,7 @@ const PaymentSummary = () => {
             <Col span={6}>
               <Card
                 size="small"
-                title="총 환불금액"
+                title="환불율"
                 bordered={false}
                 style={{ height: "100%" }}
                 bodyStyle={{
@@ -368,7 +423,12 @@ const PaymentSummary = () => {
                   justifyContent: "center",
                 }}
               >
-                <h3>{stats.refundAmount.toLocaleString("ko-KR")}원</h3>
+                <h3>
+                  {(stats.totalTransactions !== 0
+                    ? stats.refundTransactions / stats.totalTransactions
+                    : 0) * 100}
+                  %
+                </h3>
               </Card>
             </Col>
           </Row>

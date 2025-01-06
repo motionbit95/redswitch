@@ -115,7 +115,7 @@ router.post("/login", async (req, res) => {
       .once("value");
 
     if (!snapshot.exists()) {
-      return res.status(404).send({ error: "사용자를 찾을 수 없음" });
+      return res.status(403).send({ error: "사용자를 찾을 수 없음" });
     }
 
     const user = snapshot.val();

@@ -39,6 +39,7 @@ const SearchBranch = ({
         .map((item) => item)
         .filter((item) => item.branch_name.includes(search))
         .map((item) => ({ key: item.id, ...item }));
+      console.log(">>>", currentUser, currentUser.branch_id);
       setBranches(branchData);
       console.log(branchData, currentUser.branch_id);
       if (currentUser && currentUser.branch_id) {
