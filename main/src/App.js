@@ -172,8 +172,8 @@ function App() {
         <div style={{ flex: 1 }}>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Eziok />} />
-              <Route exact path="/redirect" element={<EziokStdRedirect />} />
+              {/* <Route path="/" element={<Eziok />} /> */}
+              {/* <Route exact path="/redirect" element={<EziokStdRedirect />} /> */}
               <Route
                 path="/spot/*"
                 element={<MainPage branch={branch} theme={theme} />}

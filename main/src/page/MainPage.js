@@ -16,6 +16,8 @@ import { useMediaQuery } from "react-responsive";
 import { Footer } from "../component/Footer";
 import { mainPageStyles } from "../styles"; // Import the styles
 
+import Eziok from "../eziok/eziok_react_index";
+
 function MainPage(props) {
   const { branch, theme } = props;
   const [branchInfo, setBranchInfo] = useState(null);
@@ -73,7 +75,8 @@ function MainPage(props) {
   //   verifyToken();
   // }, [token]);
 
-  const onCert = async () => {
+  const onCert = async (script) => {
+    console.log("onCert", script);
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}/accounts/anonymous-login`,
       {
@@ -193,7 +196,8 @@ function MainPage(props) {
           <Checkbox onChange={(e) => setIsAgree(e.target.checked)}>
             개인 정보 수집 및 이용동의
           </Checkbox>
-          <Button
+          <Eziok onCert={onCert} />
+          {/* <Button
             disabled={!isAgree}
             type="primary"
             danger
@@ -202,7 +206,7 @@ function MainPage(props) {
             onClick={onCert}
           >
             휴대폰 본인 인증
-          </Button>
+          </Button> */}
         </div>
       </Modal>
       <Footer theme={theme} />

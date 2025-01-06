@@ -1,10 +1,13 @@
+import { Button } from "antd";
 import React, { Component } from "react";
 
 /* react-helmet 이용 시 react-helmet 다운 및 주석해제 */
 import { Helmet } from "react-helmet";
+import { mainPageStyles } from "../styles";
 
-class ezioK_react_index extends Component {
-  eziok() {
+const ezioK_react_index = (props) => {
+  const { onCert } = props;
+  const eziok = () => {
     window.eziok_std_process(
       "https://port-0-redswitch-lxwmkqxz2d25ae69.sel5.cloudtype.app/eziok/eziok_std_request",
       "WB",
@@ -35,24 +38,32 @@ class ezioK_react_index extends Component {
 
     script.appendChild(callBackFunc);
     document.body.appendChild(script);
-  }
+    onCert(script);
+  };
 
-  render() {
-    return (
-      <main>
-        {/* react-helmet 이용 시 주석해제 */}
-        <Helmet>
-          {/* 운영 */}
-          {/* <script src="https://cert.ez-iok.com/stdauth/ds_auth_ptb/asset/js/ptb_ezauth_proc.js"></script> */}
-          {/* 개발 */}
-          <script src="https://scert.ez-iok.com/stdauth/ds_auth_ptb/asset/js/ptb_ezauth_proc.js"></script>
-        </Helmet>
+  return (
+    <>
+      {/* react-helmet 이용 시 주석해제 */}
+      <Helmet>
+        {/* 운영 */}
+        {/* <script src="https://cert.ez-iok.com/stdauth/ds_auth_ptb/asset/js/ptb_ezauth_proc.js"></script> */}
+        {/* 개발 */}
+        <script src="https://scert.ez-iok.com/stdauth/ds_auth_ptb/asset/js/ptb_ezauth_proc.js"></script>
+      </Helmet>
 
-        <button onClick={this.eziok}>인증_팝업</button>
-        <textarea cols="100" rows="50" id="result"></textarea>
-      </main>
-    );
-  }
-}
+      {/* <button onClick={this.eziok}>인증_팝업</button> */}
+      <Button
+        type="primary"
+        danger
+        size="large"
+        style={mainPageStyles.certButton}
+        onClick={eziok}
+      >
+        휴대폰 본인 인증
+      </Button>
+      {/* <textarea cols="100" rows="50" id="result"></textarea> */}
+    </>
+  );
+};
 
 export default ezioK_react_index;
