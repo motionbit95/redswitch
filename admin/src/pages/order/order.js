@@ -78,7 +78,7 @@ const Order = (props) => {
     } else {
       setFilteredOrders([]);
     }
-  }, [selectedBranch]);
+  }, [orders]);
 
   const onSearch = () => {
     let filtered = orders.filter((order) => order.order_status !== 0);
@@ -196,6 +196,20 @@ const Order = (props) => {
     },
   ];
 
+  // 주문 확인 여부 체크
+  const updateCheckedStatus = async (id) => {
+    try {
+      await AxiosPut(`/orders/${id}`, { checked: 1 }); // Update server
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === id ? { ...order, checked: 1 } : order
+        )
+      ); // Update UI
+    } catch (error) {
+      console.error("Error updating checked status:", error);
+    }
+  };
+
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
       <Card>
@@ -245,6 +259,11 @@ const Order = (props) => {
           ),
           rowExpandable: (record) =>
             record.select_products && record.select_products.length > 0,
+          onExpand: (expanded, record) => {
+            if ((expanded && record.checked === 0) || !record.checked) {
+              updateCheckedStatus(record.id); // Update when row is expanded
+            }
+          },
         }}
       />
     </Space>
