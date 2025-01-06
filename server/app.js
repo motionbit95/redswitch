@@ -27,19 +27,9 @@ app.use(
 );
 
 // 모든요청에 cors 적용
-const whitelist = [
-  "http://localhost:3000",
-  "https://redswitch-customer.netlify.app",
-];
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || whitelist.indexOf(origin) !== -1) {
-        callback(null, true); // 허용된 도메인
-      } else {
-        callback(new Error("Not allowed by CORS")); // 허용되지 않은 도메인
-      }
-    },
+    origin: true,
     credentials: true, // 쿠키 허용
     methods: ["GET", "POST", "DELETE", "UPDATE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
