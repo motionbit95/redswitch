@@ -38,7 +38,9 @@ const ezioK_react_index = (props) => {
 
     script.appendChild(callBackFunc);
     document.body.appendChild(script);
-    onCert(script);
+    if (script.errorCode === "2000") {
+      onCert(script);
+    }
   };
 
   return (
