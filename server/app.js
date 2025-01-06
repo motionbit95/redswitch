@@ -14,14 +14,9 @@ const session = require("express-session");
 
 app.use(
   session({
-    secret: "your-secret-key",
+    secret: uuid(),
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      secure: false, // HTTPS 환경에서는 true로 설정
-      httpOnly: true,
-      maxAge: 60000, // 1분
-    },
   })
 );
 
@@ -142,6 +137,9 @@ app.post(requestUri, (req, res) => {
   /* 2.3 인증 결과 검증을 위한 이용기관 거래ID 세션 저장 (필수) */
   // 동일한 세션내 요청과 결과가 동일한지 확인 및 인증결과 재사용 방지처리
   req.session.clientTxId = clientTxId;
+
+  console.log("세션에 저장된 clientTxId:", req.session.clientTxId); // 세션 값 확인
+
   // 2.4. 간편인증-표준창 거래정보 생성
   // - 간편인증-표준창 인증요청 정보 생성날짜 5분이 초과한 경우 거래정보 유효시간 오류 발생
   clientTxId = dateTime + "|" + clientTxId;
@@ -208,7 +206,7 @@ app.post(resultUri, express.text(), async (req, res) => {
   /* 4. 이용기관 응답데이터 셔션 및 검증유효시간 처리  */
   // 세션 내 요청 clientTxId 와 수신한 clientTxId 가 동일한지 비교(필수)
 
-  console.log("resultToken", req.session);
+  console.log("req.session.clientTxId : ", req.session);
 
   if (req.session.clientTxId != clientTxId) {
     return res.send("-4|세션값에 저장된 거래ID 비교 실패");
