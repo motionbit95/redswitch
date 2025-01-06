@@ -444,6 +444,7 @@ const App = () => {
               )}
               <Space style={{ marginTop: "5px" }}>
                 <Popover
+<<<<<<< Updated upstream
                   open={openPopover}
                   overlayStyle={{ width: 400 }}
                   placement="bottomRight"
@@ -549,6 +550,18 @@ const App = () => {
                     size="small"
                     onClick={() => setOpenPopover(true)}
                   >
+=======
+                  placement="bottomRight"
+                  title={
+                    <Typography.Text
+                      style={{ fontSize: "18px", fontWeight: "bold" }}
+                    >
+                      알림
+                    </Typography.Text>
+                  }
+                >
+                  <Badge count={5} size="small">
+>>>>>>> Stashed changes
                     <NotificationOutlined
                       style={{
                         fontSize: "20px",
