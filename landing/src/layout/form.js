@@ -93,7 +93,7 @@ const CenteredForm = (props) => {
       <Drawer
         open={open}
         onClose={() => setOpen(false)}
-        width={size === "mobile" ? "100%" : "700px"}
+        width={size === "mobile" ? "100%" : "600px"}
         height="100vh"
         centered
         placement={size === "mobile" ? "bottom" : "right"}
@@ -101,15 +101,19 @@ const CenteredForm = (props) => {
           backgroundColor: "#000",
           display: "flex",
         }}
+        bodyStyle={{
+          overflow: "hidden",
+        }}
         closeIcon={<CloseOutlined style={{ color: "#fff" }} />}
       >
         <div
           style={{
-            height: "90%",
-            maxHeight: "800px",
+            // height: size === "mobile" ? "90%" : "100%",
+            // maxHeight: size === "mobile" ? "800px" : "100%",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-around",
+            overflow: "hidden",
           }}
         >
           <Space direction="vertical" size={"large"}>
@@ -138,6 +142,7 @@ const CenteredForm = (props) => {
               justifyContent: "flex-end",
               display: "flex",
               marginBottom: "60px",
+              marginTop: "20px",
             }}
           >
             <Form
@@ -240,6 +245,7 @@ const CenteredForm = (props) => {
                     justifyContent: "space-between",
                     marginTop: size ? "8px" : "16px",
                     marginBottom: size ? "16px" : "32px",
+                    padding: "0 15px",
                   }}
                 >
                   <Checkbox style={{ color: "white", alignItems: "center" }}>

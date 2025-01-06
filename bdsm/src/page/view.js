@@ -60,7 +60,7 @@ function View(props) {
         <Typography.Paragraph>
           테스트는 100% 무료이며 익명으로 귀하의 정보가 필요하지 않습니다.
         </Typography.Paragraph>
-        <Button size="large" type="primary">
+        <Button size="large" type="primary" onClick={() => navigate("/test")}>
           🔥 BDSM 테스트하러 가기
         </Button>
       </div>
