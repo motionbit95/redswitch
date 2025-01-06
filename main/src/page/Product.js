@@ -8,6 +8,7 @@ import {
   message,
   Radio,
   Typography,
+  Drawer,
 } from "antd";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import { useMediaQuery } from "react-responsive";
@@ -70,6 +71,7 @@ function Product({ branch, theme }) {
       const data = await response.json();
       if (response.status === 201) {
         message.success("장바구니에 상품을 담았습니다.");
+        setShowOptions(false);
       } else {
         message.error(data.message);
       }
@@ -217,9 +219,15 @@ function Product({ branch, theme }) {
             flexDirection: "column",
             gap: "10px",
             width: "100%",
+            position: isLarge ? "static" : "fixed",
+            bottom: isLarge ? "0" : "58px",
+            left: isLarge ? "0" : "0",
+            backgroundColor: isLarge ? "none" : "#fff",
+            paddingTop: isLarge ? "0" : "10px",
+            paddingBottom: isLarge ? "0" : "10px",
           }}
         >
-          {showOptions && productData?.options?.length > 0 && (
+          {/* {showOptions && productData?.options?.length > 0 && (
             <div
               style={{
                 marginBottom: "10px",
@@ -282,46 +290,122 @@ function Product({ branch, theme }) {
                 </Typography.Text>
               </div>
             </div>
-          )}
+          )} */}
+          <Drawer
+            title="옵션 선택"
+            placement={isLarge ? "right" : "bottom"}
+            onClose={() => setShowOptions(false)}
+            height={"auto"}
+            open={showOptions}
+            mask={false}
+            bodyStyle={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
+            <Checkbox.Group
+              style={{ width: "100%" }}
+              onChange={handleOptionChange}
+            >
+              {productData?.options?.map((option) => (
+                <Checkbox key={option.id} value={option.id}>
+                  {option.optionName} (+
+                  {parseInt(option.optionPrice).toLocaleString()}원)
+                </Checkbox>
+              ))}
+            </Checkbox.Group>
+            <Divider style={{ display: isLarge ? "none" : "flex" }} />
+            <div
+              style={{
+                display: "flex",
+                gap: "20px",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginTop: "10px",
+                }}
+              >
+                <Typography.Text
+                  style={{ fontWeight: "bold", fontSize: "large" }}
+                >
+                  예상 결제금액
+                </Typography.Text>
+                <Typography.Text
+                  style={{ fontWeight: "bold", fontSize: "large" }}
+                >
+                  {(
+                    parseInt(quantity) *
+                      parseInt(productData?.product_price || 0) +
+                    selectedOptions.reduce(
+                      (total, option) => total + (option?.optionPrice || 0),
+                      0
+                    )
+                  ).toLocaleString()}
+                  원
+                </Typography.Text>
+              </div>
+              {/* 버튼 그룹 */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: "10px",
+                  // width: "100%",
+                  padding: isLarge ? "10px" : "5px",
+                }}
+              >
+                <Button
+                  size="large"
+                  onClick={handleAddToCart}
+                  style={{ width: "100%" }}
+                >
+                  장바구니에 추가
+                </Button>
+                <Button
+                  size="large"
+                  type="primary"
+                  danger
+                  onClick={handleBuyNow}
+                  style={{ width: "100%" }}
+                >
+                  바로 구매하기
+                </Button>
+              </div>
+            </div>
+          </Drawer>
 
           {/* 버튼 그룹 */}
           <div
             style={{
-              width: "100%",
-              position: isLarge ? "static" : "fixed",
-              bottom: isLarge ? "0" : "58px",
-              left: isLarge ? "0" : "0",
-              backgroundColor: isLarge ? "none" : "#fff",
-              paddingTop: isLarge ? "0" : "10px",
-              paddingBottom: isLarge ? "0" : "10px",
+              display: "flex",
+              flexDirection: "row",
+              gap: "10px",
+              // width: "100%",
+              padding: isLarge ? "10px" : "5px",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "10px",
-                // width: "100%",
-                padding: isLarge ? "10px" : "5px",
-              }}
+            <Button
+              size="large"
+              onClick={handleAddToCart}
+              style={{ width: "100%" }}
             >
-              <Button
-                size="large"
-                onClick={handleAddToCart}
-                style={{ width: "100%" }}
-              >
-                장바구니에 추가
-              </Button>
-              <Button
-                size="large"
-                type="primary"
-                danger
-                onClick={handleBuyNow}
-                style={{ width: "100%" }}
-              >
-                바로 구매하기
-              </Button>
-            </div>
+              장바구니에 추가
+            </Button>
+            <Button
+              size="large"
+              type="primary"
+              danger
+              onClick={handleBuyNow}
+              style={{ width: "100%" }}
+            >
+              바로 구매하기
+            </Button>
           </div>
         </div>
       </div>
