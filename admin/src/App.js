@@ -249,15 +249,10 @@ const App = () => {
       icon: React.createElement(InboxOutlined),
       label: "상품관리",
       children: [
-        // ...(currentUser.permission === "1"
-        //   ? [
         {
           key: "/product/material",
           label: <Link to="/product/material">물자등록</Link>,
         },
-        ,
-        //   ]
-        // : [])
         {
           key: "/product/product",
           label: <Link to="/product/product">판매상품관리</Link>,
@@ -613,7 +608,10 @@ const App = () => {
             >
               {/* 페이지 라우팅 */}
               <Routes>
-                <Route path="/dashboard" element={<Main />} />
+                <Route
+                  path="/dashboard"
+                  element={<Main currentUser={currentUser} />}
+                />
                 <Route path="/admin/account" element={<Account />} />
                 <Route path="/admin/spot" element={<Spot />} />
 

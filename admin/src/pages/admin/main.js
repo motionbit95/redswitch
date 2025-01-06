@@ -6,7 +6,7 @@ import FranchiseList from "../../components/list/franchise";
 import SalesList from "../../components/list/sales";
 import InquiryList from "../../components/list/inquiry";
 
-const Main = () => {
+const Main = ({ currentUser }) => {
   const [dateRange, setDateRange] = React.useState(null);
   return (
     <Row gutter={[16, 16]}>
@@ -25,11 +25,14 @@ const Main = () => {
               <InquiryList />
             </Card>
           </Col>
-          <Col span={24}>
-            <Card title="가맹점신청">
-              <FranchiseList />
-            </Card>
-          </Col>
+          {currentUser.permission === "1" ||
+            (currentUser.permission === "2" && (
+              <Col span={24}>
+                <Card title="가맹점신청">
+                  <FranchiseList />
+                </Card>
+              </Col>
+            ))}
         </Row>
       </Col>
       <Col span={12}>

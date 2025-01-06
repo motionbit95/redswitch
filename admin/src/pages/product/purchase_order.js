@@ -36,6 +36,7 @@ const DetailModal = ({
 }) => {
   const [orderDetails, setOrderDetails] = useState([]); // 발주 상세 데이터 상태 관리
   const [materials, setMaterials] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
 
   // 발주 내역 불러오기
   useEffect(() => {
@@ -69,25 +70,38 @@ const DetailModal = ({
     fetchMaterials();
   }, []);
 
+  useEffect(() => {
+    let filteredOrders = [];
+    console.log(orderDetails.map((order) => order.material_pk));
+    console.log(materials);
+    orderDetails.map((order) => {
+      let data = materials.filter(
+        (material) => material.pk === order.material_pk
+      );
+      if (data.length > 0) {
+        console.log(">>>>>>", data[0]);
+        filteredOrders.push({
+          ...order,
+          product_name: data[0].product_name,
+          product_code: data[0].product_code,
+          provider_name: data[0].provider_name,
+        });
+      }
+    });
+
+    setFilteredOrders(filteredOrders);
+  }, [orderDetails]);
+
   const columns = [
     {
       title: "상품명",
-      render: (text, record) => {
-        let material = materials.filter(
-          (material) => material.pk === record.material_pk
-        );
-
-        return <span>{material[0]?.product_name}</span>;
-      },
+      dataIndex: "product_name",
+      key: "material_name",
     },
     {
       title: "상품코드",
-      render: (text, record) => {
-        let material = materials.filter(
-          (material) => material.pk === record.material_pk
-        );
-        return <span>{material[0]?.product_code}</span>;
-      },
+      dataIndex: "product_code",
+      key: "material_code",
     },
     {
       title: "발주 수량",
@@ -96,18 +110,14 @@ const DetailModal = ({
     },
     {
       title: "거래처 명",
-      render: (text, record) => {
-        let provider = materials.filter(
-          (provider) => provider.pk === record.material_pk
-        );
-        return <span>{provider[0]?.provider_name}</span>;
-      },
+      dataIndex: "provider_name",
+      key: "provider_name",
     },
   ];
 
   // Use the custom hook to export data to Excel
   const exportToExcel = useExportToExcel(
-    orderDetails,
+    filteredOrders,
     columns,
     [],
     "발주 내역" + dayjs().format("YYYYMMDD")
@@ -138,7 +148,7 @@ const DetailModal = ({
       >
         엑셀 다운로드
       </Button>
-      <Table size="small" columns={columns} dataSource={orderDetails} />
+      <Table size="small" columns={columns} dataSource={filteredOrders} />
     </Modal>
   );
 };
