@@ -77,6 +77,10 @@ function MainPage(props) {
 
   const onCert = async (script) => {
     console.log("onCert", script);
+    if (!script) {
+      // 인증 성공시에만
+      return;
+    }
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}/accounts/anonymous-login`,
       {
