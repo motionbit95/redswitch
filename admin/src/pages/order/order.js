@@ -78,7 +78,7 @@ const Order = (props) => {
     } else {
       setFilteredOrders([]);
     }
-  }, [orders]);
+  }, [orders, selectedBranch]);
 
   const onSearch = () => {
     let filtered = orders.filter((order) => order.order_status !== 0);
