@@ -8,6 +8,8 @@ const path = require("path");
 app.use(express.json());
 // URL-encoded 형식의 요청 본문을 파싱
 app.use(express.urlencoded({ extended: true }));
+// text/plain 형식 요청 본문 처리
+app.use(express.text());
 
 const cors = require("cors");
 // 모든요청에 cors 적용
