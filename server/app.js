@@ -176,7 +176,6 @@ app.post(requestUri, (req, res) => {
 app.post(resultUri, async (req, res) => {
   // 결과 Token 수신
   const resultToken = req.body; //retType이 callback 방식일 경우
-  console.log("resultToken", resultToken);
 
   // const resultToken = req.body.hubToken; //retType이 redirect 방식일 경우
   if (resultToken == "" || resultToken == null) {
@@ -215,6 +214,9 @@ app.post(resultUri, async (req, res) => {
 
   /* 4. 이용기관 응답데이터 셔션 및 검증유효시간 처리  */
   // 세션 내 요청 clientTxId 와 수신한 clientTxId 가 동일한지 비교(필수)
+
+  console.log("resultToken", req.session);
+
   if (req.session.clientTxId != clientTxId) {
     return res.send("-4|세션값에 저장된 거래ID 비교 실패");
   }
