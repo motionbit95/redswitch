@@ -198,18 +198,18 @@ const PaymentSummaryByBranch = () => {
       key: "branchAddress",
       ...getColumnSearchProps("branchAddress"),
     },
-    {
-      title: "결제건수",
-      dataIndex: "totalTransactions",
-      key: "totalTransactions",
-      sorter: (a, b) => a.totalTransactions - b.totalTransactions,
-    },
-    {
-      title: "환불건수",
-      dataIndex: "refundTransactions",
-      key: "refundTransactions",
-      sorter: (a, b) => a.refundTransactions - b.refundTransactions,
-    },
+    // {
+    //   title: "결제건수",
+    //   dataIndex: "totalTransactions",
+    //   key: "totalTransactions",
+    //   sorter: (a, b) => a.totalTransactions - b.totalTransactions,
+    // },
+    // {
+    //   title: "환불건수",
+    //   dataIndex: "refundTransactions",
+    //   key: "refundTransactions",
+    //   sorter: (a, b) => a.refundTransactions - b.refundTransactions,
+    // },
     {
       title: "결제금액",
       dataIndex: "totalAmount",

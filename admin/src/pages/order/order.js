@@ -3,13 +3,10 @@ import { AxiosGet, AxiosPut } from "../../api";
 import {
   Button,
   Card,
-  Col,
   DatePicker,
   Form,
   Input,
   message,
-  Row,
-  Select,
   Space,
   Table,
   Tag,
@@ -17,148 +14,108 @@ import {
 import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
 import useSearchFilter from "../../hook/useSearchFilter";
-import useExportToExcel from "../../hook/useExportToExcel";
-import { DownloadOutlined } from "@ant-design/icons";
+import isBetween from "dayjs/plugin/isBetween";
+import SearchBranch from "../../components/popover/searchbranch";
+import { on } from "events";
+dayjs.extend(isBetween);
 
-const Order = () => {
+const { RangePicker } = DatePicker;
+
+const Order = (props) => {
+  const { currentUser } = props;
   const [orders, setOrders] = useState([]);
   const [payments, setPayments] = useState([]);
-  const [filteredOrders, setFilteredOrders] = useState([]);
   const [branches, setBranches] = useState([]);
-  const [materials, setMaterials] = useState([]);
-  const [expandedRowData, setExpandedRowData] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [dateRange, setDateRange] = useState([null, null]); // 시작일, 종료일
+  const [selectedBranch, setSelectedBranch] = useState(null);
 
   const { getColumnSearchProps } = useSearchFilter();
 
-  // 물자 정보 - 주문 상품의 거래처 표시 위함
-  useEffect(() => {
-    const fetchMaterials = async () => {
-      AxiosGet("/products/materials")
-        .then((res) => {
-          setMaterials(res.data);
-        })
-        .catch((err) => console.log(err));
-    };
-    fetchMaterials();
-  }, []);
-
-  // 주문 정보
-  useEffect(() => {
-    const fetchOrders = async () => {
-      AxiosGet("/orders")
-        .then((res) => {
-          const sortedOrders = res.data.sort((a, b) => {
-            // `checked`가 0인 항목을 최상단으로 정렬
-            return a.checked === b.checked ? 0 : a.checked === 0 ? -1 : 1;
-          });
-
-          sortedOrders.forEach((order) => {
-            console.log(order.branch_pk);
-            const branch = branches.find(
-              (branch) => branch.id === order.branch_pk
-            );
-            if (branch) {
-              order.branch_name = branch.branch_name;
-            }
-          });
-
-          console.log(sortedOrders);
-
-          setOrders(sortedOrders);
-        })
-        .catch((err) => console.error(err));
-    };
-
-    fetchOrders();
-  }, [branches]);
-
-  // 지점 정보 - 주문 지점 및 지역을 표시하기 위함
   useEffect(() => {
     const fetchBranches = async () => {
-      AxiosGet("/branches")
-        .then((res) => {
-          setBranches(res.data);
-        })
-        .catch((err) => console.err(err));
+      try {
+        const res = await AxiosGet("/branches");
+        setBranches(res.data);
+      } catch (err) {
+        console.error(err);
+      }
     };
     fetchBranches();
   }, []);
 
-  // 결제 정보 - 결제 취소 위함
   useEffect(() => {
-    const fetchPayments = async () => {
-      AxiosGet("/payments")
-        .then((res) => {
-          setPayments(res.data);
-        })
-        .catch((err) => console.log(err));
-    };
-    fetchPayments();
-  }, [orders]);
-
-  // 결제 대기인 주문을 필터링 하기 위함
-  useEffect(() => {
-    let filteredOrders = [];
-    orders.map((order) => {
-      let data = payments.filter(
-        (payment) => payment.ordNo === order.order_code
-      );
-
-      if (data.length > 0) {
-        filteredOrders.push(order);
-      }
-    });
-
-    setFilteredOrders(filteredOrders);
-  }, [payments]);
-
-  // 주문 확인 여부 체크
-  const updateCheckedStatus = async (id) => {
-    try {
-      await AxiosPut(`/orders/${id}`, { checked: 1 }); // Update server
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === id ? { ...order, checked: 1 } : order
-        )
-      ); // Update UI
-    } catch (error) {
-      console.error("Error updating checked status:", error);
-    }
-  };
-
-  // 주문취소
-  const cancelPayment = async (items) => {
-    console.log(items);
-    // 해당 order code의 payment data를 가지고 옴
-    const payment = payments.filter(
-      (payment) =>
-        payment.ordNo === items.order_code && payment.cancelYN === "N" // 취소되지 않은
-    );
-
-    // payment data가 있으면 취소
-    if (payment.length > 0) {
-      console.log(payment[0]);
-
-      const queryParams = {
-        tid: payment[0].tid,
-        ordNo: payment[0].ordNo,
-        amt: payment[0].goodsAmt,
-        ediDate: payment[0].ediDate,
-      };
-
-      if (items.order_status < 2) {
-        window.location.replace(
-          `${process.env.REACT_APP_SERVER_URL}/payments/admin/payCancel?tid=${queryParams?.tid}&ordNo=${queryParams?.ordNo}&canAmt=${queryParams?.amt}&ediDate=${queryParams?.ediDate}`
+    const fetchOrders = async () => {
+      try {
+        const res = await AxiosGet("/orders");
+        const sortedOrders = res.data.sort((a, b) =>
+          a.checked === b.checked ? 0 : a.checked === 0 ? -1 : 1
         );
-      } else if (items.order_status === 2) {
-        message.error("이미 취소된 주문입니다.");
-      } else {
-        message.error("취소 불가 주문입니다.");
+
+        sortedOrders.forEach((order) => {
+          const branch = branches.find(
+            (branch) => branch.id === order.branch_pk
+          );
+          if (branch) {
+            order.branch_name = branch.branch_name;
+          }
+        });
+
+        setOrders(sortedOrders);
+        // setFilteredOrders(sortedOrders); // 초기 필터링 데이터
+      } catch (err) {
+        console.error(err);
       }
+    };
+    fetchOrders();
+  }, [branches]);
+
+  useEffect(() => {
+    console.log("orders", orders, selectedBranch);
+    if (selectedBranch) {
+      onSearch();
+    } else {
+      setFilteredOrders([]);
+    }
+  }, [selectedBranch]);
+
+  const onSearch = () => {
+    let filtered = orders.filter((order) => order.order_status !== 0);
+
+    // 상품 코드 검색
+    if (searchKeyword) {
+      filtered = filtered.filter((order) =>
+        order.select_products.some((product) =>
+          product.product_code.includes(searchKeyword)
+        )
+      );
+    }
+
+    // 지점 필터링
+    if (selectedBranch.length > 0) {
+      filtered = filtered.filter((order) =>
+        selectedBranch.some((branch) => branch.id === order.branch_pk)
+      );
+    }
+
+    // 주문일시 필터링
+    if (dateRange[0] && dateRange[1]) {
+      const [start, end] = dateRange;
+      filtered = filtered.filter((order) => {
+        const orderDate = dayjs(order.created_at);
+        return orderDate.isBetween(start, end, "day", "[]");
+      });
+    }
+
+    console.log("filtered", filtered);
+    if (selectedBranch) {
+      setFilteredOrders(filtered);
+    } else {
+      setFilteredOrders([]);
     }
   };
 
-  // 메인 테이블 컬럼 속성
   const columns = [
     {
       title: "No.",
@@ -169,9 +126,7 @@ const Order = () => {
       dataIndex: "created_at",
       key: "created_at",
       ellipsis: true,
-      render: (text) => (
-        <span>{dayjs(text).format("YYYY-MM-DD HH:mm:ss")}</span>
-      ),
+      render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
     },
     {
       title: "주문번호",
@@ -179,95 +134,44 @@ const Order = () => {
       key: "order_code",
       ...getColumnSearchProps("order_code"),
     },
-    // {
-    //   title: "주문명",
-    //   dataIndex: "goods_name",
-    //   key: "goods_name",
-    // },
     {
       title: "배송메세지",
       dataIndex: "delivery_message",
       key: "delivery_message",
       ellipsis: true,
-      ...getColumnSearchProps("delivery_message"),
     },
     {
       title: "주문금액",
       dataIndex: "order_amount",
       key: "order_amount",
-      render: (text) => <span>{parseInt(text).toLocaleString()}원</span>,
-      sorter: (a, b) => a.order_amount - b.order_amount,
+      render: (text) => `${parseInt(text).toLocaleString()}원`,
     },
     {
       title: "지점명",
-      ellipsis: true,
       dataIndex: "branch_name",
       key: "branch_name",
+      ellipsis: true,
     },
     {
-      title: "주소",
+      title: "호실",
       dataIndex: "customer_address",
       key: "customer_address",
       ellipsis: true,
-      render: (text) => <span>{text}호</span>,
-      ...getColumnSearchProps("customer_address"),
     },
     {
       title: "주문상태",
       dataIndex: "order_status",
       key: "order_status",
       render: (text, record) => {
-        let data = payments.filter(
-          (payment) => payment.ordNo === record.order_code
-        );
         return (
-          <Tag
-            color={data.length === 0 ? "" : data.length === 1 ? "green" : "red"}
-          >
-            {data.length === 0
-              ? "결제대기"
-              : data.length === 1
-              ? "주문완료"
-              : "주문취소"}
+          <Tag color={text === 0 ? "" : text === 1 ? "green" : "red"}>
+            {text === 0 ? "결제대기" : text === 1 ? "주문완료" : "주문취소"}
           </Tag>
-        );
-      },
-
-      filters: [
-        { text: "결제대기", value: 0 },
-        { text: "주문완료", value: 1 },
-        { text: "주문취소", value: 2 },
-      ],
-      onFilter: (value, record) => {
-        let data = payments.filter(
-          (payment) => payment.ordNo === record.order_code
-        );
-        return data.length === value;
-      },
-    },
-    {
-      title: "동작",
-      dataIndex: "action",
-      key: "action",
-      width: 120,
-      render: (text, record) => {
-        let data = payments.filter(
-          (payment) => payment.ordNo === record.order_code
-        );
-        return (
-          <span style={{ display: "flex", gap: "10px" }}>
-            {/* {record.order_status !== 0 && <a>주문취소</a>} */}
-            <a>삭제</a>
-            {data.length === 1 && (
-              <a onClick={() => cancelPayment(record)}>주문취소</a>
-            )}
-          </span>
         );
       },
     },
   ];
 
-  // 서브 테이블 컬럼 속성
   const subColumns = [
     {
       title: "상품코드",
@@ -275,21 +179,10 @@ const Order = () => {
       key: "product_code",
     },
     {
-      title: "거래처",
-      render: (text, record) => {
-        let material = materials.filter(
-          (material) => material.pk === record.material_id
-        );
-
-        return <span>{material[0]?.provider_name}</span>;
-      },
-    },
-    {
       title: "상품명",
       dataIndex: "product_name",
       key: "product_name",
     },
-
     {
       title: "수량",
       dataIndex: "count",
@@ -299,191 +192,62 @@ const Order = () => {
       title: "상품금액",
       dataIndex: "product_price",
       key: "product_price",
-      render: (text) => <span>{parseInt(text).toLocaleString()}원</span>,
-    },
-    {
-      title: "지점추가매출",
-      dataIndex: "additional_fee",
-      key: "additional_fee",
-      render: (text) => <span>{parseInt(text).toLocaleString()}원</span>,
-    },
-    {
-      title: "옵션",
-      dataIndex: "option",
-      key: "option",
-      render: (text, record) => {
-        // Parse text into an array if it's JSON-like
-        let optionArray;
-        try {
-          optionArray = typeof text === "string" ? JSON.parse(text) : text;
-        } catch (e) {
-          optionArray = [];
-        }
-
-        if (Array.isArray(optionArray) && optionArray.length > 0) {
-          return (
-            <span>
-              {optionArray.map((option, index) => {
-                const { optionName, optionPrice } = option;
-                return (
-                  <span key={index}>
-                    {optionName} (+{parseInt(optionPrice).toLocaleString()}원)
-                    {index < optionArray.length - 1 && ", "}
-                  </span>
-                );
-              })}
-            </span>
-          );
-        }
-
-        // Fallback if parsing fails or data is empty
-        return <span>-</span>;
-      },
-    },
-    {
-      title: "합계",
-      dataIndex: "amount",
-      key: "amount",
-      render: (text) => <span>{parseInt(text).toLocaleString()}원</span>,
+      render: (text) => `${parseInt(text).toLocaleString()}원`,
     },
   ];
 
-  // 필터링
-  const onSubmit = (values) => {
-    console.log("필터링 값:", values);
-  };
-
-  // 엑셀 내보내기
-  const exportToExcel = useExportToExcel(
-    filteredOrders, // 필터된 주문 데이터
-    columns.slice(1, columns.length - 1), // 주문 컬럼
-    "주문관리_" + dayjs().format("YYYYMMDD")
-  );
-
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
-      {/* <OrderFilter onSubmit={onSubmit} /> */}
-      <Button
-        style={{ float: "right" }}
-        icon={<DownloadOutlined />}
-        onClick={exportToExcel}
-      >
-        엑셀 다운로드
-      </Button>
+      <Card>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <Space>
+            <SearchBranch
+              selectedBranch={selectedBranch}
+              setSelectedBranch={(branches) => {
+                setSelectedBranch(branches[0]);
+              }}
+              multiple={false}
+              currentUser={currentUser}
+            />
+            <Input
+              placeholder="상품코드를 입력하세요"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              style={{ width: 300 }}
+            />
+            <RangePicker
+              onChange={(dates) => setDateRange(dates)}
+              style={{ marginLeft: 10 }}
+            />
+          </Space>
+          <Button type="primary" icon={<SearchOutlined />} onClick={onSearch}>
+            검색
+          </Button>
+        </div>
+      </Card>
       <Table
         size="small"
         columns={columns}
         dataSource={filteredOrders}
-        rowKey={(record) => record.order_code} // Ensure each row has a unique key
+        rowKey={(record) => record.order_code}
         rowClassName={(record) =>
           record.checked === 0 || !record.checked ? "highlight-row" : ""
         }
-        pagination={{
-          pageSize: 20,
-          showSizeChanger: true,
-        }}
         expandable={{
-          expandedRowRender: (record) => {
-            return (
-              <Table
-                size="small"
-                columns={subColumns}
-                dataSource={record.select_products}
-                rowKey={(item) => `${record.order_code}-${item.product_name}`} // Ensure sub-rows also have unique keys
-                pagination={false}
-              />
-            );
-          },
-          onExpand: (expanded, record) => {
-            if ((expanded && record.checked === 0) || !record.checked) {
-              updateCheckedStatus(record.id); // Update when row is expanded
-            }
-          },
+          expandedRowRender: (record) => (
+            <Table
+              size="small"
+              columns={subColumns}
+              dataSource={record.select_products}
+              rowKey={(item) => `${record.order_code}-${item.product_code}`}
+              pagination={false}
+            />
+          ),
           rowExpandable: (record) =>
-            record.select_products && record.select_products.length > 0, // Expand only if items exist
+            record.select_products && record.select_products.length > 0,
         }}
       />
     </Space>
-  );
-};
-
-const OrderFilter = (props) => {
-  const [form] = Form.useForm();
-  const { onSubmit } = props;
-
-  // 폼 제출 시 호출되는 함수
-  const onFinish = (values) => {
-    onSubmit(values); // 부모 컴포넌트로 필터링된 값 전달
-  };
-
-  return (
-    <Card>
-      <Form
-        layout="inline"
-        form={form}
-        onFinish={onFinish}
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 16,
-        }}
-      >
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              {/* 주문 날짜 */}
-              <Form.Item name="order_date" label="주문날짜">
-                <DatePicker.RangePicker />
-              </Form.Item>
-              {/* 주문 상태 */}
-              <Form.Item name="order_status" label="주문상태">
-                <Select defaultValue="전체" style={{ width: 120 }}>
-                  <Select.Option value="전체">전체</Select.Option>
-                  <Select.Option value="1">주문완료</Select.Option>
-                  <Select.Option value="2">주문취소</Select.Option>
-                  <Select.Option value="3">배송완료</Select.Option>
-                </Select>
-              </Form.Item>
-            </div>
-          </Col>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center" }}>
-              {/* 검색 조건 */}
-              <Form.Item name="search_option" label="검색조건">
-                <Select defaultValue="---선택---" style={{ width: 120 }}>
-                  <Select.Option value="product_code">상품코드</Select.Option>
-                  <Select.Option value="branch">지점별</Select.Option>
-                  <Select.Option value="region">지역별</Select.Option>
-                  <Select.Option value="provider">거래처별</Select.Option>
-                </Select>
-              </Form.Item>
-              {/* 검색 키워드 */}
-              <Form.Item name="search_keyword">
-                <Input placeholder="검색어 입력" />
-              </Form.Item>
-            </div>
-            {/* 검색 버튼 */}
-            <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                iconPosition="end"
-                icon={<SearchOutlined />}
-              >
-                검색
-              </Button>
-            </Form.Item>
-          </div>
-        </Row>
-      </Form>
-    </Card>
   );
 };
 

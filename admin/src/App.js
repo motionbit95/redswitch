@@ -639,7 +639,10 @@ const App = () => {
                   element={<Purchase_order />}
                 />
 
-                <Route path="/order" element={<Order />} />
+                <Route
+                  path="/order"
+                  element={<Order currentUser={currentUser} />}
+                />
 
                 <Route
                   path="/post/notification"
