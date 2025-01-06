@@ -12,6 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.text());
 
 const cors = require("cors");
+const session = require("express-session");
 
 app.use(
   session({
