@@ -30,6 +30,7 @@ import {
   Row,
   Col,
   Popconfirm,
+  Image,
 } from "antd";
 import { Footer } from "antd/es/layout/layout";
 import BDSMQuestions from "./pages/bdsm/bdsm_questions";
@@ -58,6 +59,8 @@ import TabPane from "antd/es/tabs/TabPane";
 import PaymentSummary from "./pages/sales/salse";
 import PaymentSummaryByBranch from "./pages/sales/branch";
 import NoticeList from "./components/list/notice";
+import { use } from "react";
+import { Descriptions, Tag } from "antd/lib";
 
 const { Header, Content, Sider } = Layout;
 
@@ -80,16 +83,6 @@ const App = () => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-
-  const duminotifications = [
-    { id: 1, message: "새로운 알림이 도착했습니다." },
-    { id: 2, message: "시스템 점검 예정입니다." },
-  ];
-
-  const dumiorders = [
-    { id: 1, message: "주문이 완료되었습니다." },
-    { id: 2, message: "배송이 시작되었습니다." },
-  ];
 
   const defaultOpenKeys = window.location.pathname.split("/")[1] || "dashboard";
   const defaultSelectedKeys = window.location.pathname;
@@ -150,6 +143,7 @@ const App = () => {
       if (latestUnseenAlarm) {
         setSelectedAlarm(latestUnseenAlarm);
         setIsModalVisible(true);
+        playSound();
       }
 
       if (isFirstLoad) setIsFirstLoad(false);
@@ -340,6 +334,7 @@ const App = () => {
     <Router>
       {/* 모달을 통한 알림 상세 내용 표시 */}
       <Modal
+        centered
         title={selectedAlarm?.alarm_title}
         visible={isModalVisible}
         onCancel={handleCloseModal}
@@ -382,21 +377,7 @@ const App = () => {
         width={600}
         closable={false} // X 버튼을 없애기 위해 추가
       >
-        <p>
-          <strong>내용:</strong> {selectedAlarm?.alarm_content}
-        </p>
-        <p>
-          <strong>지점 PK:</strong> {selectedAlarm?.branch_pk}
-        </p>
-        <p>
-          <strong>주문 PK:</strong> {selectedAlarm?.order_pk}
-        </p>
-        <p>
-          <strong>생성 시간:</strong>{" "}
-          {selectedAlarm
-            ? new Date(selectedAlarm.created_at).toLocaleString()
-            : ""}
-        </p>
+        <OrderDetail selectedAlarm={selectedAlarm} />
       </Modal>
       <Layout style={{ minHeight: "100vh", minWidth: "1200px" }}>
         <Header
@@ -674,6 +655,83 @@ const App = () => {
         </Layout>
       </Layout>
     </Router>
+  );
+};
+
+const OrderDetail = ({ selectedAlarm }) => {
+  const [order, setOrder] = useState();
+  const [branch, setBranch] = useState();
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const response = await AxiosGet("/orders/" + selectedAlarm.order_pk);
+        const order = response.data;
+        console.log(order);
+        setOrder(order);
+
+        let res = await AxiosGet("/branches/" + order.branch_pk);
+        const branch = res.data;
+        setBranch(branch);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
+    fetchOrder();
+  }, []);
+
+  return (
+    <Descriptions title={""} bordered column={2}>
+      <Descriptions.Item span={2} label="주문내용">
+        {selectedAlarm?.alarm_content}
+      </Descriptions.Item>
+      <Descriptions.Item label="주문지점">
+        {branch?.branch_name}
+      </Descriptions.Item>
+      <Descriptions.Item span={2} label="주문번호">
+        {order?.order_code}
+      </Descriptions.Item>
+      <Descriptions.Item label="주문일시">
+        {order?.created_at ? new Date(order?.created_at).toLocaleString() : ""}
+      </Descriptions.Item>
+      <Descriptions.Item label="주문금액">
+        {order?.order_amount.toLocaleString()}원
+      </Descriptions.Item>
+      {/* <Descriptions.Item span={2} label="주문상태">
+        <Tag>
+          {order?.order_status === 0
+            ? "결제대기"
+            : order?.order_status === 1
+            ? "결제완료"
+            : "주문취소"}
+        </Tag>
+      </Descriptions.Item> */}
+      <Descriptions.Item span={2} label="주문상세">
+        {order?.select_products?.map((product, index) => (
+          <Space>
+            <Image
+              src={product.blurred_image || "https://via.placeholder.com/120"}
+              alt={product.product_name}
+              width={60}
+              height={60}
+            />
+            <div key={index}>
+              <div>{product.product_name}</div>
+              {product.option?.map((option, index) => (
+                <div key={index}>
+                  {option.optionName} : {option.optionValue}
+                </div>
+              ))}
+              <div style={{ opacity: "0.5", fontSize: "small" }}>
+                {parseInt(product.amount).toLocaleString("ko-KR")}원 |{" "}
+                {product.count}개
+              </div>
+            </div>
+          </Space>
+        ))}
+      </Descriptions.Item>
+    </Descriptions>
   );
 };
 
