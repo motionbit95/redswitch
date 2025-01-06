@@ -307,6 +307,7 @@ function getCurrentDate() {
 }
 
 async function sendPost(targetUrl, keyToken) {
+  console.log("keyToken", targetUrl, keyToken);
   let hubToken = await axios({
     method: "post",
     url: targetUrl,
