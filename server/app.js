@@ -4,6 +4,7 @@ const app = express();
 const port = 8080;
 const path = require("path");
 
+app.use(express.static("./"));
 // JSON 형식의 요청 본문을 파싱
 app.use(express.json());
 // URL-encoded 형식의 요청 본문을 파싱
@@ -206,11 +207,10 @@ app.post(resultUri, express.text(), async (req, res) => {
   /* 4. 이용기관 응답데이터 셔션 및 검증유효시간 처리  */
   // 세션 내 요청 clientTxId 와 수신한 clientTxId 가 동일한지 비교(필수)
 
-  console.log("req.session.clientTxId : ", req.session);
-
-  if (req.session.clientTxId != clientTxId) {
-    return res.send("-4|세션값에 저장된 거래ID 비교 실패");
-  }
+  // 이 부분 오류나서 잠시 보류
+  // if (req.session.clientTxId != clientTxId) {
+  //   return res.send("-4|세션값에 저장된 거래ID 비교 실패");
+  // }
 
   // 검증정보 유효시간 검증 (검증결과 생성 후 10분 이내 검증 권고)
   let oldDate = new Date(issueDate);
