@@ -300,6 +300,10 @@ export const cartStyles = {
     boxShadow: "0 -2px 5px rgba(0, 0, 0, 0.1)",
     gap: "10px",
     backgroundColor: "white",
+
+    "media (min-width: 768px)": {
+      bottom: "70px",
+    },
   },
 
   footerContent: {

@@ -127,7 +127,10 @@ function Product({ branch, theme }) {
                 labelStyle={{ fontWeight: "bold", textAlign: "left" }}
               >
                 <Descriptions.Item label="가격">
-                  {parseInt(productData.product_price).toLocaleString()}원
+                  {(
+                    parseInt(productData.product_price) * quantity
+                  ).toLocaleString()}
+                  원
                 </Descriptions.Item>
                 <Descriptions.Item label="수량">
                   <InputNumber
@@ -284,28 +287,41 @@ function Product({ branch, theme }) {
           {/* 버튼 그룹 */}
           <div
             style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "10px",
               width: "100%",
+              position: isLarge ? "static" : "fixed",
+              bottom: isLarge ? "0" : "58px",
+              left: isLarge ? "0" : "0",
+              backgroundColor: isLarge ? "none" : "#fff",
+              paddingTop: isLarge ? "0" : "10px",
+              paddingBottom: isLarge ? "0" : "10px",
             }}
           >
-            <Button
-              size="large"
-              onClick={handleAddToCart}
-              style={{ width: "100%" }}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                gap: "10px",
+                // width: "100%",
+                padding: isLarge ? "10px" : "5px",
+              }}
             >
-              장바구니에 추가
-            </Button>
-            <Button
-              size="large"
-              type="primary"
-              danger
-              onClick={handleBuyNow}
-              style={{ width: "100%" }}
-            >
-              바로 구매하기
-            </Button>
+              <Button
+                size="large"
+                onClick={handleAddToCart}
+                style={{ width: "100%" }}
+              >
+                장바구니에 추가
+              </Button>
+              <Button
+                size="large"
+                type="primary"
+                danger
+                onClick={handleBuyNow}
+                style={{ width: "100%" }}
+              >
+                바로 구매하기
+              </Button>
+            </div>
           </div>
         </div>
       </div>

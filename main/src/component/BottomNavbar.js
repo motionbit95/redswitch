@@ -32,13 +32,13 @@ function BottomNavbar(props) {
         bottom: "0",
         left: "0",
         right: "0",
-        padding: "10px",
         justifyContent: "center",
         backgroundColor: props.theme === "dark" ? "#1e1e1e" : "white",
         boxShadow: "0 -2px 5px rgba(0, 0, 0, 0.1)",
+        borderTop: "2px solid #f0f0f0",
       }}
     >
-      <Row gutter={[16, 16]} style={{ width: "100%" }}>
+      <Row gutter={[16, 16]} style={{ width: "100%", padding: "10px" }}>
         <Col
           onClick={() => {
             setMenu(0);
