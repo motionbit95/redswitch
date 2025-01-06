@@ -62,7 +62,6 @@ const BranchModal = ({
           key="submit"
           type="primary"
           onClick={() => {
-            console.log("여기");
             form.submit();
           }}
         >

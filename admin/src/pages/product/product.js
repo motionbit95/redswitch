@@ -39,7 +39,6 @@ const ProductCRUD = (props) => {
       ? JSON.parse(localStorage.getItem("selectedBranch"))
       : null
   );
-
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]); // 연관 상품 리스트
 
@@ -50,7 +49,7 @@ const ProductCRUD = (props) => {
 
   // 상품 목록 불러오기
   const fetchProducts = async () => {
-    console.log("selectedBranch >>>>", selectedBranch.id);
+    console.log("selectedBranch >>>>", selectedBranch?.id);
     try {
       const response = await AxiosGet(`/products/search/${selectedBranch.id}`);
       setProducts(response.data);

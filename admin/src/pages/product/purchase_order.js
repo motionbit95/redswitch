@@ -127,6 +127,7 @@ const DetailModal = ({
     <Modal
       title="발주 내역"
       open={isModalOpen}
+      centered
       onCancel={() => setIsModalOpen(false)}
       footer={null}
     >

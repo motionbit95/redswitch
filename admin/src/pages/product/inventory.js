@@ -18,6 +18,7 @@ import { useEffect } from "react";
 import { AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import useSearchFilter from "../../hook/useSearchFilter";
 import usePagination from "../../hook/usePagination";
+import { set } from "firebase/database";
 
 // 발주 추가 모달
 const AddModal = (props) => {
@@ -173,6 +174,8 @@ const Inventory = (props) => {
   const { getColumnSearchProps } = useSearchFilter();
 
   const [products, setProducts] = useState([]);
+  const [inventories, setInventories] = useState([]);
+  const [filteredInventories, setFilteredInventories] = useState([]);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -191,37 +194,62 @@ const Inventory = (props) => {
   const { pagination, setPagination, handleTableChange } = usePagination(10); // Default page size is 10
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    if (selectedBranch) {
+      fetchProducts();
+      fetchInventories();
+    }
+  }, [selectedBranch]);
 
   // 상품 목록 불러오기
   const fetchProducts = async () => {
     try {
-      const productsResponse = await AxiosGet(
-        `/products/search/${selectedBranch.id}`
-      );
-      const inventoriesResponse = await AxiosGet(`/products/inventories`);
-
-      console.log("Products:", productsResponse.data);
-      console.log("Inventories:", inventoriesResponse.data);
-
-      const inventoriesMap = {};
-      inventoriesResponse.data.forEach((inventory) => {
-        inventoriesMap[inventory.pk] = inventory;
-      });
-
-      const productsWithInventories = productsResponse.data.map((product) => ({
-        ...product,
-        key: product.PK,
-        inventory_cnt: inventoriesMap[product.PK]?.inventory_cnt || 0,
-        inventory_min_cnt: inventoriesMap[product.PK]?.inventory_min_cnt || 0,
-      }));
-
-      setProducts(productsWithInventories);
+      const response = await AxiosGet(`/products/search/${selectedBranch.id}`);
+      setProducts(response.data);
     } catch (error) {
-      message.error("상품 및 재고 목록을 불러오는 데 실패했습니다.");
+      message.error("상품을 불러오는 데 실패했습니다.");
     }
   };
+
+  // 재고 목록 불러오기
+  const fetchInventories = async () => {
+    try {
+      const response = await AxiosGet(`/products/inventories/`);
+      setInventories(response.data);
+    } catch (error) {
+      message.error("재고 목록을 불러오는 데 실패했습니다.");
+    }
+  };
+
+  // 필터된 재고 목록
+  useEffect(() => {
+    const filteredInventories = products.map((product) => {
+      const matchingInventory = inventories.find(
+        (inventory) => inventory.pk === product.PK
+      );
+
+      // 매칭되는 재고가 있다면 데이터 결합
+      if (matchingInventory) {
+        return {
+          product_code: product.product_code,
+          product_name: product.product_name,
+          inventory_cnt: matchingInventory.inventory_cnt || 0,
+          inventory_min_cnt: matchingInventory.inventory_min_cnt || 0,
+          ordered_cnt: matchingInventory.ordered_cnt || 0,
+        };
+      }
+
+      // 매칭되는 재고가 없으면 기본값 반환
+      return {
+        product_code: product.product_code,
+        product_name: product.product_name,
+        inventory_cnt: 0,
+        inventory_min_cnt: 0,
+        ordered_cnt: 0,
+      };
+    });
+
+    setFilteredInventories(filteredInventories);
+  }, [products, inventories]);
 
   // 상품 수정 버튼
   const handleEditInventory = (product) => {
@@ -343,8 +371,17 @@ const Inventory = (props) => {
             }
           />
         ) : (
-          // 재고 수량이 없으면 0
-          <div>{text ? text : 0}</div>
+          // 재고 수량이 재고 한도보다 작으면 빨간색
+          <div
+            style={{
+              color:
+                record.inventory_cnt <= record.inventory_min_cnt
+                  ? "red"
+                  : "inherit",
+            }}
+          >
+            {`${text}` || 0}
+          </div>
         ),
     },
     {
@@ -362,19 +399,11 @@ const Inventory = (props) => {
               handleInputChange("inventory_min_cnt", value, record)
             }
           />
-        ) : // 재고 최소 수량이 없으면 0
-        text ? (
-          text
         ) : (
-          0
+          // 재고 최소 수량이 없으면 0
+          <div>{`${text}` || 0}</div>
         ),
     },
-    // {
-    //   title: "입고가",
-    // },
-    // {
-    //   title: "판매가",
-    // },
     {
       title: "동작",
       key: "action",
@@ -439,7 +468,7 @@ const Inventory = (props) => {
       <Table
         size="small"
         columns={columns}
-        dataSource={products}
+        dataSource={filteredInventories}
         rowSelection={rowSelection}
         onChange={(pagination) => {
           handleTableChange(pagination);
