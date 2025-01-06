@@ -414,7 +414,7 @@ const InquiryBoard = (props) => {
   );
 };
 
-const InquiryDetailModal = ({
+export const InquiryDetailModal = ({
   isDetailModalVisible,
   setIsDetailModalVisible,
   currentInquiry,

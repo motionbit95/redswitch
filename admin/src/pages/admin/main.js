@@ -4,6 +4,7 @@ import RCalendar from "../../components/calendar";
 import NoticeList from "../../components/list/notice";
 import FranchiseList from "../../components/list/franchise";
 import SalesList from "../../components/list/sales";
+import InquiryList from "../../components/list/inquiry";
 
 const Main = () => {
   const [dateRange, setDateRange] = React.useState(null);
@@ -21,7 +22,7 @@ const Main = () => {
           </Col>
           <Col span={24}>
             <Card title="게시판">
-              <List></List>
+              <InquiryList />
             </Card>
           </Col>
           <Col span={24}>
