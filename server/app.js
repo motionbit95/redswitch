@@ -12,8 +12,40 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.text());
 
 const cors = require("cors");
+
+app.use(
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // HTTPS 환경에서는 true로 설정
+      httpOnly: true,
+      maxAge: 60000, // 1분
+    },
+  })
+);
+
 // 모든요청에 cors 적용
-app.use(cors());
+const whitelist = [
+  "http://localhost:3000",
+  "https://redswitch-customer.netlify.app",
+];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || whitelist.indexOf(origin) !== -1) {
+        callback(null, true); // 허용된 도메인
+      } else {
+        callback(new Error("Not allowed by CORS")); // 허용되지 않은 도메인
+      }
+    },
+    credentials: true, // 쿠키 허용
+    methods: ["GET", "POST", "DELETE", "UPDATE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Set-Cookie"],
+  })
+);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -127,7 +159,7 @@ app.post(requestUri, (req, res) => {
   let clientTxId = clientPrefix + uuid();
   /* 2.3 인증 결과 검증을 위한 이용기관 거래ID 세션 저장 (필수) */
   // 동일한 세션내 요청과 결과가 동일한지 확인 및 인증결과 재사용 방지처리
-  // req.session.clientTxId = clientTxId; // <- 여기서 버그 생김
+  req.session.clientTxId = clientTxId; // <- 여기서 버그 생김
   // 2.4. 간편인증-표준창 거래정보 생성
   // - 간편인증-표준창 인증요청 정보 생성날짜 5분이 초과한 경우 거래정보 유효시간 오류 발생
   // clientTxId = dateTime + "|" + clientTxId;
