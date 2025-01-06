@@ -27,15 +27,8 @@ app.use(
 );
 
 // 모든요청에 cors 적용
-app.use(
-  cors({
-    origin: true,
-    credentials: true, // 쿠키 허용
-    methods: ["GET", "POST", "DELETE", "UPDATE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["Set-Cookie"],
-  })
-);
+
+app.use(cors());
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
