@@ -4,29 +4,39 @@ import { List, Skeleton, Button } from "antd";
 import { PostDetailModal } from "../../pages/provider/franchise_post";
 
 function FranchiseList(props) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [currentPost, setCurrentPost] = useState(null); // For post
-  const [franchise_post, setFranchisePost] = useState([]);
-
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+  const [currentPost, setCurrentPost] = useState(null); // 현재 선택된 포스트
+  const [franchisePosts, setFranchisePosts] = useState([]); // 가맹점 게시물 목록
+  const [loading, setLoading] = useState(true); // 로딩 상태
 
+  // 데이터를 처음 불러오기
   useEffect(() => {
-    AxiosGet("/posts/franchises")
-      .then((res) => {
-        console.log(res.data);
-        setFranchisePost(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const fetchFranchisePosts = async () => {
+      try {
+        const res = await AxiosGet("/posts/franchises");
+        setFranchisePosts(res.data.slice(0, 5)); // 처음 5개만 가져옴
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFranchisePosts();
   }, []);
 
+  // 더보기 버튼 클릭 시 처리
   const onLoadMore = () => {
-    window.location.replace("/provider/post");
+    // 현재는 5개만 표시되므로 더보기 버튼을 클릭하면 나머지 항목을 불러옴
+    AxiosGet("/posts/franchises")
+      .then((res) => {
+        setFranchisePosts(res.data); // 전체 데이터를 업데이트 (페이지네이션 로직을 추가할 수 있음)
+      })
+      .catch((err) => console.log(err));
   };
+
   const loadMore =
-    franchise_post.length > 0 ? (
+    franchisePosts.length > 0 ? (
       <div
         style={{
           textAlign: "center",
@@ -45,18 +55,12 @@ function FranchiseList(props) {
         className="demo-loadmore-list"
         itemLayout="horizontal"
         loadMore={loadMore}
-        dataSource={franchise_post}
+        dataSource={franchisePosts}
         renderItem={(item) => (
           <List.Item>
-            <Skeleton title={false} loading={item.loading} active>
-              <List.Item style={{ width: "100%" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    width: "100%",
-                  }}
-                >
+            <Skeleton title={false} loading={loading} active>
+              <List.Item.Meta
+                title={
                   <a
                     style={{ color: "black", fontWeight: "bold" }}
                     onClick={() => {
@@ -66,12 +70,9 @@ function FranchiseList(props) {
                   >
                     {item.franchise_name}
                   </a>
-
-                  <div style={{ color: "gray" }}>
-                    {item.created_at.split("T")[0]}
-                  </div>
-                </div>
-              </List.Item>
+                }
+                description={item.created_at.split("T")[0]}
+              />
             </Skeleton>
           </List.Item>
         )}
@@ -80,7 +81,6 @@ function FranchiseList(props) {
         isModalOpen={isDetailModalVisible}
         setIsModalOpen={setIsDetailModalVisible}
         currentPost={currentPost}
-        // handleOk={handleOk}
       />
     </>
   );

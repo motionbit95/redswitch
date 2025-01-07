@@ -2,38 +2,41 @@ import React, { useEffect, useState } from "react";
 import { Avatar, Button, List, Skeleton } from "antd";
 import { AxiosGet } from "../../api";
 import { NoticeDetailModal } from "../../pages/post/post";
-const count = 5;
-const fakeDataUrl = `https://randomuser.me/api/?results=${count}&inc=name,gender,email,nat,picture&noinfo`;
+import useCurrentUser from "../../hook/useCurrentUser";
 
-// 현재 로그인 사용자 (더미 데이터)
-const currentUser = {
-  id: "-OCRwtnmaTllsx2c3OWM", // -OCRwmUYTeUtxH-auNvx
-  user_id: "krystal", // redswitch
-  user_name: "박수정",
-  permission: "2", // 1
-};
+const count = 5;
 
 const NoticeList = () => {
-  const [notices, setNotices] = useState([]);
+  const [notices, setNotices] = useState([]); // 현재 표시된 알림 목록
+  const [allNotices, setAllNotices] = useState([]); // 전체 알림 목록
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [currentNotice, setCurrentNotice] = useState(null);
+  const { currentUser } = useCurrentUser();
 
+  // 알림 데이터 로딩
   useEffect(() => {
     AxiosGet("/posts")
       .then((res) => {
-        console.log(res.data);
-        setNotices(res.data);
+        setAllNotices(res.data); // 전체 알림 데이터를 저장
+        setNotices(res.data.slice(0, count)); // 처음 5개만 표시
       })
       .catch((err) => {
         console.log(err);
       });
   }, []);
 
+  // 더보기 버튼 클릭 시
   const onLoadMore = () => {
-    window.location.replace("/post/notification");
+    const nextNotices = allNotices.slice(
+      notices.length,
+      notices.length + count
+    );
+    setNotices((prevNotices) => [...prevNotices, ...nextNotices]); // 추가 항목을 리스트에 추가
   };
+
+  // 더보기 버튼 표시
   const loadMore =
-    notices.length > 0 ? (
+    notices.length < allNotices.length ? (
       <div
         style={{
           textAlign: "center",
@@ -45,6 +48,7 @@ const NoticeList = () => {
         <Button onClick={onLoadMore}>더보기</Button>
       </div>
     ) : null;
+
   return (
     <>
       <List
@@ -55,14 +59,8 @@ const NoticeList = () => {
         renderItem={(item) => (
           <List.Item>
             <Skeleton title={false} loading={item.loading} active>
-              <List.Item style={{ width: "100%" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    width: "100%",
-                  }}
-                >
+              <List.Item.Meta
+                title={
                   <a
                     style={{ color: "black", fontWeight: "bold" }}
                     onClick={() => {
@@ -72,12 +70,9 @@ const NoticeList = () => {
                   >
                     {item.title}
                   </a>
-
-                  <div style={{ color: "gray" }}>
-                    {item.createdAt.split("T")[0]}
-                  </div>
-                </div>
-              </List.Item>
+                }
+                description={item.createdAt.split("T")[0]}
+              />
             </Skeleton>
           </List.Item>
         )}
@@ -94,4 +89,5 @@ const NoticeList = () => {
     </>
   );
 };
+
 export default NoticeList;

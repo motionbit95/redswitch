@@ -12,6 +12,7 @@ const InquiryList = ({ currentUser }) => {
   const [inquiries, setInquiries] = useState([]); // 문의 목록 상태
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false); // 상세 모달 가시성 상태
   const [currentInquiry, setCurrentInquiry] = useState(null); // 현재 선택된 문의
+  const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
   // API를 통해 문의 데이터를 가져옵니다.
   useEffect(() => {
@@ -21,6 +22,8 @@ const InquiryList = ({ currentUser }) => {
         setInquiries(res.data);
       } catch (err) {
         console.error("문의 데이터를 가져오는 중 오류 발생:", err);
+      } finally {
+        setLoading(false); // 로딩 상태 종료
       }
     };
 
@@ -31,6 +34,8 @@ const InquiryList = ({ currentUser }) => {
    * 더보기 버튼 클릭 시 처리
    */
   const onLoadMore = () => {
+    // 페이지네이션 로직을 사용해서 데이터를 추가로 불러올 수 있음
+    // 예: AxiosGet(`/posts/inquiries?page=2`)와 같은 방식
     window.location.replace("/post/inquiry");
   };
 
@@ -39,6 +44,11 @@ const InquiryList = ({ currentUser }) => {
    * @param {Object} inquiry - 선택된 문의
    */
   const showDetailModal = (inquiry) => {
+    if (!currentUser) {
+      message.error("로그인된 사용자만 열람할 수 있습니다.");
+      return;
+    }
+
     const hasAccess =
       (inquiry.allowedUsers && inquiry.allowedUsers.includes(currentUser.id)) ||
       inquiry.author === currentUser.user_id;
@@ -57,6 +67,7 @@ const InquiryList = ({ currentUser }) => {
       <List
         className="inquiry-list"
         itemLayout="horizontal"
+        loading={loading} // 로딩 상태를 전체에 적용
         loadMore={
           inquiries.length > 0 && (
             <div
@@ -74,7 +85,7 @@ const InquiryList = ({ currentUser }) => {
         dataSource={inquiries}
         renderItem={(item) => (
           <List.Item>
-            <Skeleton title={false} loading={item.loading} active>
+            <Skeleton title={false} loading={loading} active>
               <List.Item.Meta
                 title={
                   <a
@@ -95,9 +106,9 @@ const InquiryList = ({ currentUser }) => {
         setIsDetailModalVisible={setIsDetailModalVisible}
         currentInquiry={currentInquiry}
         setCurrentInquiry={setCurrentInquiry}
-        setNotices={setInquiries}
+        setInquiries={setInquiries} // 업데이트 방식 수정
         currentUser={currentUser}
-        notices={inquiries}
+        inquiries={inquiries} // 'notices' -> 'inquiries'
       />
     </>
   );

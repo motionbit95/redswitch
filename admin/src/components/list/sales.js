@@ -1,30 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Table, Row, Col, Card } from "antd";
+import { Row, Col, Card } from "antd";
 import dayjs from "dayjs";
 import { AxiosGet } from "../../api";
+import { useDailySales, usePaymentStats } from "../../hook/usePaymentsStats";
 
-/**
- * SalesList 컴포넌트: 매출 데이터를 날짜별로 정리하고 표시
- * @param {Object} props - 컴포넌트 속성
- * @param {Object} props.selectedBranch - 선택된 지점 정보
- * @param {Object} props.dateRange - 선택된 날짜 범위
- */
 const SalesList = ({ selectedBranch, dateRange }) => {
-  // 기본 날짜 범위: 이번 달 1일부터 마지막 날까지
   const defaultRange = [
     dateRange ? dateRange.startOf("month") : dayjs().startOf("month"),
     dateRange ? dateRange.endOf("month") : dayjs().endOf("month"),
   ];
 
-  // 상태값 정의
-  const [orders, setOrders] = useState([]); // 주문 데이터
-  const [payments, setPayments] = useState([]); // 결제 데이터
-  const [groupedPayments, setGroupedPayments] = useState({}); // 날짜별 그룹화된 결제 데이터
-  const [selectedRange, setSelectedRange] = useState(defaultRange); // 선택된 날짜 범위
-  const [stats, setStats] = useState(null); // 통계 데이터
-  const [dailySales, setDailySales] = useState({ today: 0, yesterday: 0 }); // 금일 및 전일 매출
+  const [orders, setOrders] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [groupedPayments, setGroupedPayments] = useState({}); // 그룹화된 결제 데이터 상태 추가
+  const [selectedRange, setSelectedRange] = useState(defaultRange);
 
-  // 초기 데이터 로드
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,30 +31,23 @@ const SalesList = ({ selectedBranch, dateRange }) => {
     fetchData();
   }, []);
 
-  // 날짜 범위 변경 시 데이터 필터링 및 통계 계산
+  // 날짜 범위 변경 시 데이터 필터링 및 계산
   useEffect(() => {
+    if (!selectedBranch) return;
+
     const filteredPayments = filterPaymentsByBranch();
     const dateFilteredPayments = filterPaymentsByDate(
       filteredPayments,
       selectedRange
     );
-    setGroupedPayments(groupPaymentsByDate(dateFilteredPayments));
 
-    const calculatedStats = calculatePaymentStats(
-      filteredPayments,
-      selectedRange
-    );
-    setStats(calculatedStats);
-
-    calculateDailySales(filteredPayments);
+    // 날짜별 결제 데이터 그룹화 후 상태 업데이트
+    const groupedPayments = groupPaymentsByDate(dateFilteredPayments);
+    setGroupedPayments(groupedPayments); // 상태 업데이트
   }, [selectedBranch, selectedRange, payments]);
 
-  /**
-   * 특정 지점에 맞는 결제 데이터 필터링
-   * @returns {Array} 필터링된 결제 데이터
-   */
   const filterPaymentsByBranch = () => {
-    if (!selectedBranch) return []; // 지점 미선택 시 결제 데이터 반환 X
+    if (!selectedBranch) return [];
     const branchOrders = orders.filter(
       (order) => order.branch_pk === selectedBranch.key
     );
@@ -73,12 +56,6 @@ const SalesList = ({ selectedBranch, dateRange }) => {
     );
   };
 
-  /**
-   * 날짜 범위에 맞는 결제 데이터 필터링
-   * @param {Array} payments - 결제 데이터
-   * @param {Array} range - 날짜 범위 [시작일, 종료일]
-   * @returns {Array} 필터링된 결제 데이터
-   */
   const filterPaymentsByDate = (payments, range) => {
     const [startDate, endDate] = range;
     return payments.filter((payment) => {
@@ -87,11 +64,6 @@ const SalesList = ({ selectedBranch, dateRange }) => {
     });
   };
 
-  /**
-   * 결제 데이터를 날짜별로 그룹화
-   * @param {Array} payments - 결제 데이터
-   * @returns {Object} 날짜별 그룹화된 데이터
-   */
   const groupPaymentsByDate = (payments) => {
     return payments.reduce((acc, payment) => {
       const date = dayjs(payment.ediDate, "YYYYMMDDHHmmss").format(
@@ -103,58 +75,10 @@ const SalesList = ({ selectedBranch, dateRange }) => {
     }, {});
   };
 
-  /**
-   * 통계 데이터 계산
-   * @param {Array} payments - 결제 데이터
-   * @param {Array} range - 날짜 범위 [시작일, 종료일]
-   * @returns {Object} 통계 데이터
-   */
-  const calculatePaymentStats = (payments, [startDate, endDate]) => {
-    const filteredPayments = filterPaymentsByDate(payments, [
-      startDate,
-      endDate,
-    ]);
-    const totalAmount = filteredPayments
-      .filter((payment) => payment.cancelYN === "N")
-      .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
-    const refundAmount = filteredPayments
-      .filter((payment) => payment.cancelYN === "Y")
-      .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
-    return {
-      totalAmount,
-      totalTransactions: filteredPayments.length,
-      refundAmount,
-    };
-  };
-
-  /**
-   * 금일 및 전일 매출 계산
-   * @param {Array} payments - 결제 데이터
-   */
-  const calculateDailySales = (payments) => {
-    const today = dayjs().format("YYYY-MM-DD");
-    const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
-
-    const todaySales = payments
-      .filter(
-        (payment) =>
-          dayjs(payment.ediDate, "YYYYMMDDHHmmss").format("YYYY-MM-DD") ===
-          today
-      )
-      .filter((payment) => payment.cancelYN === "N")
-      .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
-
-    const yesterdaySales = payments
-      .filter(
-        (payment) =>
-          dayjs(payment.ediDate, "YYYYMMDDHHmmss").format("YYYY-MM-DD") ===
-          yesterday
-      )
-      .filter((payment) => payment.cancelYN === "N")
-      .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
-
-    setDailySales({ today: todaySales, yesterday: yesterdaySales });
-  };
+  // 통계 계산
+  const stats = usePaymentStats(payments, selectedRange); // 통계 계산
+  // 금일 및 전일 매출 계산
+  const dailySales = useDailySales(payments);
 
   return (
     <Row gutter={[16, 16]}>
