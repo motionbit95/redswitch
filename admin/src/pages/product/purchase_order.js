@@ -88,6 +88,7 @@ const DetailModal = ({
           product_name: data[0].product_name,
           product_code: data[0].product_code,
           provider_name: data[0].provider_name,
+          product_sale: data[0].product_sale,
         });
       }
     });
@@ -107,6 +108,11 @@ const DetailModal = ({
       key: "material_code",
     },
     {
+      title: "상품 금액",
+      dataIndex: "product_sale",
+      key: "product_sale",
+    },
+    {
       title: "발주 수량",
       dataIndex: "ordered_cnt",
       key: "ordered_cnt",
@@ -123,7 +129,11 @@ const DetailModal = ({
     filteredOrders,
     columns,
     [],
-    "발주 내역" + dayjs().format("YYYYMMDD")
+    "발주 내역" +
+      "_" +
+      selectedBranch +
+      "_" +
+      dayjs(filteredOrders[0]?.created_at).format("YYYYMMDD")
   );
 
   return (

@@ -68,6 +68,7 @@ const { Header, Content, Sider } = Layout;
 let AudioContext;
 let audioContext;
 
+// 음성 권한 요청 함수
 window.onload = function () {
   navigator.mediaDevices
     .getUserMedia({ audio: true })
@@ -177,6 +178,7 @@ const App = () => {
     }
   }, [alarms]);
 
+  // 알람 발생 시 사운드 실행
   const playSound = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -189,6 +191,7 @@ const App = () => {
       .catch((e) => console.error("Audio play failed:", e));
   };
 
+  // 로그인 시 현재 사용자 정보 가져오기
   useEffect(() => {
     AxiosGet(`/accounts/${localStorage.getItem("id")}`)
       .then((response) => {
@@ -786,31 +789,6 @@ const OrderDetail = ({ selectedAlarm }) => {
         ))}
       </Descriptions.Item>
     </Descriptions>
-  );
-};
-
-const UserInfo = ({ currentUser }) => {
-  return (
-    <Popover>
-      <Space style={{ cursor: "pointer" }}>
-        <Tag
-          color={
-            currentUser.permission === "1"
-              ? "red"
-              : currentUser.permission === "2"
-              ? "blue"
-              : "green"
-          }
-        >
-          {currentUser.permission === "1"
-            ? "본사관리자"
-            : currentUser.permission === "2"
-            ? "지사관리자"
-            : "지점관리자"}
-        </Tag>
-        <div style={{ color: "white" }}>{currentUser.user_id} 님</div>
-      </Space>
-    </Popover>
   );
 };
 
