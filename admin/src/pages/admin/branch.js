@@ -40,6 +40,20 @@ const BranchModal = ({
   onDelete,
 }) => {
   const [address, setAddress] = useState();
+  const [isChecked, setIsChecked] = useState(true);
+
+  const handleCheck = (e) => {
+    setIsChecked(e.target.checked);
+    if (!e.target.checked) {
+      form.resetFields(["delivery_fee"]); // 체크 해제시 'delivery_fee' 필드를 초기화
+    }
+  };
+
+  useEffect(() => {
+    if (visible) {
+      setIsChecked(form.getFieldValue("delivery_fee") !== 0); // 모달이 열릴 때 체크박스 상태 설정
+    }
+  }, [visible, form]);
 
   useEffect(() => {
     setAddress(form.getFieldValue("branch_address"));
@@ -259,7 +273,18 @@ const BranchModal = ({
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item
-            label="지점 배달료"
+            label={
+              <Space direction="vertical">
+                <div>지점 배달료</div>
+                <Checkbox
+                  onChange={handleCheck}
+                  checked={isChecked}
+                  style={{ transform: "scale(0.8)" }}
+                >
+                  사용여부
+                </Checkbox>
+              </Space>
+            }
             labelStyle={{ whiteSpace: "nowrap" }}
             span={1}
           >
@@ -268,7 +293,12 @@ const BranchModal = ({
               name="delivery_fee"
               style={{ marginBottom: 0 }}
             >
-              <Input defaultValue={0} type="number" addonAfter="원" />
+              <Input
+                defaultValue={0}
+                disabled={!isChecked}
+                type="number"
+                addonAfter="원"
+              />
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item

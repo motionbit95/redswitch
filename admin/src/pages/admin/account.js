@@ -318,9 +318,20 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
       visible={visible}
       centered
       width={800}
-      onCancel={onCancel}
+      onCancel={() => {
+        onCancel();
+        setSelectedBranch([]);
+        setSelectedProvider([]);
+      }}
       footer={[
-        <Button key="back" onClick={onCancel}>
+        <Button
+          key="back"
+          onClick={() => {
+            onCancel();
+            setSelectedBranch([]);
+            setSelectedProvider([]);
+          }}
+        >
           취소
         </Button>,
         <Button key="submit" type="primary" onClick={() => form.submit()}>

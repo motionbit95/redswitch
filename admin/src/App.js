@@ -189,27 +189,22 @@ const App = () => {
       .catch((e) => console.error("Audio play failed:", e));
   };
 
-  const getUser = async () => {
-    try {
-      const response = await AxiosGet(
-        `/accounts/${localStorage.getItem("id")}`
-      );
-      if (response.status === 200) {
-        setCurrentUser(response.data);
-        setIsLoggedIn(true);
-      }
-    } catch (error) {
-      if (error?.response?.status === 401) {
-        setCurrentUser({});
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("id");
-        setIsLoggedIn(false);
-      }
-    }
-  };
-
   useEffect(() => {
-    getUser();
+    AxiosGet(`/accounts/${localStorage.getItem("id")}`)
+      .then((response) => {
+        if (response.status === 200) {
+          setCurrentUser(response.data);
+          setIsLoggedIn(true);
+        }
+      })
+      .catch((error) => {
+        if (error?.response?.status === 401) {
+          setCurrentUser({});
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("id");
+          setIsLoggedIn(false);
+        }
+      });
   }, [localStorage.getItem("id")]);
 
   const handleLogout = () => {
@@ -414,6 +409,7 @@ const App = () => {
                 color: "#fff",
                 fontSize: "20px",
                 fontWeight: "bold",
+                cursor: "pointer",
               }}
               onClick={() => {
                 window.location.href = "/dashboard";
@@ -790,6 +786,31 @@ const OrderDetail = ({ selectedAlarm }) => {
         ))}
       </Descriptions.Item>
     </Descriptions>
+  );
+};
+
+const UserInfo = ({ currentUser }) => {
+  return (
+    <Popover>
+      <Space style={{ cursor: "pointer" }}>
+        <Tag
+          color={
+            currentUser.permission === "1"
+              ? "red"
+              : currentUser.permission === "2"
+              ? "blue"
+              : "green"
+          }
+        >
+          {currentUser.permission === "1"
+            ? "본사관리자"
+            : currentUser.permission === "2"
+            ? "지사관리자"
+            : "지점관리자"}
+        </Tag>
+        <div style={{ color: "white" }}>{currentUser.user_id} 님</div>
+      </Space>
+    </Popover>
   );
 };
 
