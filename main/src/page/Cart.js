@@ -168,7 +168,7 @@ const Cart = ({ token, theme }) => {
       optionsAmount += element.optionPrice;
     });
     if (selectedItems.includes(item.pk)) {
-      return total + item.amount * item.count + optionsAmount;
+      return total + item.amount * item.count + optionsAmount * item.count;
     }
     return total;
   }, 0);

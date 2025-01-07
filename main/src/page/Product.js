@@ -342,10 +342,11 @@ function Product({ branch, theme }) {
                   {(
                     parseInt(quantity) *
                       parseInt(productData?.product_price || 0) +
-                    selectedOptions.reduce(
-                      (total, option) => total + (option?.optionPrice || 0),
-                      0
-                    )
+                    parseInt(quantity) *
+                      selectedOptions.reduce(
+                        (total, option) => total + (option?.optionPrice || 0),
+                        0
+                      )
                   ).toLocaleString()}
                   원
                 </Typography.Text>
