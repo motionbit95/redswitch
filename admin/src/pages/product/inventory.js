@@ -45,10 +45,11 @@ const AddModal = (props) => {
   // 삭제 기능
   const handleDelete = (record) => {
     console.log(
-      products.filter((item) => item.PK !== record),
+      "삭제!!!",
+      products.filter((item) => item.key !== record),
       record
     );
-    setProducts((prevData) => prevData.filter((item) => item.PK !== record));
+    setProducts((prevData) => prevData.filter((item) => item.key !== record));
   };
 
   // 발주 신청 - 지점
@@ -58,10 +59,10 @@ const AddModal = (props) => {
       return;
     }
 
-    // if (products.some((item) => !item.ordered_cnt || item.ordered_cnt <= 0)) {
-    //   message.error("발주수량을 입력해주세요.");
-    //   return;
-    // }
+    if (products.some((item) => !item.ordered_cnt || item.ordered_cnt <= 0)) {
+      message.error("발주수량을 입력해주세요.");
+      return;
+    }
 
     if (!selectedBranch) {
       message.error("지점을 선택해주세요.");
@@ -130,7 +131,7 @@ const AddModal = (props) => {
 
       render: (_, record) => (
         <Space>
-          <a onClick={() => handleDelete(record.PK)}>삭제</a>
+          <a onClick={() => handleDelete(record.key)}>삭제</a>
         </Space>
       ),
     },
@@ -280,6 +281,7 @@ const Inventory = (props) => {
       record.inventory_cnt,
       record.inventory_min_cnt
     );
+
     try {
       if (record.inventory_cnt !== undefined) {
         // 재고 수정

@@ -12,6 +12,9 @@ import {
   Table,
   Descriptions,
   Tag,
+  Popover,
+  Checkbox,
+  Radio,
 } from "antd";
 import {
   PlusOutlined,
@@ -23,7 +26,7 @@ import React, { useEffect, useState } from "react";
 import SearchProvider from "../../components/popover/searchprovider";
 import SearchMaterial from "../../components/popover/searchmaterial";
 import { useNavigate } from "react-router-dom";
-import { AxiosDelete, AxiosGet, AxiosPost } from "../../api";
+import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import dayjs from "dayjs";
 import usePagination from "../../hook/usePagination";
 import useExportToExcel from "../../hook/useExportToExcel";
@@ -161,6 +164,9 @@ const Purchase_order = () => {
   const [branches, setBranches] = useState([]);
   const [historyPK, setHistoryPK] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
+  const [popoverVisible, setPopoverVisible] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("0");
+  const [currentRecord, setCurrentRecord] = useState(null);
 
   // 발주 이력 가져오기 (본사 기준)
   useEffect(() => {
@@ -169,6 +175,7 @@ const Purchase_order = () => {
   const fetchOrders = async () => {
     try {
       const response = await AxiosGet("/products/ordering_history");
+      console.log(response.data);
       setOrderHistory(response.data);
     } catch (error) {
       message.error("발주 이력을 불러오는 데 실패했습니다.");
@@ -182,11 +189,6 @@ const Purchase_order = () => {
       })
       .catch((err) => console.err(err));
   }, [orderHistory]);
-
-  // 발주 내역 수정
-  const handleEditSubmit = () => {
-    console.log();
-  };
 
   // 발주 내역 확인 버튼
   const handleDetail = (record) => {
@@ -211,6 +213,46 @@ const Purchase_order = () => {
         console.error("발주 이력 삭제 오류:", error);
         message.error("발주 이력을 삭제하는 데 실패했습니다.");
       });
+  };
+
+  // 발주 내역 수정
+  const handleUpdate = async () => {
+    console.log(currentRecord.pk, selectedStatus);
+    const updateData = parseInt(selectedStatus);
+
+    // 선택된 상태와 현재 상태가 동일한 경우
+    if (updateData === currentRecord.arrive) {
+      message.warning("변경 사항이 없습니다.");
+      return;
+    }
+
+    try {
+      // 서버 요청
+      const currentDate = new Date().toISOString();
+      if (updateData === 3) {
+        await AxiosPut(`/products/ordering_history/${currentRecord.pk}`, {
+          arrive: updateData,
+          receving_date: currentDate,
+        });
+      } else {
+        await AxiosPut(`/products/ordering_history/${currentRecord.pk}`, {
+          arrive: updateData,
+          receving_date: null,
+        });
+      }
+
+      message.success("발주 상태가 성공적으로 업데이트되었습니다.");
+      setPopoverVisible(false); // 팝오버 닫기
+      fetchOrders(); // 테이블 데이터 새로 고침
+    } catch (error) {
+      console.error("발주 상태 업데이트 오류:", error);
+      message.error("발주 상태 업데이트에 실패했습니다.");
+    }
+  };
+
+  // 발주 상태 체크박스 선택
+  const handleRadioChange = (e) => {
+    setSelectedStatus(e.target.value); // 선택된 상태 값 설정
   };
 
   const { pagination, setPagination, handleTableChange } = usePagination();
@@ -252,20 +294,94 @@ const Purchase_order = () => {
       title: "발주 상태",
       dataIndex: "arrive",
       key: "arrive",
-      render(text) {
-        return text === "0" ? (
-          <Tag color="red">발주 신청</Tag>
-        ) : text === "1" ? (
-          <Tag color="blue">발주 확인</Tag>
-        ) : text === "2" ? (
-          <Tag color="green">배송 중</Tag>
-        ) : (
-          <Tag color="orange">수령 완료</Tag>
+      render(text, record) {
+        return (
+          <Popover
+            placement="right"
+            content={
+              <div>
+                <Radio.Group
+                  style={{ display: "flex", flexDirection: "column" }}
+                  onChange={handleRadioChange} // 선택된 상태 값 관리
+                  value={selectedStatus} // 현재 선택된 값 표시
+                >
+                  <Radio value="0">발주 신청</Radio>
+                  <Radio value="1">발주 확인</Radio>
+                  <Radio value="2">배송 중</Radio>
+                  <Radio value="3">수령 완료</Radio>
+                </Radio.Group>
+                <Row justify="end" gutter={8} style={{ marginTop: "10px" }}>
+                  <Col span={12}>
+                    <Button
+                      style={{ width: "100%" }}
+                      onClick={() => setPopoverVisible(false)}
+                    >
+                      닫기
+                    </Button>
+                  </Col>
+                  <Col span={12}>
+                    <Popconfirm
+                      title="정말로 업데이트 하시겠습니까?"
+                      onConfirm={handleUpdate}
+                      onCancel={() => setPopoverVisible(false)}
+                      okText="확인"
+                      cancelText="취소"
+                    >
+                      <Button style={{ width: "100%" }} type="primary">
+                        확인
+                      </Button>
+                    </Popconfirm>
+                  </Col>
+                </Row>
+              </div>
+            }
+            title="발주 상태 변경"
+            trigger="click"
+            open={
+              popoverVisible &&
+              currentRecord?.pk === record.pk &&
+              currentRecord?.arrive !== 3
+            } // Popover 가시성 제어
+            onOpenChange={(visible) => {
+              setPopoverVisible(visible);
+              if (visible) {
+                setCurrentRecord(record); // 현재 기록 설정
+                setSelectedStatus(record.arrive); // 현재 상태 값으로 초기화
+              } else {
+                setCurrentRecord(null);
+              }
+            }}
+          >
+            <Tag
+              color={
+                text === 0
+                  ? "red"
+                  : text === 1
+                  ? "blue"
+                  : text === 2
+                  ? "orange"
+                  : "green"
+              }
+            >
+              {text === 0
+                ? "발주 신청"
+                : text === 1
+                ? "발주 확인"
+                : text === 2
+                ? "배송 중"
+                : "수령 완료"}
+            </Tag>
+          </Popover>
         );
       },
     },
     {
       title: "입고 일자",
+      dataIndex: "receving_date",
+      key: "receving_date",
+      render: (text) => (
+        <span>{text ? dayjs(text).format("YYYY-MM-DD HH:mm:ss") : ""}</span>
+      ),
     },
     {
       title: "발주 내역",

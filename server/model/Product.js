@@ -453,6 +453,7 @@ class OrderingHistory {
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || null;
     this.arrive = data.arrive || 0;
+    this.receving_date = data.receving_date || null;
   }
 
   toJSON() {
@@ -461,6 +462,7 @@ class OrderingHistory {
       created_at: this.created_at,
       updated_at: this.updated_at,
       arrive: this.arrive,
+      receving_date: this.receving_date,
     };
   }
 
@@ -515,12 +517,17 @@ class OrderingHistory {
       if (!this.pk) {
         throw new Error("PK is required for update");
       }
+      if (this.arrive === 3) {
+        this.receving_date = new Date().toISOString();
+      }
       this.updated_at = new Date().toISOString();
       const updatedData = Object.fromEntries(
         Object.entries(this.toJSON()).filter(
           ([_, value]) => value !== undefined
         )
       );
+
+      console.log(updatedData);
       await orderingHistoryRef.child(this.pk).update(updatedData);
       return this;
     } catch (error) {
