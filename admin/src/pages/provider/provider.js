@@ -14,7 +14,7 @@ import {
   Descriptions,
 } from "antd";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
-import { UploadOutlined } from "@ant-design/icons";
+import { SearchOutlined, UploadOutlined } from "@ant-design/icons";
 import KakaoAddressSearch from "../../components/kakao";
 import FormItem from "antd/es/form/FormItem";
 import FileUpload from "../../components/button";
@@ -28,6 +28,7 @@ const ProviderModal = ({
   initialValues,
   form,
   isEditMode,
+  onDelete,
 }) => {
   const [address, setAddress] = useState();
 
@@ -44,20 +45,41 @@ const ProviderModal = ({
         onCancel();
         form.resetFields();
       }}
-      footer={[
-        <Button
-          key="cancel"
-          onClick={() => {
-            onCancel();
-            form.resetFields();
+      footer={
+        <Space
+          style={{
+            width: "100%",
+            justifyContent: "space-between",
+            direction: "rtl",
           }}
         >
-          취소
-        </Button>,
-        <Button key="submit" type="primary" onClick={() => form.submit()}>
-          {isEditMode ? "수정 완료" : "추가 완료"}
-        </Button>,
-      ]}
+          <Space style={{ direction: "ltr" }}>
+            <Button
+              key="cancel"
+              onClick={() => {
+                onCancel();
+                form.resetFields();
+              }}
+            >
+              취소
+            </Button>
+            <Button
+              key="submit"
+              type="primary"
+              onClick={() => {
+                form.submit();
+              }}
+            >
+              {isEditMode ? "수정 완료" : "추가 완료"}
+            </Button>
+          </Space>
+          {isEditMode && (
+            <Popconfirm title="거래처를 삭제하시겠습니까?" onConfirm={onDelete}>
+              <Button danger>삭제</Button>
+            </Popconfirm>
+          )}
+        </Space>
+      }
       centered
     >
       <Form
@@ -159,6 +181,29 @@ const ProviderModal = ({
 
           <Descriptions.Item
             span={1}
+            label="이메일"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item name="provider_email" style={{ marginBottom: 0 }}>
+              <Input />
+            </Form.Item>
+          </Descriptions.Item>
+
+          <Descriptions.Item
+            span={1}
+            label="사업자등록증 파일"
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item name="business_file" style={{ marginBottom: 0 }}>
+              <FileUpload
+                url={form.getFieldValue("business_file")}
+                setUrl={(url) => form.setFieldsValue({ business_file: url })}
+              />
+            </Form.Item>
+          </Descriptions.Item>
+
+          <Descriptions.Item
+            span={1}
             label="대표자명"
             labelStyle={{ whiteSpace: "nowrap" }}
           >
@@ -211,33 +256,14 @@ const ProviderModal = ({
 
           <Descriptions.Item
             span={1}
-            label="결제 방식"
+            label="결제방식"
             labelStyle={{ whiteSpace: "nowrap" }}
             style={{ marginBottom: 0 }}
           >
             <Form.Item name="bank_account_number" style={{ marginBottom: 0 }}>
-              <TextArea rows={3} />
-            </Form.Item>
-          </Descriptions.Item>
-          <Descriptions.Item
-            span={1}
-            label="특이사항"
-            labelStyle={{ whiteSpace: "nowrap" }}
-            style={{ marginBottom: 0 }}
-          >
-            <Form.Item name="provider_description" style={{ marginBottom: 0 }}>
-              <TextArea rows={3} />
-            </Form.Item>
-          </Descriptions.Item>
-
-          <Descriptions.Item
-            label="사업자등록증 파일"
-            labelStyle={{ whiteSpace: "nowrap" }}
-          >
-            <Form.Item name="business_file" style={{ marginBottom: 0 }}>
-              <FileUpload
-                url={form.getFieldValue("business_file")}
-                setUrl={(url) => form.setFieldsValue({ business_file: url })}
+              <TextArea
+                placeholder="결제방식 혹은 계좌번호 등을 자유롭게 입력하세요."
+                rows={3}
               />
             </Form.Item>
           </Descriptions.Item>
@@ -255,6 +281,16 @@ const ProviderModal = ({
               >
                 <Button icon={<UploadOutlined />}>파일 업로드</Button>
               </Upload>
+            </Form.Item>
+          </Descriptions.Item>
+          <Descriptions.Item
+            span={2}
+            label="특이사항"
+            labelStyle={{ whiteSpace: "nowrap" }}
+            style={{ marginBottom: 0 }}
+          >
+            <Form.Item name="provider_description" style={{ marginBottom: 0 }}>
+              <TextArea rows={3} />
             </Form.Item>
           </Descriptions.Item>
 
@@ -422,6 +458,16 @@ const Provider = () => {
       key: "provider_name",
     },
     {
+      title: "대표자명",
+      dataIndex: "provider_ceo_name",
+      key: "provider_ceo_name",
+    },
+    {
+      title: "대표자 전화번호",
+      dataIndex: "provider_ceo_phone",
+      key: "provider_ceo_phone",
+    },
+    {
       title: "담당자명",
       dataIndex: "provider_manager_name",
       key: "provider_manager_name",
@@ -437,30 +483,15 @@ const Provider = () => {
       key: "provider_brn",
     },
     {
-      title: "관리자명",
-      dataIndex: "user_name",
-      key: "user_name",
+      title: "이메일",
+      dataIndex: "provider_email",
+      key: "provider_email",
     },
     {
-      title: "관리자 전화번호",
-      dataIndex: "user_phone",
-      key: "user_phone",
-    },
-    {
-      title: "동작",
-      key: "actions",
-      width: 100,
-      fixed: "right",
-      render: (text, record) => (
-        <Space>
-          <a onClick={() => handleEdit(record)}>수정</a>
-          <Popconfirm
-            title="거래처를 삭제하시겠습니까?"
-            onConfirm={() => handleDelete(record.id)}
-          >
-            <a>삭제</a>
-          </Popconfirm>
-        </Space>
+      title: "자세히보기",
+      key: "action",
+      render: (_, record) => (
+        <Button icon={<SearchOutlined />} onClick={() => handleEdit(record)} />
       ),
     },
   ];
@@ -500,6 +531,7 @@ const Provider = () => {
         initialValues={!currentProvider ? currentProvider : {}}
         form={form}
         isEditMode={!!currentProvider}
+        onDelete={() => handleDelete(currentProvider.id)}
       />
     </div>
   );

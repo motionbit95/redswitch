@@ -24,7 +24,8 @@ import { AxiosDelete, AxiosGet, AxiosPut } from "../../api";
 import FileUpload from "../../components/button";
 import usePagination from "../../hook/usePagination";
 
-const Material = () => {
+const Material = (props) => {
+  const { currentUser } = props;
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [searchFilters, setSearchFilters] = useState({
@@ -103,15 +104,14 @@ const Material = () => {
   };
 
   const onUpdateProductFinish = async (values) => {
-    console.log(values);
     try {
       const response = await AxiosPut(
-        `/products/materials/${values.pk}`,
+        `/products/materials/${currentMaterial.pk}`,
         values
       );
       if (response.status === 200) {
         message.success("상품 수정 성공");
-        console.log(response.data);
+        console.log("data!", response.data);
         handleSearchMaterials();
       } else {
         message.error("상품 수정 실패");
@@ -213,126 +213,139 @@ const Material = () => {
 
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
-      <Alert
-        type="warning"
-        showIcon
-        description={"지사관리자 이상 권한만 접근 가능합니다."}
-      />
-      <Space style={{ width: "100%", justifyContent: "space-between" }}>
-        <Space>
-          <Searchprovider
-            selectedProvider={selectedProvider}
-            setSelectedProvider={(providers) => {
-              setSelectedProvider(providers[0]);
-            }}
-            multiple={false}
-          />
-        </Space>
-        <Space>
-          <ProductCategory usedCodes={usedCodes} />
-          <Addproduct
-            isSelected={isSelected}
-            selectedProvider={selectedProvider}
-            categories={categories}
-            onComplete={() => {
-              if (selectedProvider) {
-                handleSearchMaterials(); // 선택된 거래처이 있는 경우만 데이터를 다시 불러옴
-              }
-            }}
-          />
-        </Space>
-      </Space>
+      {currentUser.permission === "3" ? (
+        <Alert
+          type="warning"
+          showIcon
+          description={"지사관리자 이상 권한만 접근 가능합니다."}
+        />
+      ) : (
+        <>
+          <Space style={{ width: "100%", justifyContent: "space-between" }}>
+            <Space>
+              <Searchprovider
+                selectedProvider={selectedProvider}
+                setSelectedProvider={(providers) => {
+                  setSelectedProvider(providers[0]);
+                }}
+                multiple={false}
+              />
+            </Space>
+            <Space>
+              <ProductCategory usedCodes={usedCodes} />
+              <Addproduct
+                isSelected={isSelected}
+                selectedProvider={selectedProvider}
+                categories={categories}
+                onComplete={() => {
+                  if (selectedProvider) {
+                    handleSearchMaterials(); // 선택된 거래처이 있는 경우만 데이터를 다시 불러옴
+                  }
+                }}
+              />
+            </Space>
+          </Space>
 
-      <Table
-        size="small"
-        columns={columns}
-        dataSource={materialList}
-        rowKey="id"
-        loading={loading}
-        onChange={(pagination, filters, sorter) => {
-          handleTableChange(pagination);
-          handleChange(pagination, filters, sorter);
-        }}
-        pagination={{
-          ...pagination,
-          defaultPageSize: 10,
-          showSizeChanger: true,
-        }}
-      />
-      <Modal
-        title="상품 수정"
-        visible={editModalOpen}
-        onCancel={() => setEditModalOpen(false)}
-        footer={[
-          <Button key="back" onClick={() => setEditModalOpen(false)}>
-            취소
-          </Button>,
-          <Button
-            type="primary"
+          <Table
+            size="small"
+            columns={columns}
+            dataSource={materialList}
+            rowKey="id"
             loading={loading}
-            onClick={() => form.submit()}
-          >
-            수정
-          </Button>,
-        ]}
-      >
-        <Form
-          form={form}
-          onFinish={onUpdateProductFinish}
-          initialValues={currentMaterial}
-          layout="vertical"
-          style={{ width: "100%" }}
-        >
-          <Form.Item
-            label="상품명"
-            name="product_name"
-            rules={[{ required: true, message: "상품명을 입력해주세요" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="상품코드"
-            name="product_code"
-            rules={[{ required: true, message: "상품코드을 입력해주세요" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="원가"
-            name="product_sale"
-            rules={[{ required: true, message: "원가을 입력해주세요" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="product_category_code"
-                label="카테고리"
-                rules={[{ required: true }]}
+            onChange={(pagination, filters, sorter) => {
+              handleTableChange(pagination);
+              handleChange(pagination, filters, sorter);
+            }}
+            pagination={{
+              ...pagination,
+              defaultPageSize: 10,
+              showSizeChanger: true,
+            }}
+          />
+          <Modal
+            title="상품 수정"
+            visible={editModalOpen}
+            onCancel={() => setEditModalOpen(false)}
+            footer={[
+              <Button key="back" onClick={() => setEditModalOpen(false)}>
+                취소
+              </Button>,
+              <Button
+                type="primary"
+                loading={loading}
+                onClick={() => form.submit()}
               >
-                <Select>
-                  {categories.map(
-                    ({ product_category, product_category_code }, index) => (
-                      <Select.Option key={index} value={product_category_code}>
-                        {product_category}
-                      </Select.Option>
-                    )
-                  )}
-                </Select>
+                수정
+              </Button>,
+            ]}
+          >
+            <Form
+              form={form}
+              onFinish={onUpdateProductFinish}
+              initialValues={currentMaterial}
+              layout="vertical"
+              style={{ width: "100%" }}
+            >
+              <Form.Item
+                label="상품명"
+                name="product_name"
+                rules={[{ required: true, message: "상품명을 입력해주세요" }]}
+              >
+                <Input />
               </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="original_image" label="상품이미지">
-                <FileUpload
-                  url={form.getFieldValue("original_image")}
-                  setUrl={(url) => form.setFieldsValue({ original_image: url })}
-                />
+              <Form.Item
+                label="상품코드"
+                name="product_code"
+                rules={[{ required: true, message: "상품코드을 입력해주세요" }]}
+              >
+                <Input />
               </Form.Item>
-            </Col>
-          </Row>
-        </Form>
-      </Modal>
+              <Form.Item
+                label="원가"
+                name="product_sale"
+                rules={[{ required: true, message: "원가을 입력해주세요" }]}
+              >
+                <Input />
+              </Form.Item>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    name="product_category_code"
+                    label="카테고리"
+                    rules={[{ required: true }]}
+                  >
+                    <Select>
+                      {categories.map(
+                        (
+                          { product_category, product_category_code },
+                          index
+                        ) => (
+                          <Select.Option
+                            key={index}
+                            value={product_category_code}
+                          >
+                            {product_category}
+                          </Select.Option>
+                        )
+                      )}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item name="original_image" label="상품이미지">
+                    <FileUpload
+                      url={form.getFieldValue("original_image")}
+                      setUrl={(url) =>
+                        form.setFieldsValue({ original_image: url })
+                      }
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Form>
+          </Modal>
+        </>
+      )}
     </Space>
   );
 };

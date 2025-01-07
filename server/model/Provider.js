@@ -7,6 +7,7 @@ class Provider {
     this.id = data.id || null; // 데이터베이스에서 자동 생성됨
     this.provider_name = data.provider_name;
     this.provider_address = data.provider_address;
+    this.provider_email = data.provider_email || null;
     this.provider_sido = data.provider_sido;
     this.provider_sigungu = data.provider_sigungu;
     this.provider_code = data.provider_code || "A01"; // 기본값
@@ -29,6 +30,7 @@ class Provider {
     return {
       provider_name: this.provider_name,
       provider_address: this.provider_address,
+      provider_email: this.provider_email,
       provider_sido: this.provider_sido,
       provider_sigungu: this.provider_sigungu,
       provider_code: this.provider_code,

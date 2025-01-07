@@ -661,7 +661,10 @@ const App = () => {
                 <Route path="/bdsm/advertise" element={<BDSMAdvertise />} />
                 <Route path="/bdsm/trend" element={<BDSMStatistics />} />
 
-                <Route path="/product/material" element={<Material />} />
+                <Route
+                  path="/product/material"
+                  element={<Material currentUser={currentUser} />}
+                />
                 <Route
                   path="/product/product"
                   element={<Product currentUser={currentUser} />}

@@ -247,6 +247,8 @@ class Material {
           materials.push({ pk: child.key, ...material });
         }
       });
+
+      console.log("materials: ", materials);
       return materials.reverse(); // 역순으로 내보냄 (최신이 제일 위)
     } catch (error) {
       console.error("Error fetching materials:", error);
@@ -274,6 +276,8 @@ class Material {
       if (Object.keys(updateData).length === 0) {
         throw new Error("No valid fields to update");
       }
+
+      console.log("updateData: ", this.pk, updateData);
 
       // 데이터베이스 업데이트
       await materialsRef.child(this.pk).update(updateData);

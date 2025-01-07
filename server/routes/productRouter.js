@@ -646,7 +646,9 @@ router.put("/materials/:pk", async (req, res) => {
   try {
     const { pk } = req.params;
     const material = new Material(req.body);
+
     material.pk = pk;
+    console.log("material: ", material.pk, pk);
 
     await material.update();
     res.status(200).json(material);
