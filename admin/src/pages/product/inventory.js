@@ -29,7 +29,7 @@ const AddModal = (props) => {
 
   useEffect(() => {
     setProducts(data);
-    console.log("요기!!!!!", selectedBranch, products);
+    console.log("요기!!!!!", products);
   }, [data]);
 
   // 발주 수량 변경
@@ -37,7 +37,7 @@ const AddModal = (props) => {
     console.log(value, record);
     setProducts((prevData) =>
       prevData.map((item) =>
-        item.PK === record ? { ...item, ordered_cnt: value } : item
+        item.key === record ? { ...item, ordered_cnt: value } : item
       )
     );
   };
@@ -74,6 +74,7 @@ const AddModal = (props) => {
         material_id: product.material_id, // 서버에서 사용되는 상품 식별자
         ordered_cnt: product.ordered_cnt, // 발주 수량
       }));
+      console.log("발주 상품 등록 > ", formattedProducts);
 
       const response = await AxiosPost("/products/ordering_history", {
         branch_id: selectedBranch.id,
@@ -119,7 +120,7 @@ const AddModal = (props) => {
           defaultValue={0}
           value={record.ordered_cnt || 0}
           min={1}
-          onChange={(value) => handleQuantityChange(value, record.PK)}
+          onChange={(value) => handleQuantityChange(value, record.key)}
         />
       ),
     },
@@ -189,8 +190,6 @@ const Inventory = (props) => {
   const [editRowKey, setEditRowKey] = useState(null);
   const [editedInventory, setEditedInventory] = useState({});
 
-  const [users, setUsers] = useState([]);
-
   const { pagination, setPagination, handleTableChange } = usePagination(10); // Default page size is 10
 
   useEffect(() => {
@@ -235,6 +234,8 @@ const Inventory = (props) => {
           inventory_cnt: matchingInventory.inventory_cnt || 0,
           inventory_min_cnt: matchingInventory.inventory_min_cnt || 0,
           ordered_cnt: matchingInventory.ordered_cnt || 0,
+          key: product.PK,
+          material_id: product.material_id,
         };
       }
 
@@ -245,6 +246,8 @@ const Inventory = (props) => {
         inventory_cnt: 0,
         inventory_min_cnt: 0,
         ordered_cnt: 0,
+        key: product.PK,
+        material_id: product.material_id,
       };
     });
 
@@ -321,12 +324,17 @@ const Inventory = (props) => {
 
   // 발주 선택 리스트
   const onSelectChange = (newSelectedRowKeys) => {
-    setSelectedRowKeys(newSelectedRowKeys);
-    const filteredProducts = products.filter((product) =>
-      newSelectedRowKeys.includes(product.PK)
+    console.log(
+      "selectedRowKeys changed: ",
+      newSelectedRowKeys,
+      filteredInventories
     );
+    setSelectedRowKeys(newSelectedRowKeys);
+    const filteredProducts = filteredInventories.filter((product) =>
+      newSelectedRowKeys.includes(product.key)
+    );
+    console.log("????", filteredProducts);
     setSelectedProducts(filteredProducts);
-    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
   };
 
   // 테이블 row 선택 체크박스

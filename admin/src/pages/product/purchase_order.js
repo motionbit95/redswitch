@@ -156,8 +156,6 @@ const DetailModal = ({
 
 const Purchase_order = () => {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
-  const [selectedProvider, setSelectedProvider] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orderHistory, setOrderHistory] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -166,29 +164,23 @@ const Purchase_order = () => {
 
   // 발주 이력 가져오기 (본사 기준)
   useEffect(() => {
-    const fetchOrders = async () => {
-      if (!selectedProvider) {
-        return;
-      }
-      try {
-        const response = await AxiosGet("/products/ordering_history");
-        setOrderHistory(response.data);
-      } catch (error) {
-        message.error("발주 이력을 불러오는 데 실패했습니다.");
-      }
-    };
     fetchOrders();
   }, []);
+  const fetchOrders = async () => {
+    try {
+      const response = await AxiosGet("/products/ordering_history");
+      setOrderHistory(response.data);
+    } catch (error) {
+      message.error("발주 이력을 불러오는 데 실패했습니다.");
+    }
+  };
 
   useEffect(() => {
-    const fetchBranches = async () => {
-      AxiosGet("/branches")
-        .then((res) => {
-          setBranches(res.data);
-        })
-        .catch((err) => console.err(err));
-    };
-    fetchBranches();
+    AxiosGet("/branches")
+      .then((res) => {
+        setBranches(res.data);
+      })
+      .catch((err) => console.err(err));
   }, [orderHistory]);
 
   // 발주 내역 수정
@@ -213,6 +205,7 @@ const Purchase_order = () => {
     AxiosDelete(`/products/ordering_history/${id}`)
       .then((response) => {
         message.success("발주 이력이 성공적으로 삭제되었습니다.");
+        fetchOrders();
       })
       .catch((error) => {
         console.error("발주 이력 삭제 오류:", error);
