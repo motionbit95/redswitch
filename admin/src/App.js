@@ -1,18 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import {
-  ReadOutlined,
-  DollarOutlined,
-  InboxOutlined,
-  TruckOutlined,
-  ShopOutlined,
-  TeamOutlined,
-  SolutionOutlined,
-  NotificationOutlined,
-  CloseOutlined,
-  HomeOutlined,
-  LogoutOutlined,
-} from "@ant-design/icons";
+import { BrowserRouter as Router } from "react-router-dom";
+import { LogoutOutlined } from "@ant-design/icons";
 import {
   Breadcrumb,
   Layout,
@@ -20,51 +8,22 @@ import {
   theme,
   Button,
   Space,
-  Badge,
-  Popover,
-  Typography,
   Modal,
-  List,
-  Tabs,
-  Row,
-  Col,
   Popconfirm,
-  Image,
 } from "antd";
 import { Footer } from "antd/es/layout/layout";
-import BDSMQuestions from "./pages/bdsm/bdsm_questions";
-import BDSMResults from "./pages/bdsm/bdsm_results";
-import Account from "./pages/admin/account";
-import Provider from "./pages/provider/provider";
-import Branch from "./pages/admin/branch";
-import Main from "./pages/admin/main";
-import Post from "./pages/post/post";
-import FranchisePost from "./pages/provider/franchise_post";
 import LoginForm from "./components/login";
-import Product from "./pages/product/product";
-import Inventory from "./pages/product/inventory";
-import Purchase_order from "./pages/product/purchase_order";
-import Order from "./pages/order/order";
-import BDSMStatistics from "./pages/bdsm/bdsm_statistics";
-import Material from "./pages/product/material";
-import BDSMAdvertise from "./pages/bdsm/bdsm_advertise";
-import NoticeBoard from "./pages/post/post";
-import InquiryBoard from "./pages/post/inquiry";
 import { AxiosGet, AxiosPut } from "./api";
 import useFirebase from "./hook/useFilrebase";
-import Spot from "./pages/admin/spot";
 import soundFile from "./assets/VoicesAI_1724058982121.mp3";
-import TabPane from "antd/es/tabs/TabPane";
-import PaymentSummary from "./pages/sales/salse";
-import PaymentSummaryByBranch from "./pages/sales/branch";
-import NoticeList from "./components/list/notice";
-import { use } from "react";
-import { Descriptions, Tag } from "antd/lib";
+import { Tag } from "antd/lib";
 import SearchBranch from "./components/popover/searchbranch";
 import useSelectedBranch from "./hook/useSelectedBranch";
 import OrderDetail from "./components/modal/orderModal";
 
 import AdminRouter from "./pages";
+import menu_items from "./components/array/menu";
+import NoticeDetail from "./components/popover/notice";
 
 const { Header, Content, Sider } = Layout;
 
@@ -102,7 +61,10 @@ const App = () => {
   const [branchPks, setBranchPks] = useState([selectedBranch?.id]); // branchPks 초기값을 배열로 설정(이끌림호텔 충장점 - 테스트)
   const [selectedAlarm, setSelectedAlarm] = useState(null); // 선택된 알림 상태
   const [isModalVisible, setIsModalVisible] = useState(false); // 모달 visibility 상태
+  const [isFirstLoad, setIsFirstLoad] = useState(true); // 첫 로드 여부
+  const [shouldCheckAlarms, setShouldCheckAlarms] = useState(false); // 특정 함수 이후에 알림 확인 여부
 
+  const isEffectExecuted = useRef(false); // useEffect 중복 실행 방지
   const audioRef = useRef(null); // 알람 반복을 위한 audioRef
 
   // useFirebase 훅을 사용하여 알림 데이터를 가져옴
@@ -142,11 +104,6 @@ const App = () => {
       audioRef.current = null;
     }
   };
-
-  const [isFirstLoad, setIsFirstLoad] = useState(true); // 첫 로드 여부
-  const [shouldCheckAlarms, setShouldCheckAlarms] = useState(false); // 특정 함수 이후에 알림 확인 여부
-
-  const isEffectExecuted = useRef(false); // useEffect 중복 실행 방지
 
   // 알림 확인 로직
   useEffect(() => {
@@ -213,138 +170,11 @@ const App = () => {
       });
   }, [localStorage.getItem("id")]);
 
+  // 로그아웃
   const handleLogout = () => {
     localStorage.clear();
     setIsLoggedIn(false);
   };
-
-  // 메뉴 항목
-  const items = [
-    {
-      key: "/dashboard",
-      icon: React.createElement(HomeOutlined),
-      label: <Link to="/dashboard">홈</Link>,
-    },
-    {
-      key: "sales",
-      icon: React.createElement(DollarOutlined),
-      label: "매출관리",
-      children: [
-        {
-          key: "/sales/sales",
-          label: <Link to="/sales/sales">기간별 조회</Link>,
-        },
-        {
-          key: "/sales/branch",
-          label: <Link to="/sales/branch">지점별 조회</Link>,
-        },
-      ],
-    },
-    {
-      key: "/order",
-      icon: React.createElement(TruckOutlined),
-      label: <Link to="/order">주문관리</Link>,
-    },
-    {
-      key: "product",
-      icon: React.createElement(InboxOutlined),
-      label: "상품관리",
-      children: [
-        {
-          key: "/product/material",
-          label: <Link to="/product/material">물자등록</Link>,
-        },
-        {
-          key: "/product/product",
-          label: <Link to="/product/product">판매상품관리</Link>,
-        },
-        {
-          key: "/product/inventory",
-          label: <Link to="/product/inventory">재고관리</Link>,
-        },
-        {
-          key: "/product/purchase_order",
-          label: <Link to="/product/purchase_order">발주관리</Link>,
-        },
-      ],
-    },
-    {
-      key: "post",
-      icon: React.createElement(ReadOutlined),
-      label: "게시판",
-      children: [
-        {
-          key: "/post/notification",
-          label: <Link to="/post/notification">공지사항</Link>,
-        },
-        {
-          key: "/post/inquiry",
-          label: <Link to="/post/inquiry">게시판</Link>,
-        },
-        {
-          key: "/provider/post",
-          label: <Link to="/provider/post">가맹점 신청</Link>,
-        },
-      ],
-    },
-    {
-      key: "provider",
-      icon: React.createElement(TeamOutlined),
-      label: <Link to="/provider/provider">거래처관리</Link>,
-    },
-    {
-      key: "branch",
-      icon: React.createElement(ShopOutlined),
-      label: <Link to="/branch/branch">지점관리</Link>,
-    },
-    {
-      key: "admin",
-      icon: React.createElement(SolutionOutlined),
-      label: "관리자 설정",
-      children: [
-        {
-          key: "/admin/account",
-          label: <Link to="/admin/account">계정관리</Link>,
-        },
-        {
-          key: "homepage",
-          label: <Link to="/admin/spot">홈페이지관리</Link>,
-        },
-        {
-          key: "bdsm",
-          // icon: React.createElement(DotChartOutlined),
-          label: "BDSM",
-          children: [
-            {
-              key: "/bdsm/questions",
-              label: <Link to="/bdsm/questions">문항관리</Link>,
-            },
-            {
-              key: "/bdsm/results",
-              label: <Link to="/bdsm/results">성향관리</Link>,
-            },
-            {
-              key: "/bdsm/advertise",
-              label: <Link to="/bdsm/advertise">광고관리</Link>,
-            },
-            {
-              key: "/bdsm/trend",
-              label: <Link to="/bdsm/trend">통계관리</Link>,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      key: "logout",
-      icon: React.createElement(LogoutOutlined),
-      label: !isLoggedIn ? (
-        <LoginForm isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
-      ) : (
-        <div onClick={handleLogout}>로그아웃</div>
-      ),
-    },
-  ];
 
   return (
     <Router>
@@ -458,103 +288,12 @@ const App = () => {
                 selectedBranch={selectedBranch}
                 currentUser={currentUser}
               />
-              <Space style={{ marginTop: "5px" }}>
-                <Popover
-                  open={openPopover}
-                  overlayStyle={{ width: 400 }}
-                  placement="bottomRight"
-                  title={
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Typography.Text
-                        style={{ fontSize: "18px", fontWeight: "bold" }}
-                      >
-                        알림
-                      </Typography.Text>
-                      <Button
-                        type="text"
-                        icon={<CloseOutlined />}
-                        onClick={() => setOpenPopover(false)}
-                      />
-                    </div>
-                  }
-                  content={
-                    <Tabs defaultActiveKey="1" centered>
-                      <TabPane tab="공지사항" key="1">
-                        <NoticeList />
-                      </TabPane>
-                      <TabPane tab="주문" key="2">
-                        <List
-                          dataSource={alarms.slice(0, 5)}
-                          renderItem={(item) => (
-                            <List.Item
-                              onClick={() => handleAlarmClick(item)}
-                              style={{
-                                backgroundColor:
-                                  item.alarm_status === 0
-                                    ? "lightred"
-                                    : "white",
-                              }}
-                            >
-                              <Row
-                                style={{
-                                  width: "100%",
-
-                                  justifyContent: "space-between",
-                                }}
-                                gutter={6}
-                              >
-                                <Col span={16}>
-                                  <div style={{ fontWeight: "bold" }}>
-                                    {item.alarm_title}
-                                  </div>
-                                  <div
-                                    style={{ fontSize: "12px", opacity: "0.7" }}
-                                  >
-                                    {item.alarm_content}
-                                  </div>
-                                </Col>
-                                <Col span={8} style={{ textAlign: "right" }}>
-                                  <Space>
-                                    <div style={{ opacity: "0.7" }}>
-                                      {new Date(
-                                        item.created_at
-                                      ).toLocaleTimeString()}
-                                    </div>
-                                    {/* <Button
-                                      style={{ border: "none" }}
-                                      icon={<CloseOutlined />}
-                                    /> */}
-                                  </Space>
-                                </Col>
-                              </Row>
-                            </List.Item>
-                          )}
-                        />
-                      </TabPane>
-                    </Tabs>
-                  }
-                  trigger="click"
-                >
-                  <Badge
-                    count={5}
-                    size="small"
-                    onClick={() => setOpenPopover(true)}
-                  >
-                    <NotificationOutlined
-                      style={{
-                        fontSize: "20px",
-                        color: "white",
-                        cursor: "pointer",
-                      }}
-                    />
-                  </Badge>
-                </Popover>
-              </Space>
+              <NoticeDetail
+                alarms={alarms}
+                openPopover={openPopover}
+                setOpenPopover={setOpenPopover}
+                handleAlarmClick={handleAlarmClick}
+              />
             </Space>
           </Space>
         </Header>
@@ -582,7 +321,21 @@ const App = () => {
                 height: "100%",
                 borderRight: 0,
               }}
-              items={items}
+              items={[
+                ...menu_items,
+                {
+                  key: "logout",
+                  icon: React.createElement(LogoutOutlined),
+                  label: !isLoggedIn ? (
+                    <LoginForm
+                      isLoggedIn={isLoggedIn}
+                      setIsLoggedIn={setIsLoggedIn}
+                    />
+                  ) : (
+                    <div onClick={handleLogout}>로그아웃</div>
+                  ),
+                },
+              ]}
             />
           </Sider>
           <Layout
