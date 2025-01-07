@@ -170,10 +170,11 @@ const PaymentSummaryByBranch = () => {
       refundTransactions: branchData.refundTransactions,
       refundAmount: branchData.refundAmount,
       branchName: branchData.branchName,
-      branchAddress:
-        branchData.branchAddress.split(" ")[0] +
-        " " +
-        branchData.branchAddress.split(" ")[1],
+      branchAddress: branchData.branchAddress
+        ? branchData.branchAddress.split(" ")[0] +
+          " " +
+          branchData.branchAddress.split(" ")[1]
+        : "",
       dateRange: branchData.dateRange,
       total: branchData.total,
     };

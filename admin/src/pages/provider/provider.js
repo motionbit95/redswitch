@@ -457,16 +457,16 @@ const Provider = () => {
       dataIndex: "provider_name",
       key: "provider_name",
     },
-    {
-      title: "대표자명",
-      dataIndex: "provider_ceo_name",
-      key: "provider_ceo_name",
-    },
-    {
-      title: "대표자 전화번호",
-      dataIndex: "provider_ceo_phone",
-      key: "provider_ceo_phone",
-    },
+    // {
+    //   title: "대표자명",
+    //   dataIndex: "provider_ceo_name",
+    //   key: "provider_ceo_name",
+    // },
+    // {
+    //   title: "대표자 전화번호",
+    //   dataIndex: "provider_ceo_phone",
+    //   key: "provider_ceo_phone",
+    // },
     {
       title: "담당자명",
       dataIndex: "provider_manager_name",

@@ -11,7 +11,9 @@ import {
   Image,
   Tag,
   Input,
+  Tooltip,
 } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import FileUpload from "../../components/button";
 import SearchBranch from "../../components/popover/searchbranch";
@@ -65,7 +67,7 @@ const AddModal = ({
   return (
     <Modal
       open={isModalOpen}
-      width={620}
+      width={650}
       title={isEditMode ? "설치지점 수정" : "설치지점 등록"} // 수정/등록 구분
       onCancel={() => {
         form.resetFields();
@@ -87,7 +89,6 @@ const AddModal = ({
           {isEditMode ? "수정" : "등록"}
         </Button>,
       ]}
-      centered
     >
       <Form
         form={form}
@@ -123,7 +124,7 @@ const AddModal = ({
             <>
               <Descriptions.Item
                 label="설치지점"
-                span={2}
+                span={selectedBranch ? 2 : 3}
                 labelStyle={{ whiteSpace: "nowrap" }}
               >
                 <Form.Item name="spot_name" style={{ marginBottom: 0 }}>
@@ -136,15 +137,18 @@ const AddModal = ({
                   />
                 </Form.Item>
               </Descriptions.Item>
-              <Descriptions.Item label="설치 여부">
-                {selectedBranch && (
-                  <div>
-                    {selectedBranch?.install_flag === "0"
-                      ? "미설치"
-                      : "설치완료"}
-                  </div>
-                )}
-              </Descriptions.Item>
+              {selectedBranch && (
+                <Descriptions.Item label="설치 여부">
+                  {selectedBranch && (
+                    <div>
+                      {selectedBranch?.install_flag === "0"
+                        ? "미설치"
+                        : "설치완료"}
+                    </div>
+                  )}
+                </Descriptions.Item>
+              )}
+
               {selectedBranch && (
                 <Descriptions.Item label="주소" span={3}>
                   {selectedBranch && (
@@ -157,18 +161,12 @@ const AddModal = ({
 
           <Descriptions.Item
             label={
-              <div>
+              <Space>
                 설치지점 로고
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#FF8A8A",
-                    marginTop: "4px",
-                  }}
-                >
-                  jpg, jpeg, png
-                </div>
-              </div>
+                <Tooltip placement="bottom" title="jpg, png 등 이미지 파일">
+                  <InfoCircleOutlined />
+                </Tooltip>
+              </Space>
             }
             labelStyle={{ whiteSpace: "nowrap" }}
           >
@@ -181,18 +179,12 @@ const AddModal = ({
           </Descriptions.Item>
           <Descriptions.Item
             label={
-              <div>
+              <Space>
                 설치지점 이미지
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#FF8A8A",
-                    marginTop: "4px",
-                  }}
-                >
-                  jpg, jpeg, png
-                </div>
-              </div>
+                <Tooltip placement="bottom" title="jpg, png 등 이미지 파일">
+                  <InfoCircleOutlined />
+                </Tooltip>
+              </Space>
             }
             labelStyle={{ whiteSpace: "nowrap" }}
           >

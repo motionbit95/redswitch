@@ -505,11 +505,11 @@ function Branch(props) {
       dataIndex: "branch_address",
       key: "branch_address",
     },
-    {
-      title: "대표자명",
-      dataIndex: "branch_ceo_name",
-      key: "branch_ceo_name",
-    },
+    // {
+    //   title: "대표자명",
+    //   dataIndex: "branch_ceo_name",
+    //   key: "branch_ceo_name",
+    // },
     {
       title: "담당자명",
       dataIndex: "branch_manager_name",
