@@ -17,6 +17,7 @@ import { UpOutlined, LeftOutlined, CloseOutlined } from "@ant-design/icons";
 import axios from "axios";
 import TextBox from "../component/textbox";
 import Description from "../component/description";
+import { useEffect } from "react";
 
 const CenteredForm = (props) => {
   const { size } = props;
@@ -39,6 +40,22 @@ const CenteredForm = (props) => {
       message.error("신청 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
   };
+
+  // Drawer가 열릴 때와 닫힐 때 body 스타일을 조정
+  useEffect(() => {
+    if (open) {
+      // Drawer가 열리면 body의 overflow를 hidden으로 설정
+      document.body.style.overflow = "hidden";
+    } else {
+      // Drawer가 닫히면 body의 overflow를 원래대로 돌려놓음
+      document.body.style.overflow = "auto";
+    }
+
+    // 컴포넌트가 언마운트 될 때도 원래 상태로 돌려놓음
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [open]);
 
   const handleopenModal = (type) => {
     setIsModalOpen(true);
@@ -103,8 +120,9 @@ const CenteredForm = (props) => {
         }}
         bodyStyle={{
           overflow: "hidden",
+          height: "100vh",
+          alignContent: "center",
         }}
-        closeIcon={<CloseOutlined style={{ color: "#fff" }} />}
       >
         <div
           style={{
@@ -238,40 +256,73 @@ const CenteredForm = (props) => {
                     />
                   </Form.Item>
                 </Col>
+
                 <div
                   style={{
-                    width: "100%",
                     display: "flex",
+                    width: "100%",
                     justifyContent: "space-between",
                     marginTop: size ? "8px" : "16px",
                     marginBottom: size ? "16px" : "32px",
                     padding: "0 15px",
                   }}
                 >
-                  <Checkbox style={{ color: "white", alignItems: "center" }}>
-                    개인정보처리방침 동의
-                  </Checkbox>
-                  <Space
-                    onClick={handleopenModal}
-                    style={{
-                      cursor: "pointer",
-                      display: "flex",
-                      justifyContent: "center",
-                      borderBottom: "1px solid #fff",
-                    }}
-                  >
-                    <Description
-                      size={size}
-                      description={`개인정보처리방침 >`}
-                    />
-                  </Space>
+                  <Row justify={"space-between"} style={{ width: "100%" }}>
+                    <Col>
+                      <Form.Item
+                        name={"agreement"}
+                        valuePropName="checked"
+                        rules={[
+                          {
+                            required: true,
+                            message: "개인정보처리방침 동의란에 체크해주세요.",
+                          },
+                        ]}
+                        style={{ marginBottom: 0 }}
+                      >
+                        <Checkbox
+                          style={{
+                            color: "white",
+                            fontSize: size === "mobile" ? "12px" : "16px",
+                            alignItems: "center",
+                          }}
+                        >
+                          개인정보처리방침 동의
+                        </Checkbox>
+                      </Form.Item>
+                    </Col>
+                    <Col>
+                      <Space
+                        onClick={handleopenModal}
+                        style={{
+                          cursor: "pointer",
+                          display: "flex",
+                          justifyContent: "center",
+                          borderBottom: "1px solid #fff",
+                        }}
+                      >
+                        <Description
+                          size={size}
+                          description={`개인정보처리방침 >`}
+                        />
+                      </Space>
+                    </Col>
+                  </Row>
                 </div>
-
                 <Col span={24}>
                   <Form.Item style={{ marginBottom: 0 }}>
-                    <Button type="primary" danger htmlType="submit" block>
-                      신청하기
-                    </Button>
+                    <Row gutter={16}>
+                      <Col span={12}>
+                        <Button onClick={() => setOpen(false)} block>
+                          취소
+                        </Button>
+                      </Col>
+                      <Col span={12}>
+                        <Button type="primary" danger htmlType="submit" block>
+                          신청하기
+                        </Button>
+                      </Col>
+                    </Row>
                   </Form.Item>
                 </Col>
               </Row>

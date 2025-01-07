@@ -85,6 +85,7 @@ export function Customer(props) {
         overflow: "hidden",
         height: "100vh",
         maxWidth: "770px",
+        maxHeight: size === "mobile" ? "600px" : "100vh",
         justifyContent: "center",
         display: "flex",
         flex: 1,
@@ -105,11 +106,7 @@ export function Customer(props) {
           style={{
             marginTop: size === "mobile" ? "80px" : "0px",
             marginBottom:
-              size === "mobile"
-                ? "200px"
-                : size === "tablet"
-                ? "160px"
-                : "60px",
+              size === "mobile" ? "60px" : size === "tablet" ? "160px" : "60px",
           }}
           src={require("../asset/page/9_title.png")}
         />
@@ -122,7 +119,12 @@ export function Customer(props) {
             marginBottom: "60px",
           }}
         >
-          <Space direction="vertical" align="center">
+          <Space
+            direction="vertical"
+            align="center"
+            size={"large"}
+            style={{ width: "100%" }}
+          >
             <Space
               style={{
                 display: "flex",
@@ -133,7 +135,7 @@ export function Customer(props) {
                 icon={<LeftOutlined />}
                 onClick={handlePrev}
               />
-              <Space style={{ padding: size === "mobile" ? 0 : "20px" }}>
+              <Space style={{ padding: size === "mobile" ? "10px" : "20px" }}>
                 {visibleLogos.map((spot, idx) => (
                   <Image
                     style={{
@@ -141,6 +143,7 @@ export function Customer(props) {
                       height: size === "mobile" ? "50px" : "100px",
                       borderRadius: "50%",
                     }}
+                    preview={false}
                     src={spot.spot_logo}
                   />
                 ))}
@@ -171,6 +174,7 @@ export function Customer(props) {
                       borderRadius: "20%",
                       border: "1px solid #f1f1f1",
                     }}
+                    preview={false}
                     src={spot.spot_image}
                   />
                 ))}
