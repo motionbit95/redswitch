@@ -27,7 +27,11 @@ const AddModal = ({
   currentSpot,
 }) => {
   const [form] = Form.useForm();
-  const [selectedBranch, setSelectedBranch] = useState(null);
+  const [selectedBranch, setSelectedBranch] = useState(
+    localStorage.getItem("selectedBranch")
+      ? JSON.parse(localStorage.getItem("selectedBranch"))
+      : null
+  );
 
   const handlesubmit = async (values) => {
     const spot_name = selectedBranch?.branch_name;

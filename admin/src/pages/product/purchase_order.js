@@ -281,7 +281,7 @@ const Purchase_order = () => {
       sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
     },
     {
-      title: "지점 명",
+      title: "지점명",
 
       render: (text, record) => {
         let branch = branches.filter(

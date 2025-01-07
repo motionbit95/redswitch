@@ -11,6 +11,7 @@ import {
   NotificationOutlined,
   CloseOutlined,
   HomeOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import {
   Breadcrumb,
@@ -59,6 +60,8 @@ import PaymentSummaryByBranch from "./pages/sales/branch";
 import NoticeList from "./components/list/notice";
 import { use } from "react";
 import { Descriptions, Tag } from "antd/lib";
+import SearchBranch from "./components/popover/searchbranch";
+import useSelectedBranch from "./hook/useSelectedBranch";
 
 const { Header, Content, Sider } = Layout;
 
@@ -91,7 +94,8 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState({});
 
   // useFirebase 훅을 사용하여 알림 데이터를 가져옴
-  const [branchPks, setBranchPks] = useState(["-OCqwefrb7HMt2OMw2qE"]); // branchPks 초기값을 배열로 설정(이끌림호텔 충장점 - 테스트)
+  const { selectedBranch, setSelectedBranch } = useSelectedBranch();
+  const [branchPks, setBranchPks] = useState([selectedBranch?.id]); // branchPks 초기값을 배열로 설정(이끌림호텔 충장점 - 테스트)
   const [selectedAlarm, setSelectedAlarm] = useState(null); // 선택된 알림 상태
   const [isModalVisible, setIsModalVisible] = useState(false); // 모달 visibility 상태
 
@@ -103,10 +107,10 @@ const App = () => {
 
   // redirect
   useEffect(() => {
-    if (!isLoggedIn) {
-      window.location.href = "/login";
-    } else {
-      if (window.location.pathname === "/") {
+    if (window.location.pathname === "/") {
+      if (!isLoggedIn) {
+        window.location.href = "/login";
+      } else {
         window.location.href = "/dashboard";
       }
     }
@@ -185,38 +189,31 @@ const App = () => {
       .catch((e) => console.error("Audio play failed:", e));
   };
 
-  useEffect(() => {
-    console.log("App component mounted");
-    console.log(window.location.pathname.split("/")[1]);
-  }, []);
-
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const response = await AxiosGet(
-          `/accounts/${localStorage.getItem("id")}`
-        );
-        if (response.status === 200) {
-          console.log("유저 정보", response.data);
-          setCurrentUser(response.data);
-          setIsLoggedIn(true);
-        }
-      } catch (error) {
-        if (error?.response?.status === 401) {
-          setCurrentUser({});
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("id");
-          setIsLoggedIn(false);
-        }
+  const getUser = async () => {
+    try {
+      const response = await AxiosGet(
+        `/accounts/${localStorage.getItem("id")}`
+      );
+      if (response.status === 200) {
+        setCurrentUser(response.data);
+        setIsLoggedIn(true);
       }
-    };
+    } catch (error) {
+      if (error?.response?.status === 401) {
+        setCurrentUser({});
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("id");
+        setIsLoggedIn(false);
+      }
+    }
+  };
 
+  useEffect(() => {
     getUser();
-  }, []);
+  }, [localStorage.getItem("id")]);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("id");
+    localStorage.clear();
     setIsLoggedIn(false);
   };
 
@@ -337,6 +334,15 @@ const App = () => {
         },
       ],
     },
+    {
+      key: "logout",
+      icon: React.createElement(LogoutOutlined),
+      label: !isLoggedIn ? (
+        <LoginForm isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+      ) : (
+        <div onClick={handleLogout}>로그아웃</div>
+      ),
+    },
   ];
 
   return (
@@ -401,32 +407,55 @@ const App = () => {
             justifyContent: "space-between",
           }}
         >
-          <div
-            style={{
-              float: "left",
-              color: "#fff",
-              fontSize: "20px",
-              fontWeight: "bold",
-            }}
-            onClick={() => {
-              window.location.href = "/dashboard";
-            }}
-          >
-            Redswitch
-          </div>
+          <Space size={"large"}>
+            <div
+              style={{
+                float: "left",
+                color: "#fff",
+                fontSize: "20px",
+                fontWeight: "bold",
+              }}
+              onClick={() => {
+                window.location.href = "/dashboard";
+              }}
+            >
+              Redswitch
+            </div>
+            <Space>
+              <Tag
+                color={
+                  currentUser.permission === "1"
+                    ? "red"
+                    : currentUser.permission === "2"
+                    ? "blue"
+                    : "green"
+                }
+              >
+                {currentUser.permission === "1"
+                  ? "본사관리자"
+                  : currentUser.permission === "2"
+                  ? "지사관리자"
+                  : "지점관리자"}
+              </Tag>
+              <div style={{ color: "white" }}>{currentUser.user_id} 님</div>
+            </Space>
+          </Space>
           <Space size={50}>
-            <div style={{ color: "white" }}>{currentUser.user_id} 님</div>
             <Space size={"large"}>
-              {isLoggedIn ? (
-                <Space>
-                  <Button onClick={handleLogout}>로그아웃</Button>
-                </Space>
-              ) : (
-                <LoginForm
-                  isLoggedIn={isLoggedIn}
-                  setIsLoggedIn={setIsLoggedIn}
-                />
-              )}
+              <SearchBranch
+                setSelectedBranch={(branches) => {
+                  setSelectedBranch(branches[0]);
+                  localStorage.setItem(
+                    "selectedBranch",
+                    JSON.stringify(branches[0])
+                  );
+
+                  // 새로고침
+                  window.location.reload();
+                }}
+                selectedBranch={selectedBranch}
+                currentUser={currentUser}
+              />
               <Space style={{ marginTop: "5px" }}>
                 <Popover
                   open={openPopover}
@@ -544,6 +573,23 @@ const App = () => {
                   </Badge>
                 </Popover>
               </Space>
+              {/* {isLoggedIn ? (
+                <Space>
+                  <Button
+                    type="text"
+                    icon={<LogoutOutlined />}
+                    onClick={handleLogout}
+                    style={{ color: "white" }}
+                  >
+                    로그아웃
+                  </Button>
+                </Space>
+              ) : (
+                <LoginForm
+                  isLoggedIn={isLoggedIn}
+                  setIsLoggedIn={setIsLoggedIn}
+                />
+              )} */}
               {/* <Switch checked={isDarkMode} onChange={toggleTheme} /> */}
             </Space>
           </Space>

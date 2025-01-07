@@ -91,6 +91,7 @@ const Account = () => {
 
   // 계정 수정 모달 열기
   const handleEdit = (account) => {
+    console.log("선택한 계정 : ", account);
     setCurrentAccount(account);
     form.setFieldsValue(account);
     setIsEditModalVisible(true);
@@ -98,14 +99,8 @@ const Account = () => {
 
   // 계정 수정 처리
   const handleUpdate = async (values) => {
-    const provider_id = selectedProvider.map((provider) => provider.id);
-    const branch_id = selectedBranch.map((branch) => branch.id);
     try {
-      await AxiosPut(`/accounts/${currentAccount.id}`, {
-        ...values,
-        provider_id,
-        branch_id,
-      });
+      await AxiosPut(`/accounts/${currentAccount.id}`, values);
       message.success("계정 수정 성공");
       fetchAccounts();
       setIsEditModalVisible(false);
@@ -123,14 +118,8 @@ const Account = () => {
 
   // 계정 추가 처리
   const handleAdd = async (values) => {
-    const provider_id = selectedProvider.map((provider) => provider.id);
-    const branch_id = selectedBranch.map((branch) => branch.id);
     try {
-      await AxiosPost("/accounts", {
-        ...values,
-        provider_id,
-        branch_id,
-      });
+      await AxiosPost("/accounts", values);
       message.success("계정 생성 성공");
       fetchAccounts();
       setIsAddModalVisible(false);
@@ -281,20 +270,23 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
   }, [isEdit, form]);
 
   const fetchBranchAndProviderData = (account) => {
-    setSelectedBranch([]);
-    setSelectedProvider([]);
     // 지점 데이터 가져오기
-    account.branch_id?.forEach((branch) => {
-      AxiosGet(`/branches/${branch}`).then((response) => {
-        setSelectedBranch((prev) => [...prev, response.data]);
-      });
-    });
+    const branchPromises = account.branch_id?.map((branch) =>
+      AxiosGet(`/branches/${branch}`).then((response) => response.data)
+    );
 
     // 거래처 데이터 가져오기
-    account.provider_id?.forEach((provider) => {
-      AxiosGet(`/providers/${provider}`).then((response) => {
-        setSelectedProvider((prev) => [...prev, response.data]);
-      });
+    const providerPromises = account.provider_id?.map((provider) =>
+      AxiosGet(`/providers/${provider}`).then((response) => response.data)
+    );
+
+    // Promise.all을 사용하여 모든 데이터를 가져오고 상태 업데이트
+    Promise.all(branchPromises || []).then((branchData) => {
+      setSelectedBranch(branchData);
+    });
+
+    Promise.all(providerPromises || []).then((providerData) => {
+      setSelectedProvider(providerData);
     });
   };
 
@@ -308,6 +300,14 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
     setSelectedProvider((prev) =>
       prev.filter((provider) => provider.provider_name !== removedName)
     );
+  };
+
+  const onSubmit = () => {
+    onFinish({
+      ...form.getFieldsValue(),
+      branch_id: selectedBranch.map((branch) => branch.id),
+      provider_id: selectedProvider.map((provider) => provider.id),
+    });
   };
 
   return (
@@ -326,7 +326,7 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
         </Button>,
       ]}
     >
-      <Form form={form} layout="vertical" onFinish={onFinish}>
+      <Form form={form} layout="vertical" onFinish={onSubmit}>
         <Descriptions bordered column={2}>
           <Descriptions.Item label="ID">
             <Form.Item

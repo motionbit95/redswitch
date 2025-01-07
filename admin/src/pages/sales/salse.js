@@ -9,10 +9,10 @@ import {
   Typography,
   Button,
   Modal,
+  Tooltip,
 } from "antd";
 import dayjs from "dayjs";
 import { AxiosGet } from "../../api";
-import SearchBranch from "../../components/popover/searchbranch";
 import {
   DownloadOutlined,
   SearchOutlined,
@@ -20,39 +20,35 @@ import {
 } from "@ant-design/icons";
 import useExportToExcel from "../../hook/useExportToExcel";
 import usePagination from "../../hook/usePagination";
-import { render } from "@testing-library/react";
-import { Popover, Tooltip } from "antd/lib";
+import useSelectedBranch from "../../hook/useSelectedBranch";
 
 const { RangePicker } = DatePicker;
 
 const PaymentSummary = (props) => {
   const { currentUser } = props;
-  // 한 달 전부터 오늘까지 범위로 기본값 설정
-  const defaultRange = [
-    dayjs().subtract(1, "month"), // 한 달 전
-    dayjs(), // 오늘
-  ];
+
+  // 기본 날짜 범위: 한 달 전부터 오늘까지
+  const defaultRange = [dayjs().subtract(1, "month"), dayjs()];
 
   const [orders, setOrders] = useState([]);
   const [payments, setPayments] = useState([]);
   const [groupedPayments, setGroupedPayments] = useState({});
   const [selectedRange, setSelectedRange] = useState(defaultRange);
   const [stats, setStats] = useState(null);
-  const [selectedBranch, setSelectedBranch] = useState(null);
-
+  const { selectedBranch } = useSelectedBranch();
   const [dailySales, setDailySales] = useState({ today: 0, yesterday: 0 });
-
-  // detail modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
+  // 금일 및 전일 매출 계산
   useEffect(() => {
     const calculateDailySales = () => {
       const today = dayjs().format("YYYY-MM-DD");
       const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
 
-      // 금일 매출 계산
-      const todayRefunds = payments
+      const filteredPayments = filterPaymentsByBranch();
+
+      const todayRefunds = filteredPayments
         .filter(
           (payment) =>
             dayjs(payment.ediDate, "YYYYMMDDHHmmss").format("YYYY-MM-DD") ===
@@ -62,7 +58,7 @@ const PaymentSummary = (props) => {
         .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
 
       const todaySales =
-        payments
+        filteredPayments
           .filter(
             (payment) =>
               dayjs(payment.ediDate, "YYYYMMDDHHmmss").format("YYYY-MM-DD") ===
@@ -72,9 +68,6 @@ const PaymentSummary = (props) => {
           .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0) -
         todayRefunds;
 
-      console.log(todayRefunds);
-
-      // 전일 매출 계산
       const yesterdaySales = payments
         .filter(
           (payment) =>
@@ -88,8 +81,9 @@ const PaymentSummary = (props) => {
     };
 
     calculateDailySales();
-  }, [payments]);
+  }, [orders]);
 
+  // 초기 데이터 가져오기
   useEffect(() => {
     window.scrollTo(0, 0);
 
@@ -116,27 +110,24 @@ const PaymentSummary = (props) => {
   }, []);
 
   useEffect(() => {
-    console.log("selectedBranch:", selectedBranch);
-    handleDateChange(selectedRange);
-  }, [selectedBranch]);
+    if (orders && payments && selectedBranch) {
+      handleDateChange(selectedRange);
+    }
+  }, [orders, payments]);
 
   // 날짜 범위 변경 처리
   const handleDateChange = (dates) => {
-    console.log("날짜 범위 변경 처리", dates);
     setSelectedRange(dates);
 
     if (dates && dates.length === 2) {
       const [startDate, endDate] = dates;
-
-      // 지점에 맞는 결제 데이터 필터링
       const filteredPayments = filterPaymentsByBranch();
 
-      if (dates && dates.length === 2) {
+      if (dates.length === 2) {
         const stats = calculatePaymentStats(filteredPayments, orders, dates);
         setStats(stats);
       }
 
-      // 날짜 범위 필터링
       const dateFilteredPayments = filteredPayments.filter((payment) => {
         const ediDate = dayjs(payment.ediDate, "YYYYMMDDHHmmss");
         return (
@@ -145,13 +136,12 @@ const PaymentSummary = (props) => {
         );
       });
 
-      // 날짜별로 결제 데이터를 그룹화
       const grouped = groupPaymentsByDate(dateFilteredPayments);
       setGroupedPayments(grouped);
     }
   };
 
-  // 결제 데이터를 날짜별로 그룹화하는 함수
+  // 결제 데이터를 날짜별로 그룹화
   const groupPaymentsByDate = (payments) => {
     return payments.reduce((acc, payment) => {
       const date = dayjs(payment.ediDate, "YYYYMMDDHHmmss").format(
@@ -165,31 +155,28 @@ const PaymentSummary = (props) => {
     }, {});
   };
 
-  // 결제 통계를 계산하는 함수
+  // 결제 통계 계산
   const calculatePaymentStats = (payments, orders, [startDate, endDate]) => {
     if (!startDate || !endDate) return null;
 
-    // 날짜 범위 필터링
     const filteredPayments = payments.filter((payment) => {
-      const ediDate = dayjs(payment.ediDate, "YYYYMMDDHHmmss"); // ediDate 파싱
+      const ediDate = dayjs(payment.ediDate, "YYYYMMDDHHmmss");
       return (
         ediDate.isAfter(dayjs(startDate)) &&
         ediDate.isBefore(dayjs(endDate).endOf("day"))
       );
     });
 
-    // 해당 주문이 있는 결제만 필터링 (order_code와 ordNo 매칭)
     const paymentsWithOrders = filteredPayments.filter((payment) => {
       return orders.some((order) => order.order_code === payment.ordNo);
     });
 
-    // 데이터 계산
     const totalTransactions = paymentsWithOrders.filter(
       (payment) => payment.cancelYN === "N"
-    ).length; // 전체 결제건수
+    ).length;
     const refundTransactions = paymentsWithOrders.filter(
       (payment) => payment.cancelYN === "Y"
-    ).length; // 환불 건수
+    ).length;
     const refundAmount = paymentsWithOrders
       .filter((payment) => payment.cancelYN === "Y")
       .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
@@ -209,20 +196,17 @@ const PaymentSummary = (props) => {
 
   // 선택한 지점에 맞는 주문 데이터 필터링
   const filterPaymentsByBranch = () => {
-    if (!selectedBranch) return payments; // 지점이 선택되지 않았다면 모든 결제 데이터 반환
+    if (!selectedBranch) return [];
 
-    // 선택한 지점에 해당하는 주문번호를 찾기
     const branchOrders = orders.filter(
       (order) => order.branch_pk === selectedBranch.key
     );
 
-    // 해당 주문번호에 맞는 결제 데이터 필터링
     return payments.filter((payment) =>
       branchOrders.some((order) => order.order_code === payment.ordNo)
     );
   };
 
-  // 날짜별로 통계 계산
   const dataSource = Object.keys(groupedPayments).map((date) => {
     const datePayments = groupedPayments[date];
     const totalAmount = datePayments
@@ -250,7 +234,6 @@ const PaymentSummary = (props) => {
     };
   });
 
-  // 테이블 컬럼 정의
   const columns = [
     {
       title: "영업일",
@@ -287,12 +270,11 @@ const PaymentSummary = (props) => {
       title: "총 매출금액",
       dataIndex: "total",
       key: "total",
-      render: (value, record) => `${value.toLocaleString("ko-KR")}원`,
+      render: (value) => `${value.toLocaleString("ko-KR")}원`,
     },
     {
       title: "자세히보기",
       key: "action",
-
       render: (_, record) => (
         <Button
           icon={<SearchOutlined />}
@@ -305,7 +287,6 @@ const PaymentSummary = (props) => {
     },
   ];
 
-  // Use the custom hook to export data to Excel
   const exportToExcel = useExportToExcel(
     dataSource,
     columns,
@@ -316,14 +297,6 @@ const PaymentSummary = (props) => {
   return (
     <Space direction="vertical" style={{ width: "100%" }} size={16}>
       <Space direction="horizontal" size={8}>
-        <SearchBranch
-          selectedBranch={selectedBranch}
-          setSelectedBranch={(branches) => {
-            setSelectedBranch(branches[0]);
-          }}
-          multiple={false}
-          currentUser={currentUser}
-        />
         <RangePicker
           onChange={handleDateChange}
           defaultValue={defaultRange} // 기본값 설정
@@ -458,18 +431,16 @@ const PaymentSummary = (props) => {
   );
 };
 
+// DetailModal 컴포넌트: 선택한 날짜의 결제 상세 정보를 표시
 const DetailModal = ({
   isModalOpen,
   setIsModalOpen,
   payments,
   selectedDate,
 }) => {
-  const { pagination, setPagination, handleTableChange } = usePagination(10);
+  const { pagination, handleTableChange } = usePagination(10); // 페이지네이션 훅 사용
 
-  useEffect(() => {
-    console.log(payments);
-  }, [payments]);
-
+  // 결제 상세 정보 테이블 컬럼 정의
   const columns = [
     {
       title: "No.",
@@ -491,7 +462,7 @@ const DetailModal = ({
       dataIndex: "ediDate",
       key: "ediDate",
       render: (value) =>
-        dayjs(value, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+        dayjs(value, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"), // 날짜 형식 변환
     },
     {
       title: "취소여부",
@@ -517,11 +488,12 @@ const DetailModal = ({
     },
   ];
 
+  // 데이터 엑셀 다운로드 기능
   const exportToExcel = useExportToExcel(
     payments,
-    columns.slice(1),
+    columns.slice(1), // "No." 컬럼 제외
     [],
-    "결제내역_" + selectedDate
+    `결제내역_${selectedDate}`
   );
 
   return (
@@ -531,15 +503,14 @@ const DetailModal = ({
       width={1000}
       footer={[
         <Button
-          key="submit"
-          // type="primary"
+          key="export"
           icon={<DownloadOutlined />}
           onClick={exportToExcel}
         >
           엑셀 다운로드
         </Button>,
-        <Button key="back" onClick={() => setIsModalOpen(false)}>
-          취소
+        <Button key="close" onClick={() => setIsModalOpen(false)}>
+          닫기
         </Button>,
       ]}
     >
@@ -549,11 +520,12 @@ const DetailModal = ({
         columns={columns}
         pagination={{
           ...pagination,
-          showSizeChanger: true,
+          showSizeChanger: true, // 페이지 크기 변경 옵션 활성화
         }}
-        onChange={handleTableChange}
+        onChange={handleTableChange} // 테이블 변경 핸들러 연결
       />
     </Modal>
   );
 };
+
 export default PaymentSummary;

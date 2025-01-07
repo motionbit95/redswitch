@@ -40,7 +40,11 @@ const InquiryBoard = (props) => {
 
   const [branches, setBranches] = useState([]);
 
-  const [selectedBranch, setSelectedBranch] = useState(null);
+  const [selectedBranch, setSelectedBranch] = useState(
+    localStorage.getItem("selectedBranch")
+      ? JSON.parse(localStorage.getItem("selectedBranch"))
+      : null
+  );
 
   const { currentUser } = props;
 

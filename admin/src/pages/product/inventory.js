@@ -1,24 +1,20 @@
 import {
   Button,
-  Col,
   Form,
-  Input,
   InputNumber,
   Modal,
-  Popconfirm,
   Row,
   Space,
   Table,
   message,
 } from "antd";
-import { PlusOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
-import SearchBranch from "../../components/popover/searchbranch";
 import { useEffect } from "react";
 import { AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import useSearchFilter from "../../hook/useSearchFilter";
 import usePagination from "../../hook/usePagination";
-import { set } from "firebase/database";
+import useSelectedBranch from "../../hook/useSelectedBranch";
 
 // 발주 추가 모달
 const AddModal = (props) => {
@@ -182,11 +178,7 @@ const Inventory = (props) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
 
-  const [selectedBranch, setSelectedBranch] = useState(
-    localStorage.getItem("selectedBranch")
-      ? JSON.parse(localStorage.getItem("selectedBranch"))
-      : null
-  );
+  const { selectedBranch } = useSelectedBranch();
 
   const [editRowKey, setEditRowKey] = useState(null);
   const [editedInventory, setEditedInventory] = useState({});
@@ -457,15 +449,6 @@ const Inventory = (props) => {
           marginBottom: 16,
         }}
       >
-        <SearchBranch
-          currentUser={currentUser}
-          selectedBranch={selectedBranch}
-          setSelectedBranch={(branches) => {
-            setSelectedBranch(branches[0]);
-            localStorage.setItem("selectedBranch", JSON.stringify(branches[0]));
-          }}
-          multiple={false}
-        />
         <Button
           type="primary"
           icon={<PlusOutlined />}

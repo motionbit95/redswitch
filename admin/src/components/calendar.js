@@ -1,117 +1,116 @@
 import { Calendar, ConfigProvider, Space, Typography, Badge } from "antd";
 import React, { useEffect, useState } from "react";
-import locale from "antd/lib/locale/ko_KR"; // 우린 한국인이니까 ko_KR를 불러옵시다
-// The default locale is en-US, if you want to use other locale, just set locale in entry file globally.
+import locale from "antd/lib/locale/ko_KR"; // 한국어 로케일 설정
 import dayjs from "dayjs";
-import "dayjs/locale/ko";
+import "dayjs/locale/ko"; // dayjs 한국어 설정
 import { AxiosGet } from "../api";
+
 dayjs.locale("ko");
 
+/**
+ * 특정 날짜의 결제 데이터를 가공하여 표시할 데이터를 반환합니다.
+ * @param {dayjs.Dayjs} value - 날짜 값
+ * @param {Object} rawData - 결제 데이터 객체 (날짜별 그룹화)
+ * @returns {Array} 리스트 데이터 배열
+ */
 const getListData = (value, rawData) => {
-  const dateKey = value.format("YYYY-MM-DD"); // value에서 날짜 키를 생성
-  const records = rawData[dateKey] || []; // 해당 날짜의 데이터를 가져옴
-  let totalPayment = 0; // 총 결제금액
-  let totalRefund = 0; // 총 환불금액
+  const dateKey = value.format("YYYY-MM-DD"); // 날짜 키 생성
+  const records = rawData[dateKey] || []; // 해당 날짜의 데이터 가져오기
+
+  let totalPayment = 0; // 총 결제 금액
+  let totalRefund = 0; // 총 환불 금액
 
   records.forEach((record) => {
     const amount = parseFloat(record.goodsAmt || "0");
     if (record.cancelYN === "N") {
-      totalPayment += amount; // 결제된 금액 누적
+      totalPayment += amount; // 결제 금액 합산
     } else if (record.cancelYN === "Y") {
-      totalRefund += amount; // 환불된 금액 누적
+      totalRefund += amount; // 환불 금액 합산
     }
   });
 
-  // 리스트 데이터를 반환
-  return [
-    {
-      type: "success",
-      content: `${totalPayment}원`,
-    },
-  ];
+  return [{ type: "success", content: `${totalPayment}원` }]; // 가공된 데이터 반환
 };
 
-const RCalendar = (props) => {
-  const { setDateRange } = props;
-  const [groupedPayments, setGroupedPayments] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
+/**
+ * 결제 데이터를 날짜별로 그룹화하는 함수
+ * @param {Array} payments - 결제 데이터 배열
+ * @returns {Object} 날짜별로 그룹화된 결제 데이터 객체
+ */
+const groupPaymentsByDate = (payments) => {
+  return payments.reduce((acc, payment) => {
+    const date = dayjs(payment.ediDate, "YYYYMMDDHHmmss").format("YYYY-MM-DD");
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(payment);
+    return acc;
+  }, {});
+};
+
+/**
+ * RCalendar 컴포넌트: 결제 데이터를 기반으로 캘린더를 렌더링합니다.
+ * @param {Object} props - 컴포넌트 속성
+ * @param {Function} props.setDateRange - 날짜 범위 설정 함수
+ */
+const RCalendar = ({ setDateRange }) => {
+  const [groupedPayments, setGroupedPayments] = useState({}); // 날짜별 그룹화된 결제 데이터
+  const [selectedDate, setSelectedDate] = useState(dayjs()); // 선택된 날짜 (기본값: 오늘)
+
+  // 결제 데이터를 API에서 불러옵니다.
   useEffect(() => {
     const fetchPayment = async () => {
       try {
         const response = await AxiosGet("/payments");
-
         const payments = response.data;
 
+        // 선택된 날짜 범위 내 데이터를 필터링
         const startDate = selectedDate.startOf("month");
         const endDate = selectedDate.endOf("month");
 
-        console.log(startDate, endDate);
-
         const dateFilteredPayments = payments.filter((payment) => {
           const ediDate = dayjs(payment.ediDate, "YYYYMMDDHHmmss");
-          return (
-            ediDate.isAfter(dayjs(startDate)) &&
-            ediDate.isBefore(dayjs(endDate).endOf("day"))
-          );
+          return ediDate.isBetween(startDate, endDate, "day", "[]");
         });
 
-        // 날짜별로 결제 데이터를 지점별로 그룹화
+        // 필터링된 데이터를 날짜별로 그룹화
         const grouped = groupPaymentsByDate(dateFilteredPayments);
         setGroupedPayments(grouped);
-
-        console.log(grouped);
       } catch (error) {
-        console.error("Error fetching payment data:", error);
+        console.error("결제 데이터 가져오기 오류:", error);
       }
     };
+
     fetchPayment();
-  }, [selectedDate]);
+  }, [selectedDate]); // 선택된 날짜가 변경될 때마다 실행
 
-  // 결제 데이터를 날짜별로 그룹화하는 함수
-  const groupPaymentsByDate = (payments) => {
-    return payments.reduce((acc, payment) => {
-      const date = dayjs(payment.ediDate, "YYYYMMDDHHmmss").format(
-        "YYYY-MM-DD"
-      );
-      if (!acc[date]) {
-        acc[date] = [];
-      }
-      acc[date].push(payment);
-      return acc;
-    }, {});
-  };
-
+  // 선택된 날짜 범위 업데이트
   useEffect(() => {
-    console.log(selectedDate);
     setDateRange(selectedDate);
-  }, [selectedDate]);
+  }, [selectedDate, setDateRange]);
 
-  const cellRender = (value, rawData) => {
-    const listData = getListData(value, rawData);
-
+  // 캘린더의 날짜 셀을 커스텀 렌더링합니다.
+  const cellRender = (value) => {
+    const listData = getListData(value, groupedPayments);
     return (
-      <div flex={1}>
-        <Space direction="vertical">
-          {listData.map(
-            (item, index) =>
-              parseInt(item.content) > 0 && (
-                <Space key={index}>
-                  <Typography.Text style={{ fontSize: "10px" }}>
-                    {parseInt(item.content).toLocaleString()}
-                  </Typography.Text>
-                </Space>
-              )
-          )}
-        </Space>
-      </div>
+      <Space direction="vertical">
+        {listData.map(
+          (item, index) =>
+            parseInt(item.content) > 0 && (
+              <Typography.Text key={index} style={{ fontSize: "10px" }}>
+                {parseInt(item.content).toLocaleString()} 원
+              </Typography.Text>
+            )
+        )}
+      </Space>
     );
   };
 
   return (
     <ConfigProvider locale={locale}>
       <Calendar
-        cellRender={(value) => cellRender(value, groupedPayments)}
-        onSelect={setSelectedDate}
+        // dateCellRender={cellRender} // 날짜 셀 커스텀 렌더링
+        onSelect={setSelectedDate} // 날짜 선택 이벤트 핸들러
       />
     </ConfigProvider>
   );

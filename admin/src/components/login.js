@@ -50,7 +50,8 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
         message.success("로그인 성공");
         setIsLoggedIn(true);
         setOpen(false);
-        navigate("/dashboard"); // 로그인 성공 후 대시보드(홈)으로 이동
+        // navigate("/dashboard"); // 로그인 성공 후 대시보드(홈)으로 이동
+        window.location.href = "/dashboard";
       }
     } catch (error) {
       message.error(error.response.data.error);
@@ -59,8 +60,8 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
 
   return (
     <>
-      <Button type="primary" onClick={() => setOpen(true)}>
-        Login
+      <Button type="text" onClick={() => setOpen(true)}>
+        로그인
       </Button>
       <Drawer
         width={"100%"}

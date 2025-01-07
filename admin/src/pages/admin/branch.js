@@ -242,11 +242,15 @@ const BranchModal = ({
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item
-            label=" 지점 배달료"
+            label="지점 배달료"
             labelStyle={{ whiteSpace: "nowrap" }}
             span={1}
           >
-            <Form.Item name="delivery_fee" style={{ marginBottom: 0 }}>
+            <Form.Item
+              help="* 1건당 배달비용"
+              name="delivery_fee"
+              style={{ marginBottom: 0 }}
+            >
               <Input type="number" addonAfter="원" />
             </Form.Item>
           </Descriptions.Item>

@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { AxiosGet, AxiosPut } from "../../api";
-import {
-  Button,
-  Card,
-  DatePicker,
-  Form,
-  Input,
-  message,
-  Space,
-  Table,
-  Tag,
-} from "antd";
+import { Button, Card, DatePicker, Input, Space, Table, Tag } from "antd";
 import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
 import useSearchFilter from "../../hook/useSearchFilter";
 import isBetween from "dayjs/plugin/isBetween";
-import SearchBranch from "../../components/popover/searchbranch";
-import { on } from "events";
+import useSelectedBranch from "../../hook/useSelectedBranch";
+
 dayjs.extend(isBetween);
 
 const { RangePicker } = DatePicker;
@@ -29,7 +19,7 @@ const Order = (props) => {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [dateRange, setDateRange] = useState([null, null]); // 시작일, 종료일
-  const [selectedBranch, setSelectedBranch] = useState(null);
+  const { selectedBranch } = useSelectedBranch();
 
   const { getColumnSearchProps } = useSearchFilter();
 
@@ -215,23 +205,15 @@ const Order = (props) => {
       <Card>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Space>
-            <SearchBranch
-              selectedBranch={selectedBranch}
-              setSelectedBranch={(branches) => {
-                setSelectedBranch(branches[0]);
-              }}
-              multiple={false}
-              currentUser={currentUser}
+            <RangePicker
+              onChange={(dates) => setDateRange(dates)}
+              style={{ marginLeft: 10 }}
             />
             <Input
               placeholder="상품코드를 입력하세요"
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               style={{ width: 300 }}
-            />
-            <RangePicker
-              onChange={(dates) => setDateRange(dates)}
-              style={{ marginLeft: 10 }}
             />
           </Space>
           <Button type="primary" icon={<SearchOutlined />} onClick={onSearch}>

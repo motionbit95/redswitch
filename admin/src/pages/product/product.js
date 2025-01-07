@@ -17,7 +17,6 @@ import {
 } from "antd";
 import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
-import SearchBranch from "../../components/popover/searchbranch";
 import ToastEditor from "../../components/toasteditor";
 import FileUpload from "../../components/button";
 import useSearchFilter from "../../hook/useSearchFilter";
@@ -27,6 +26,7 @@ import useExportToExcel from "../../hook/useExportToExcel";
 import dayjs from "dayjs";
 import { DownloadOutlined } from "@ant-design/icons";
 import usePagination from "../../hook/usePagination";
+import useSelectedBranch from "../../hook/useSelectedBranch";
 
 const ProductCRUD = (props) => {
   const { currentUser } = props;
@@ -34,11 +34,8 @@ const ProductCRUD = (props) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [form] = Form.useForm();
-  const [selectedBranch, setSelectedBranch] = useState(
-    localStorage.getItem("selectedBranch")
-      ? JSON.parse(localStorage.getItem("selectedBranch"))
-      : null
-  );
+  const { selectedBranch } = useSelectedBranch();
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]); // 연관 상품 리스트
 
@@ -49,7 +46,9 @@ const ProductCRUD = (props) => {
 
   // 상품 목록 불러오기
   const fetchProducts = async () => {
-    console.log("selectedBranch >>>>", selectedBranch?.id);
+    if (!selectedBranch?.id) {
+      return;
+    }
     try {
       const response = await AxiosGet(`/products/search/${selectedBranch.id}`);
       setProducts(response.data);
@@ -302,15 +301,6 @@ const ProductCRUD = (props) => {
           marginBottom: 16,
         }}
       >
-        <SearchBranch
-          selectedBranch={selectedBranch}
-          setSelectedBranch={(branches) => {
-            setSelectedBranch(branches[0]);
-            localStorage.setItem("selectedBranch", JSON.stringify(branches[0]));
-          }}
-          multiple={false}
-          currentUser={currentUser}
-        />
         <Space>
           <Button
             type="primary"

@@ -25,12 +25,6 @@ const SearchBranch = ({
     }
   }, [popoverVisible]);
 
-  useEffect(() => {
-    if (currentUser) {
-      console.log("검색창에서 가지고온 유저 정보", currentUser.branch_id);
-    }
-  }, [currentUser]);
-
   const fetchBranches = async (search = "") => {
     try {
       const response = await AxiosGet("/branches"); // Replace with your endpoint
