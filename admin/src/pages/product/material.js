@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Col,
   DatePicker,
@@ -212,6 +213,11 @@ const Material = () => {
 
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
+      <Alert
+        type="warning"
+        showIcon
+        description={"지사관리자 이상 권한만 접근 가능합니다."}
+      />
       <Space style={{ width: "100%", justifyContent: "space-between" }}>
         <Space>
           <Searchprovider

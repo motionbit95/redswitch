@@ -34,7 +34,7 @@ const useSearchFilter = () => {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`} // 검색하려는 컬럼명 표시
+          placeholder={`검색어를 입력하세요.`} // 검색하려는 컬럼명 표시
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -50,16 +50,16 @@ const useSearchFilter = () => {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            검색
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            초기화
           </Button>
-          <Button
+          {/* <Button
             type="link"
             size="small"
             onClick={() => {
@@ -69,9 +69,9 @@ const useSearchFilter = () => {
             }}
           >
             Filter
-          </Button>
+          </Button> */}
           <Button type="link" size="small" onClick={() => close()}>
-            close
+            닫기
           </Button>
         </Space>
       </div>

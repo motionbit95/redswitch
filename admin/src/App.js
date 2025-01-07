@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import {
-  DotChartOutlined,
-  UserOutlined,
   ReadOutlined,
   DollarOutlined,
   InboxOutlined,
@@ -102,6 +100,17 @@ const App = () => {
   // useFirebase 훅을 사용하여 알림 데이터를 가져옴
   const { alarms, loading } = useFirebase(branchPks);
   const [openPopover, setOpenPopover] = useState(false);
+
+  // redirect
+  useEffect(() => {
+    if (!isLoggedIn) {
+      window.location.href = "/login";
+    } else {
+      if (window.location.pathname === "/") {
+        window.location.href = "/dashboard";
+      }
+    }
+  }, [isLoggedIn]);
 
   // branchPks 변경 시 호출되는 함수
   const handleBranchChange = (value) => {

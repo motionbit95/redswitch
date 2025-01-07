@@ -21,11 +21,12 @@ const accountsRef = db.ref("accounts"); // "accounts" 경로에 저장된 데이
 
 router.post("/", async (req, res) => {
   try {
-    const { user_password } = req.body;
-    const hashedPassword = await bcrypt.hash(user_password, 10);
+    // 해싱 필요 없음
+    // const { user_password } = req.body;
+    // const hashedPassword = await bcrypt.hash(user_password, 10);
     const newAccount = new Account({
       ...req.body,
-      user_password: hashedPassword,
+      // user_password: hashedPassword,
     });
     await newAccount.create();
     res.status(201).send({ message: "계정 생성 성공", account: newAccount });
@@ -78,12 +79,12 @@ router.put("/:id", async (req, res) => {
     console.log(updatedData);
 
     // 비밀번호는 해싱 필요
-    if (updatedData.user_password) {
-      updatedData.user_password = await bcrypt.hash(
-        updatedData.user_password,
-        10
-      );
-    }
+    // if (updatedData.user_password) {
+    //   updatedData.user_password = await bcrypt.hash(
+    //     updatedData.user_password,
+    //     10
+    //   );
+    // }
 
     updatedData.updated_at = new Date().toISOString();
     await accountsRef.child(id).update(updatedData);
@@ -120,9 +121,10 @@ router.post("/login", async (req, res) => {
 
     const user = snapshot.val();
     const userKey = Object.keys(user)[0]; // 첫 번째 계정 키
-    const storedHash = user[userKey].user_password;
+    // const storedHash = user[userKey].user_password;
 
-    const isMatch = await bcrypt.compare(user_password, storedHash);
+    // const isMatch = await bcrypt.compare(user_password, storedHash);
+    const isMatch = user_password === user[userKey].user_password;
     if (!isMatch) {
       return res.status(401).send({ error: "잘못된 인증 정보" });
     }
