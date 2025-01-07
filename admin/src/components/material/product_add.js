@@ -94,8 +94,8 @@ const Addproduct = ({
             <Col span={12}>
               <Form.Item
                 name="product_sale"
-                label="원가"
-                tooltip={"상품 매입 금액을 입력해주세요."}
+                label="소비자가"
+                tooltip={"상품 소비자가를 입력해주세요."}
                 rules={[{ required: true }]}
               >
                 <Input />
@@ -103,7 +103,7 @@ const Addproduct = ({
             </Col>
           </Row>
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={24}>
               <Form.Item
                 name="product_category_code"
                 label="카테고리"
@@ -130,6 +130,14 @@ const Addproduct = ({
                 <FileUpload
                   url={form.getFieldValue("original_image")}
                   setUrl={(url) => form.setFieldsValue({ original_image: url })}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="blind_image" label="블라인드 이미지">
+                <FileUpload
+                  url={form.getFieldValue("blind_image")}
+                  setUrl={(url) => form.setFieldsValue({ blind_image: url })}
                 />
               </Form.Item>
             </Col>

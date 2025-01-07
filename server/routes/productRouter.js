@@ -1681,28 +1681,13 @@ router.get("/", async (req, res) => {
 router.put("/:PK", async (req, res) => {
   try {
     const { PK } = req.params;
-    const {
-      product_code,
-      branch_id,
-      product_name,
-      product_price,
-      product_image,
-      blurred_image,
-      options,
-      related_products,
-    } = req.body;
 
     const product = new Product({
+      ...req.body,
       PK,
-      product_code,
-      branch_id,
-      product_name,
-      product_price,
-      product_image,
-      blurred_image,
-      options,
-      related_products,
     });
+
+    console.log("product: ", product);
     const updatedProduct = await product.update();
     res.status(200).json(updatedProduct);
   } catch (error) {

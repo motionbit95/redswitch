@@ -76,6 +76,7 @@ const ProductCRUD = (props) => {
         });
 
       console.log("선택된 상품 : ", product);
+
       if (product.blurred_image) {
         setUseBlurImage(true);
         setBlurredImage(product.blurred_image);
@@ -160,9 +161,7 @@ const ProductCRUD = (props) => {
           origin_price: selectedProduct.product_sale,
           thumbnail: selectedProduct.original_image,
           material_id: selectedProduct.pk,
-          blurred_image: selectedProduct.blurred_image
-            ? selectedProduct.blurred_image
-            : selectedProduct.original_image, // 수정할 이미지
+          blurred_image: selectedProduct.blinded_image,
           branch_id: selectedBranch.id,
           related_products: relatedProductPKs, // 추가된 관련 상품들
         };
@@ -201,6 +200,14 @@ const ProductCRUD = (props) => {
   const handleChange = (pagination, filters, sorter) => {
     console.log("Various parameters", pagination, filters, sorter);
   };
+
+  useEffect(() => {
+    if (selectedProduct)
+      form.setFieldsValue({
+        product_name: selectedProduct.product_name,
+        product_price: selectedProduct.product_sale,
+      });
+  }, [selectedProduct]);
 
   // 테이블 컬럼 정의
   const columns = [
@@ -382,10 +389,10 @@ const ProductCRUD = (props) => {
               bordered
               column={2}
             >
-              <Descriptions.Item label="거래처명">
+              <Descriptions.Item span={2} label="거래처명">
                 {selectedProduct.provider_name}
               </Descriptions.Item>
-              <Descriptions.Item label="상품명">
+              <Descriptions.Item span={2} label="상품명">
                 {selectedProduct.product_name}
               </Descriptions.Item>
               <Descriptions.Item label="상품코드">
@@ -397,8 +404,15 @@ const ProductCRUD = (props) => {
               <Descriptions.Item label="이미지">
                 <Image
                   src={selectedProduct.original_image}
-                  width={200}
-                  height={200}
+                  width={150}
+                  height={150}
+                />
+              </Descriptions.Item>
+              <Descriptions.Item label="블라인드 이미지">
+                <Image
+                  src={selectedProduct.blinded_image}
+                  width={150}
+                  height={150}
                 />
               </Descriptions.Item>
             </Descriptions>
@@ -452,7 +466,7 @@ const ProductCRUD = (props) => {
               </Form.Item>
             </Col>
 
-            <Col span={12}>
+            {/* <Col span={12}>
               <Form.Item
                 label={
                   <Space>
@@ -474,7 +488,7 @@ const ProductCRUD = (props) => {
                   )}
                 </>
               </Form.Item>
-            </Col>
+            </Col> */}
 
             <Col span={24}>
               <Form.Item label="상품 상세 설명" name="product_detail">

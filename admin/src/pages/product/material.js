@@ -1,3 +1,4 @@
+// Material.js - 물자 관리 화면 컴포넌트
 import {
   Alert,
   Button,
@@ -14,25 +15,21 @@ import {
   Table,
   Tag,
   message,
-  theme,
 } from "antd";
 import React, { useEffect, useState } from "react";
 import Searchprovider from "../../components/popover/searchprovider";
 import Addproduct from "../../components/material/product_add";
 import ProductCategory from "../../components/material/product_category";
 import { AxiosDelete, AxiosGet, AxiosPut } from "../../api";
-import FileUpload from "../../components/button";
 import usePagination from "../../hook/usePagination";
+import FileUpload from "../../components/button";
 
-const Material = (props) => {
-  const { currentUser } = props;
+const Material = ({ currentUser }) => {
+  // State 관리
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
-  const [searchFilters, setSearchFilters] = useState({
-    provider: "",
-  });
+  const [searchFilters, setSearchFilters] = useState({ provider: "" });
   const [materialList, setMaterialList] = useState([]);
-  const [isSelected, setIsSelected] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(
     localStorage.getItem("selectedProvider")
       ? JSON.parse(localStorage.getItem("selectedProvider"))
@@ -43,67 +40,71 @@ const Material = (props) => {
   const [categories, setCategories] = useState([]);
   const [filteredInfo, setFilteredInfo] = useState({});
   const [sortedInfo, setSortedInfo] = useState({});
+
+  const { pagination, setPagination, handleTableChange } = usePagination();
+
+  // 중복된 카테고리 코드 제거
   const usedCodes = [
     ...new Set(materialList.map((item) => item.product_category_code)),
   ];
 
+  // 거래처 선택 시 데이터 로드
   useEffect(() => {
-    // 개발시에만 넣음
     if (selectedProvider) {
       localStorage.setItem(
         "selectedProvider",
         JSON.stringify(selectedProvider)
       );
-      handleSearchMaterials();
+      fetchMaterials();
     }
   }, [selectedProvider]);
 
+  // 카테고리 데이터 로드
   useEffect(() => {
     fetchCategories();
-  }, [categories]);
+  }, []);
 
-  const handleSearchMaterials = async () => {
+  // 물자 검색 API 호출
+  const fetchMaterials = async () => {
     try {
       const response = await AxiosGet(
         `/products/materials/search/${selectedProvider.id}`
       );
       setMaterialList(response.data);
     } catch (error) {
-      message.error("실패");
+      message.error("물자 검색 실패");
     }
   };
 
+  // 카테고리 API 호출
   const fetchCategories = async () => {
     try {
-      const response = await AxiosGet("/products/categories"); // Replace with your endpoint
+      const response = await AxiosGet("/products/categories");
       setCategories(response.data);
     } catch (error) {
-      message.error("실패");
-    } finally {
-      setLoading(false);
-      // console.log(categories);
+      message.error("카테고리 불러오기 실패");
     }
   };
 
-  const handleDelete = async (material) => {
-    console.log(material);
+  // 상품 삭제 처리
+  const handleDelete = async (pk) => {
     try {
-      await AxiosDelete(`/products/materials/${material}`);
-      handleSearchMaterials();
+      await AxiosDelete(`/products/materials/${pk}`);
+      fetchMaterials();
       message.success("상품 삭제 성공");
     } catch (error) {
       message.error("상품 삭제 실패");
     }
   };
 
-  // Edit material - Open modal
+  // 수정 모달 열기
   const handleEdit = (material) => {
-    console.log(material);
     setCurrentMaterial(material);
     setEditModalOpen(true);
   };
 
-  const onUpdateProductFinish = async (values) => {
+  // 상품 수정 API 호출
+  const handleUpdate = async (values) => {
     try {
       const response = await AxiosPut(
         `/products/materials/${currentMaterial.pk}`,
@@ -111,8 +112,7 @@ const Material = (props) => {
       );
       if (response.status === 200) {
         message.success("상품 수정 성공");
-        console.log("data!", response.data);
-        handleSearchMaterials();
+        fetchMaterials();
       } else {
         message.error("상품 수정 실패");
       }
@@ -123,14 +123,7 @@ const Material = (props) => {
     }
   };
 
-  const { pagination, setPagination, handleTableChange } = usePagination();
-
-  const handleChange = (pagination, filters, sorter) => {
-    console.log("Various parameters", pagination, filters, sorter);
-    setFilteredInfo(filters);
-    setSortedInfo(sorter);
-  };
-
+  // 테이블 컬럼 정의
   const columns = [
     {
       title: "No.",
@@ -142,62 +135,42 @@ const Material = (props) => {
     {
       title: "상품 이미지",
       dataIndex: "original_image",
-      key: "original_image",
-
-      render: (text) => {
-        return (
-          <>
-            {text ? (
-              <Image
-                src={text}
-                alt="product"
-                style={{ width: "40px", height: "40px" }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  backgroundColor: "#f1f1f1",
-                }}
-              ></div>
-            )}
-          </>
-        );
-      },
+      render: (text) =>
+        text ? (
+          <Image src={text} alt="product" style={{ width: 40, height: 40 }} />
+        ) : (
+          <div
+            style={{ width: 40, height: 40, backgroundColor: "#f1f1f1" }}
+          ></div>
+        ),
     },
     {
       title: "상품명",
       dataIndex: "product_name",
-      key: "product_name",
     },
     {
       title: "상품코드",
       dataIndex: "product_code",
-      key: "product_code",
     },
     {
       title: "카테고리",
       dataIndex: "product_category_code",
-      key: "product_category_code",
-
       render: (text) => {
         const category = categories.find(
-          (category) => category.product_category_code === text
+          (cat) => cat.product_category_code === text
         );
         return category ? category.product_category : "Unknown";
       },
     },
     {
-      title: "원가",
+      title: "소비자가",
       dataIndex: "product_sale",
-      key: "product_sale",
+      render: (text) => `${parseInt(text).toLocaleString("ko-KR")}원`,
     },
     {
       title: "동작",
       key: "actions",
-
-      render: (text, record) => (
+      render: (_, record) => (
         <Space>
           <a onClick={() => handleEdit(record)}>수정</a>
           <Popconfirm
@@ -217,31 +190,24 @@ const Material = (props) => {
         <Alert
           type="warning"
           showIcon
-          description={"지사관리자 이상 권한만 접근 가능합니다."}
+          description="지사관리자 이상 권한만 접근 가능합니다."
         />
       ) : (
         <>
           <Space style={{ width: "100%", justifyContent: "space-between" }}>
-            <Space>
-              <Searchprovider
-                selectedProvider={selectedProvider}
-                setSelectedProvider={(providers) => {
-                  setSelectedProvider(providers[0]);
-                }}
-                multiple={false}
-              />
-            </Space>
+            <Searchprovider
+              selectedProvider={selectedProvider}
+              setSelectedProvider={(providers) =>
+                setSelectedProvider(providers[0])
+              }
+              multiple={false}
+            />
             <Space>
               <ProductCategory usedCodes={usedCodes} />
               <Addproduct
-                isSelected={isSelected}
                 selectedProvider={selectedProvider}
                 categories={categories}
-                onComplete={() => {
-                  if (selectedProvider) {
-                    handleSearchMaterials(); // 선택된 거래처이 있는 경우만 데이터를 다시 불러옴
-                  }
-                }}
+                onComplete={fetchMaterials}
               />
             </Space>
           </Space>
@@ -252,25 +218,25 @@ const Material = (props) => {
             dataSource={materialList}
             rowKey="id"
             loading={loading}
-            onChange={(pagination, filters, sorter) => {
-              handleTableChange(pagination);
-              handleChange(pagination, filters, sorter);
-            }}
+            onChange={handleTableChange}
             pagination={{
               ...pagination,
               defaultPageSize: 10,
               showSizeChanger: true,
             }}
           />
+
           <Modal
+            centered
             title="상품 수정"
-            visible={editModalOpen}
+            open={editModalOpen}
             onCancel={() => setEditModalOpen(false)}
             footer={[
-              <Button key="back" onClick={() => setEditModalOpen(false)}>
+              <Button key="cancel" onClick={() => setEditModalOpen(false)}>
                 취소
               </Button>,
               <Button
+                key="submit"
                 type="primary"
                 loading={loading}
                 onClick={() => form.submit()}
@@ -281,10 +247,9 @@ const Material = (props) => {
           >
             <Form
               form={form}
-              onFinish={onUpdateProductFinish}
+              onFinish={handleUpdate}
               initialValues={currentMaterial}
               layout="vertical"
-              style={{ width: "100%" }}
             >
               <Form.Item
                 label="상품명"
@@ -296,47 +261,53 @@ const Material = (props) => {
               <Form.Item
                 label="상품코드"
                 name="product_code"
-                rules={[{ required: true, message: "상품코드을 입력해주세요" }]}
+                rules={[{ required: true, message: "상품코드를 입력해주세요" }]}
               >
                 <Input />
               </Form.Item>
               <Form.Item
-                label="원가"
+                label="소비자가"
                 name="product_sale"
-                rules={[{ required: true, message: "원가을 입력해주세요" }]}
+                rules={[{ required: true, message: "소비자가를 입력해주세요" }]}
               >
                 <Input />
               </Form.Item>
               <Row gutter={16}>
-                <Col span={12}>
+                <Col span={24}>
                   <Form.Item
-                    name="product_category_code"
                     label="카테고리"
+                    name="product_category_code"
                     rules={[{ required: true }]}
                   >
                     <Select>
-                      {categories.map(
-                        (
-                          { product_category, product_category_code },
-                          index
-                        ) => (
-                          <Select.Option
-                            key={index}
-                            value={product_category_code}
-                          >
-                            {product_category}
-                          </Select.Option>
-                        )
-                      )}
+                      {categories.map((category) => (
+                        <Select.Option
+                          key={category.product_category_code}
+                          value={category.product_category_code}
+                        >
+                          {category.product_category}
+                        </Select.Option>
+                      ))}
                     </Select>
                   </Form.Item>
                 </Col>
+
                 <Col span={12}>
                   <Form.Item name="original_image" label="상품이미지">
                     <FileUpload
                       url={form.getFieldValue("original_image")}
                       setUrl={(url) =>
                         form.setFieldsValue({ original_image: url })
+                      }
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item name="blind_image" label="블라인드 이미지">
+                    <FileUpload
+                      url={form.getFieldValue("blind_image")}
+                      setUrl={(url) =>
+                        form.setFieldsValue({ blind_image: url })
                       }
                     />
                   </Form.Item>

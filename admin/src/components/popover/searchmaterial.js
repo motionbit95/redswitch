@@ -2,6 +2,7 @@ import { Button, Popover, Table, Form, Input, message, Space } from "antd";
 import React, { useEffect, useState } from "react";
 import { AxiosGet } from "../../api";
 import useSearchFilter from "../../hook/useSearchFilter";
+import { render } from "@testing-library/react";
 
 const SearchMaterial = ({
   selectedProduct,
@@ -115,9 +116,10 @@ const SearchMaterial = ({
       ...getColumnSearchProps("provider_name"),
     },
     {
-      title: "원가",
+      title: "소비자가",
       dataIndex: "product_sale",
       key: "product_sale",
+      render: (text) => `${text.toLocaleString("ko-KR")}원`,
     },
   ];
 
