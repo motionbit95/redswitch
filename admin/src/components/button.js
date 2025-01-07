@@ -9,7 +9,6 @@ const FileUpload = (props) => {
   const [fileList, setFileList] = useState([]);
 
   useEffect(() => {
-    console.log(url);
     if (url) {
       setFileList([
         {

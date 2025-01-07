@@ -13,6 +13,7 @@ import {
   Space,
   Table,
   Tag,
+  Tooltip,
   Upload,
   message,
 } from "antd";
@@ -21,7 +22,11 @@ import FormItem from "antd/es/form/FormItem";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import KakaoAddressSearch from "../../components/kakao";
 import FileUpload from "../../components/button";
-import { UploadOutlined } from "@ant-design/icons";
+import {
+  InfoCircleOutlined,
+  SearchOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import usePagination from "../../hook/usePagination";
 
@@ -32,6 +37,7 @@ const BranchModal = ({
   initialValues,
   form,
   isEditMode,
+  onDelete,
 }) => {
   const [address, setAddress] = useState();
 
@@ -48,26 +54,41 @@ const BranchModal = ({
         onCancel();
         form.resetFields();
       }}
-      footer={[
-        <Button
-          key="cancel"
-          onClick={() => {
-            onCancel();
-            form.resetFields();
+      footer={
+        <Space
+          style={{
+            width: "100%",
+            justifyContent: "space-between",
+            direction: "rtl",
           }}
         >
-          취소
-        </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          onClick={() => {
-            form.submit();
-          }}
-        >
-          {isEditMode ? "수정 완료" : "추가 완료"}
-        </Button>,
-      ]}
+          <Space style={{ direction: "ltr" }}>
+            <Button
+              key="cancel"
+              onClick={() => {
+                onCancel();
+                form.resetFields();
+              }}
+            >
+              취소
+            </Button>
+            <Button
+              key="submit"
+              type="primary"
+              onClick={() => {
+                form.submit();
+              }}
+            >
+              {isEditMode ? "수정 완료" : "추가 완료"}
+            </Button>
+          </Space>
+          {isEditMode && (
+            <Popconfirm title="지점을 삭제하시겠습니까?" onConfirm={onDelete}>
+              <Button danger>삭제</Button>
+            </Popconfirm>
+          )}
+        </Space>
+      }
       centered
     >
       <Form
@@ -76,7 +97,7 @@ const BranchModal = ({
         initialValues={initialValues}
         onFinish={onSubmit}
       >
-        <Descriptions bordered column={3} size="small">
+        <Descriptions bordered column={2} size="small">
           <Descriptions.Item
             label="지점명"
             span={2}
@@ -91,18 +112,6 @@ const BranchModal = ({
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item
-            label="설치여부"
-            labelStyle={{ whiteSpace: "nowrap" }}
-            span={1}
-          >
-            <Form.Item name="install_flag" style={{ marginBottom: 0 }}>
-              <Select>
-                <Select.Option value="0">미설치</Select.Option>
-                <Select.Option value="1">설치완료</Select.Option>
-              </Select>
-            </Form.Item>
-          </Descriptions.Item>
-          <Descriptions.Item
             label="객실 수"
             labelStyle={{ whiteSpace: "nowrap" }}
             span={1}
@@ -110,6 +119,49 @@ const BranchModal = ({
             <Form.Item
               name={"branch_room_cnt"}
               rules={[{ required: true, message: "객실 수를 입력해주세요" }]}
+              style={{ marginBottom: 0 }}
+            >
+              <Input />
+            </Form.Item>
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="사업자등록번호"
+            span={2}
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item
+              name="branch_brn"
+              rules={[
+                { required: true, message: "사업자등록번호를 입력해주세요" },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <Input />
+            </Form.Item>
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="이메일"
+            span={1}
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item
+              name="branch_email"
+              rules={[{ required: true, message: "이메일을 입력해주세요" }]}
+              style={{ marginBottom: 0 }}
+            >
+              <Input />
+            </Form.Item>
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="지점 전화번호"
+            span={2}
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item
+              name="branch_contact"
+              rules={[
+                { required: true, message: "지점 전화번호를 입력해주세요" },
+              ]}
               style={{ marginBottom: 0 }}
             >
               <Input />
@@ -145,24 +197,19 @@ const BranchModal = ({
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item
-            label="지점 전화번호"
+            label={
+              <Space>
+                계약서 파일
+                <Tooltip
+                  placement="right"
+                  title="계약서, 사업자등록증, 통장사본을 pdf 파일로 묶어서 한번에 업로드해주세요"
+                >
+                  <InfoCircleOutlined />
+                </Tooltip>
+              </Space>
+            }
+            labelStyle={{ whiteSpace: "nowrap" }}
             span={2}
-            labelStyle={{ whiteSpace: "nowrap" }}
-          >
-            <Form.Item
-              name="branch_contact"
-              rules={[
-                { required: true, message: "지점 전화번호를 입력해주세요" },
-              ]}
-              style={{ marginBottom: 0 }}
-            >
-              <Input />
-            </Form.Item>
-          </Descriptions.Item>
-          <Descriptions.Item
-            label="계약서 파일"
-            labelStyle={{ whiteSpace: "nowrap" }}
-            span={1}
           >
             <Form.Item name="contract_image" style={{ marginBottom: 0 }}>
               <FileUpload
@@ -200,14 +247,51 @@ const BranchModal = ({
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item
-            label="지점 이미지"
+            label="설치여부"
             labelStyle={{ whiteSpace: "nowrap" }}
             span={1}
+          >
+            <Form.Item name="install_flag" style={{ marginBottom: 0 }}>
+              <Select>
+                <Select.Option value="0">미설치</Select.Option>
+                <Select.Option value="1">설치완료</Select.Option>
+              </Select>
+            </Form.Item>
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="지점 배달료"
+            labelStyle={{ whiteSpace: "nowrap" }}
+            span={1}
+          >
+            <Form.Item
+              help="* 1건당 배달비용"
+              name="delivery_fee"
+              style={{ marginBottom: 0 }}
+            >
+              <Input defaultValue={0} type="number" addonAfter="원" />
+            </Form.Item>
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="지점 이미지(외부)"
+            labelStyle={{ whiteSpace: "nowrap" }}
+            span={2}
           >
             <Form.Item name="branch_image" style={{ marginBottom: 0 }}>
               <FileUpload
                 url={form.getFieldValue("branch_image")}
                 setUrl={(url) => form.setFieldsValue({ branch_image: url })}
+              />
+            </Form.Item>
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="NFC 설치 이미지(내부)"
+            labelStyle={{ whiteSpace: "nowrap" }}
+            span={2}
+          >
+            <Form.Item name="install_image" style={{ marginBottom: 0 }}>
+              <FileUpload
+                url={form.getFieldValue("install_image")}
+                setUrl={(url) => form.setFieldsValue({ install_image: url })}
               />
             </Form.Item>
           </Descriptions.Item>
@@ -227,31 +311,6 @@ const BranchModal = ({
           >
             <Form.Item name="branch_manager_phone" style={{ marginBottom: 0 }}>
               <Input />
-            </Form.Item>
-          </Descriptions.Item>
-          <Descriptions.Item
-            label="NFC 설치 이미지"
-            labelStyle={{ whiteSpace: "nowrap" }}
-            span={1}
-          >
-            <Form.Item name="install_image" style={{ marginBottom: 0 }}>
-              <FileUpload
-                url={form.getFieldValue("install_image")}
-                setUrl={(url) => form.setFieldsValue({ install_image: url })}
-              />
-            </Form.Item>
-          </Descriptions.Item>
-          <Descriptions.Item
-            label="지점 배달료"
-            labelStyle={{ whiteSpace: "nowrap" }}
-            span={1}
-          >
-            <Form.Item
-              help="* 1건당 배달비용"
-              name="delivery_fee"
-              style={{ marginBottom: 0 }}
-            >
-              <Input type="number" addonAfter="원" />
             </Form.Item>
           </Descriptions.Item>
 
@@ -323,6 +382,8 @@ function Branch(props) {
       await AxiosDelete(`/branches/${id}`);
       setBranchs(branchs.filter((branch) => branch.id !== id));
       message.success("지점 삭제 성공");
+
+      setIsModalVisible(false);
     } catch (error) {
       message.error("지점 삭제 실패");
     }
@@ -404,11 +465,20 @@ function Branch(props) {
       dataIndex: "branch_name",
       key: "branch_name",
     },
-
+    {
+      title: "객실 수",
+      dataIndex: "branch_room_cnt",
+      key: "branch_room_cnt",
+    },
     {
       title: "주소",
       dataIndex: "branch_address",
       key: "branch_address",
+    },
+    {
+      title: "대표자명",
+      dataIndex: "branch_ceo_name",
+      key: "branch_ceo_name",
     },
     {
       title: "담당자명",
@@ -421,12 +491,17 @@ function Branch(props) {
       key: "branch_manager_phone",
     },
     {
-      title: "객실 수",
-      dataIndex: "branch_room_cnt",
-      key: "branch_room_cnt",
+      title: "사업자등록번호",
+      dataIndex: "branch_brn",
+      key: "branch_brn",
     },
     {
-      title: "설치 여부",
+      title: "이메일",
+      dataIndex: "branch_email",
+      key: "branch_email",
+    },
+    {
+      title: "설치여부",
       dataIndex: "install_flag",
       key: "install_flag",
 
@@ -439,21 +514,24 @@ function Branch(props) {
       },
     },
     {
-      title: "동작",
+      title: "자세히보기",
       key: "actions",
       width: 100,
       fixed: "right",
-      render: (text, record) => (
-        <Space>
-          <a onClick={() => handleEdit(record)}>수정</a>
-          <Popconfirm
-            title="지점을 삭제하시겠습니까?"
-            onConfirm={() => handleDelete(record.id)}
-          >
-            <a>삭제</a>
-          </Popconfirm>
-        </Space>
+      render: (_, record) => (
+        <Button icon={<SearchOutlined />} onClick={() => handleEdit(record)} />
       ),
+      // render: (text, record) => (
+      //   <Space>
+      //     <a onClick={() => handleEdit(record)}>수정</a>
+      //     <Popconfirm
+      //       title="지점을 삭제하시겠습니까?"
+      //       onConfirm={() => handleDelete(record.id)}
+      //     >
+      //       <a>삭제</a>
+      //     </Popconfirm>
+      //   </Space>
+      // ),
     },
   ];
 
@@ -493,6 +571,7 @@ function Branch(props) {
         initialValues={!currentBranch ? currentBranch : {}}
         form={form}
         isEditMode={!!currentBranch}
+        onDelete={() => handleDelete(currentBranch.id)}
       />
     </div>
   );

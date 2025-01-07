@@ -272,7 +272,9 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
   const fetchBranchAndProviderData = (account) => {
     // 지점 데이터 가져오기
     const branchPromises = account.branch_id?.map((branch) =>
-      AxiosGet(`/branches/${branch}`).then((response) => response.data)
+      AxiosGet(`/branches/${branch}`)
+        .then((response) => response.data)
+        .catch((error) => console.error(error))
     );
 
     // 거래처 데이터 가져오기
@@ -292,7 +294,7 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
 
   const handleCloseBranch = (removedName) => {
     setSelectedBranch((prev) =>
-      prev.filter((branch) => branch.branch_name !== removedName)
+      prev.filter((branch) => branch?.branch_name !== removedName)
     );
   };
 
@@ -398,11 +400,11 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
               <Row>
                 {selectedBranch.map((branch) => (
                   <Tag
-                    key={branch.id}
+                    key={branch?.id}
                     closable
-                    onClose={() => handleCloseBranch(branch.branch_name)}
+                    onClose={() => handleCloseBranch(branch?.branch_name)}
                   >
-                    {branch.branch_name}
+                    {branch?.branch_name || "[Unknown]"}
                   </Tag>
                 ))}
               </Row>
