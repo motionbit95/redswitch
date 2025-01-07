@@ -4,58 +4,68 @@ import {
   Button,
   Form,
   Input,
-  Flex,
-  Row,
-  Col,
-  Modal,
-  theme,
-  message,
-  Typography,
   Drawer,
+  Typography,
+  message,
+  Row,
+  Space,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { AxiosPost } from "../api";
+
 const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      setOpen(true);
-    }
+    if (!isLoggedIn) setOpen(true);
   }, [isLoggedIn]);
 
-  const onFinish = async (values) => {
-    console.log("Received values of form: ", values);
-
+  const handleLogin = async (values) => {
     try {
-      const response = await AxiosPost("/accounts/login", {
-        user_id: values.user_id,
-        user_password: values.password,
-      });
-      if (response.status === 200) {
-        const { token, id } = response.data;
-
-        console.log(token, id);
-
-        // 토큰과 아이디를 localStorage에 저장
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("id", id);
-
-        message.success("로그인 성공");
-        setIsLoggedIn(true);
-        setOpen(false);
-        // navigate("/dashboard"); // 로그인 성공 후 대시보드(홈)으로 이동
-        window.location.href = "/dashboard";
-      }
+      const { user_id, password } = values;
+      console.log("values", values);
+      AxiosPost("/accounts/login", {
+        user_id,
+        user_password: password,
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            const { token, id } = response.data;
+            localStorage.setItem("authToken", token);
+            localStorage.setItem("id", id);
+            message.success("로그인 성공");
+            console.log(response.data);
+            setIsLoggedIn(true);
+            setOpen(false);
+            navigate("/dashboard");
+          }
+        })
+        .catch((error) => {
+          message.error(
+            error.response?.data?.error || "로그인에 실패했습니다."
+          );
+        });
     } catch (error) {
-      message.error(error.response.data.error);
+      message.error(error.response?.data?.error || "로그인에 실패했습니다.");
     }
+    // try {
+    //   const response = await AxiosPost("/accounts/login", values);
+
+    //   if (response.status === 200) {
+    //     const { token, id } = response.data;
+    //     localStorage.setItem("authToken", token);
+    //     localStorage.setItem("id", id);
+
+    //     message.success("로그인 성공");
+    //     setIsLoggedIn(true);
+    //     setOpen(false);
+    //     window.location.href = "/dashboard";
+    //   }
+    // } catch (error) {
+    //   message.error(error.response?.data?.error || "로그인에 실패했습니다.");
+    // }
   };
 
   return (
@@ -64,85 +74,57 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
         로그인
       </Button>
       <Drawer
-        width={"100%"}
-        height="100vh"
-        motion={false}
-        bodyStyle={{
-          justifyContent: "center",
-          alignContent: "center",
-        }}
         open={open}
-        footer={null}
         onClose={() => setOpen(false)}
-        closeIcon={null}
+        width="100%"
         placement="left"
+        bodyStyle={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        closeIcon={null}
       >
-        <Typography.Title
-          level={2}
-          style={{ textAlign: "center", fontWeight: "bold" }}
-        >
-          레드스위치 관리자포탈
-        </Typography.Title>
-        <Form
-          form={form}
-          name="login"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            width: 400,
-            margin: "40px auto",
-          }}
-          onFinish={onFinish}
-        >
-          <Row gutter={16}>
-            <Col span={24}>
-              <Form.Item
-                name="user_id"
-                rules={[
-                  {
-                    required: true,
-                    message: "아이디를 입력해주세요!",
-                  },
-                ]}
-              >
-                <Input
-                  prefix={<UserOutlined />}
-                  placeholder="아이디"
-                  size="large"
-                />
-              </Form.Item>
-            </Col>
-            <Col span={24}>
-              <Form.Item
-                name="password"
-                rules={[
-                  {
-                    required: true,
-                    message: "비밀번호를 입력해주세요!",
-                  },
-                ]}
-              >
-                <Input
-                  size="large"
-                  prefix={<LockOutlined />}
-                  type="password"
-                  placeholder="비밀번호"
-                />
-              </Form.Item>
-            </Col>
-            <Col span={24}>
-              <Form.Item>
-                <Button block type="primary" htmlType="submit" size="large">
-                  로그인
-                </Button>
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
+        <Space direction="vertical" align="center" size="large">
+          <Typography.Title level={2} style={{ textAlign: "center" }}>
+            레드스위치 관리자포탈
+          </Typography.Title>
+          <Form
+            form={form}
+            name="login"
+            style={{ maxWidth: 400, width: "100%" }}
+            onFinish={handleLogin}
+          >
+            <Form.Item
+              name="user_id"
+              rules={[{ required: true, message: "아이디를 입력해주세요!" }]}
+            >
+              <Input
+                prefix={<UserOutlined />}
+                placeholder="아이디"
+                size="large"
+              />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              rules={[{ required: true, message: "비밀번호를 입력해주세요!" }]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder="비밀번호"
+                size="large"
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" block size="large">
+                로그인
+              </Button>
+            </Form.Item>
+          </Form>
+        </Space>
       </Drawer>
     </>
   );
 };
+
 export default LoginForm;
