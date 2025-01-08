@@ -23,6 +23,7 @@ const SearchProvider = ({
   const fetchProviders = async (search = "") => {
     try {
       const response = await AxiosGet("/providers"); // Replace with your endpoint
+
       setProviders(
         response.data
           .map((item) => item)

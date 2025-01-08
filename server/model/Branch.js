@@ -25,6 +25,7 @@ class Branch {
     this.delivery_fee = data.delivery_fee || 0;
     this.branch_brn = data.branch_brn || null;
     this.branch_email = data.branch_email || null;
+    this.company_name = data.company_name || null;
   }
 
   toJSON() {
@@ -49,6 +50,7 @@ class Branch {
       delivery_fee: this.delivery_fee,
       branch_brn: this.branch_brn,
       branch_email: this.branch_email,
+      company_name: this.company_name,
     };
   }
 

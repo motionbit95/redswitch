@@ -11,7 +11,6 @@ import {
   HomeOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import LoginForm from "../login";
 
 const menu_items = [
   {
@@ -74,58 +73,6 @@ const menu_items = [
       {
         key: "/post/inquiry",
         label: <Link to="/post/inquiry">게시판</Link>,
-      },
-      {
-        key: "/provider/post",
-        label: <Link to="/provider/post">가맹점 신청</Link>,
-      },
-    ],
-  },
-  {
-    key: "provider",
-    icon: React.createElement(TeamOutlined),
-    label: <Link to="/provider/provider">거래처관리</Link>,
-  },
-  {
-    key: "branch",
-    icon: React.createElement(ShopOutlined),
-    label: <Link to="/branch/branch">지점관리</Link>,
-  },
-  {
-    key: "admin",
-    icon: React.createElement(SolutionOutlined),
-    label: "관리자 설정",
-    children: [
-      {
-        key: "/admin/account",
-        label: <Link to="/admin/account">계정관리</Link>,
-      },
-      {
-        key: "homepage",
-        label: <Link to="/admin/spot">홈페이지관리</Link>,
-      },
-      {
-        key: "bdsm",
-        // icon: React.createElement(DotChartOutlined),
-        label: "BDSM",
-        children: [
-          {
-            key: "/bdsm/questions",
-            label: <Link to="/bdsm/questions">문항관리</Link>,
-          },
-          {
-            key: "/bdsm/results",
-            label: <Link to="/bdsm/results">성향관리</Link>,
-          },
-          {
-            key: "/bdsm/advertise",
-            label: <Link to="/bdsm/advertise">광고관리</Link>,
-          },
-          {
-            key: "/bdsm/trend",
-            label: <Link to="/bdsm/trend">통계관리</Link>,
-          },
-        ],
       },
     ],
   },

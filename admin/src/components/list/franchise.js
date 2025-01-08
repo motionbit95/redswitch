@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AxiosGet } from "../../api";
 import { List, Skeleton, Button } from "antd";
-import { PostDetailModal } from "../../pages/provider/franchise_post";
+import { PostDetailModal } from "../../pages/admin/franchise_post";
 
 function FranchiseList(props) {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);

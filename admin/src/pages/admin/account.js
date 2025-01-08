@@ -18,11 +18,13 @@ import SearchBranch from "../../components/popover/searchbranch";
 import SearchProvider from "../../components/popover/searchprovider";
 import useSearchFilter from "../../hook/useSearchFilter";
 import Filter from "../../components/filter";
+import { render } from "@testing-library/react";
 
 // 메인 Account 컴포넌트
 const Account = () => {
   // 상태 관리
   const [accounts, setAccounts] = useState([]); // 계정 데이터
+  const [branches, setBranches] = useState([]); // 지점 데이터
   const [loading, setLoading] = useState(true); // 로딩 상태
   const [isEditModalVisible, setIsEditModalVisible] = useState(false); // 수정 모달 표시 여부
   const [isAddModalVisible, setIsAddModalVisible] = useState(false); // 추가 모달 표시 여부
@@ -37,7 +39,17 @@ const Account = () => {
   // 데이터 가져오기
   useEffect(() => {
     fetchAccounts();
+    fetchBranches();
   }, []);
+
+  const fetchBranches = async () => {
+    try {
+      const res = await AxiosGet("/branches");
+      setBranches(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     if (selectedBranch) {
@@ -184,6 +196,19 @@ const Account = () => {
       },
     },
     {
+      title: "지사/지점",
+      dataIndex: "company_name",
+      key: "company_name",
+      render: (text, record) => {
+        if (record.permission === "1") return "전체";
+        if (record.permission === "2") return text;
+        return (
+          branches.find((branch) => record.branch_id?.includes(branch.id))
+            ?.branch_name ?? ""
+        );
+      },
+    },
+    {
       title: "동작",
       key: "actions",
       render: (text, record) => (
@@ -209,25 +234,6 @@ const Account = () => {
           width: "100%",
         }}
       >
-        <Space>
-          <Filter onChange={setFilterValue} value={filterValue} />
-          {filterValue === "provider" && (
-            <SearchProvider
-              setSelectedProvider={(providers) => {
-                setSelectedProvider(providers[0]);
-              }}
-              selectedProvider={selectedProvider}
-            />
-          )}
-          {filterValue === "branch" && (
-            <SearchBranch
-              setSelectedBranch={(branches) => {
-                setSelectedBranch(branches[0]);
-              }}
-              selectedBranch={selectedBranch}
-            />
-          )}
-        </Space>
         <Button type="primary" onClick={handleAddAccount}>
           계정 추가
         </Button>
@@ -258,12 +264,14 @@ const Account = () => {
 const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
   const [selectedBranch, setSelectedBranch] = useState([]);
   const [selectedProvider, setSelectedProvider] = useState([]);
+  const [selectedPermissions, setSelectedPermissions] = useState("1");
 
   useEffect(() => {
     if (isEdit) {
       AxiosGet(`/accounts/${form.getFieldValue("id")}`).then((response) => {
         const account = response.data;
-        // console.log(account);
+        console.log(account);
+        setSelectedPermissions(account.permission);
         fetchBranchAndProviderData(account);
       });
     }
@@ -394,53 +402,92 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
               name="permission"
               rules={[{ required: true, message: "권한을 선택해주세요" }]}
             >
-              <Select>
+              <Select onChange={(value) => setSelectedPermissions(value)}>
                 <Select.Option value="1">본사관리자</Select.Option>
                 <Select.Option value="2">지사관리자</Select.Option>
                 <Select.Option value="3">지점관리자</Select.Option>
               </Select>
             </Form.Item>
           </Descriptions.Item>
-          <Descriptions.Item label="지점" span={2}>
-            <Space direction="vertical">
-              <SearchBranch
-                selectedBranch={selectedBranch}
-                setSelectedBranch={setSelectedBranch}
-                multiple
-              />
-              <Row>
-                {selectedBranch.map((branch) => (
-                  <Tag
-                    key={branch?.id}
-                    closable
-                    onClose={() => handleCloseBranch(branch?.branch_name)}
-                  >
-                    {branch?.branch_name || "[Unknown]"}
-                  </Tag>
-                ))}
-              </Row>
-            </Space>
-          </Descriptions.Item>
-          <Descriptions.Item label="거래처" span={2}>
-            <Space direction="vertical">
-              <SearchProvider
-                selectedProvider={selectedProvider}
-                setSelectedProvider={setSelectedProvider}
-                multiple
-              />
-              <Row>
-                {selectedProvider.map((provider) => (
-                  <Tag
-                    key={provider.id}
-                    closable
-                    onClose={() => handleCloseProvider(provider.provider_name)}
-                  >
-                    {provider.provider_name}
-                  </Tag>
-                ))}
-              </Row>
-            </Space>
-          </Descriptions.Item>
+          {selectedPermissions !== "1" && (
+            <>
+              {selectedPermissions === "3" && (
+                <Descriptions.Item label="지점" span={2}>
+                  <Space direction="vertical">
+                    <SearchBranch
+                      selectedBranch={selectedBranch}
+                      setSelectedBranch={setSelectedBranch}
+                      multiple={selectedPermissions === "2" ? true : false}
+                    />
+                    <Row>
+                      {selectedBranch.map((branch) => (
+                        <Tag
+                          key={branch?.id}
+                          closable
+                          onClose={() => handleCloseBranch(branch?.branch_name)}
+                        >
+                          {branch?.branch_name || "[Unknown]"}
+                        </Tag>
+                      ))}
+                    </Row>
+                  </Space>
+                </Descriptions.Item>
+              )}
+              {selectedPermissions === "2" && (
+                <>
+                  <Descriptions.Item label="지사" span={2}>
+                    <Space direction="vertical">
+                      <Form.Item name="company_name">
+                        <Input placeholder="지사명을 입력해주세요." />
+                      </Form.Item>
+                      <Space direction="vertical">
+                        <SearchBranch
+                          selectedBranch={selectedBranch}
+                          setSelectedBranch={setSelectedBranch}
+                          multiple
+                        />
+                        <Row>
+                          {selectedBranch.map((branch) => (
+                            <Tag
+                              key={branch?.id}
+                              closable
+                              onClose={() =>
+                                handleCloseBranch(branch?.branch_name)
+                              }
+                            >
+                              {branch?.branch_name || "[Unknown]"}
+                            </Tag>
+                          ))}
+                        </Row>
+                      </Space>
+                    </Space>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="거래처" span={2}>
+                    <Space direction="vertical">
+                      <SearchProvider
+                        selectedProvider={selectedProvider}
+                        setSelectedProvider={setSelectedProvider}
+                        multiple
+                      />
+                      <Row>
+                        {selectedProvider.map((provider) => (
+                          <Tag
+                            key={provider.id}
+                            closable
+                            onClose={() =>
+                              handleCloseProvider(provider.provider_name)
+                            }
+                          >
+                            {provider.provider_name}
+                          </Tag>
+                        ))}
+                      </Row>
+                    </Space>
+                  </Descriptions.Item>
+                </>
+              )}
+            </>
+          )}
         </Descriptions>
       </Form>
     </Modal>
