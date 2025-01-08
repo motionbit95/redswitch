@@ -203,7 +203,10 @@ const Material = ({ currentUser }) => {
               multiple={false}
             />
             <Space>
-              <ProductCategory usedCodes={usedCodes} />
+              <ProductCategory
+                usedCodes={usedCodes}
+                materialList={materialList}
+              />
               <Addproduct
                 selectedProvider={selectedProvider}
                 categories={categories}

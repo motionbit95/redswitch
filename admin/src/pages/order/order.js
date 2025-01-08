@@ -208,6 +208,7 @@ const Order = (props) => {
             <RangePicker
               onChange={(dates) => setDateRange(dates)}
               style={{ marginLeft: 10 }}
+              allowClear={false}
             />
             <Input
               placeholder="상품코드를 입력하세요"

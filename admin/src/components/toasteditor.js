@@ -11,6 +11,13 @@ const ToastEditor = ({ onChange, ...props }) => {
     onChange(html);
   };
 
+  useEffect(() => {
+    if (editorRef.current) {
+      const editorInstance = editorRef.current.getInstance();
+      editorInstance.setHTML(props.initialValue || "");
+    }
+  }, [props.initialValue]);
+
   return (
     <Editor
       {...props}

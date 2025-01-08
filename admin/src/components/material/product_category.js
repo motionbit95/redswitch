@@ -101,7 +101,7 @@ const ProductCategory = ({ materialList }) => {
   };
 
   const handleDelete = async (category) => {
-    const searchMaterialCode = materialList.map(
+    const searchMaterialCode = materialList?.map(
       (material) => material.product_category_code
     );
     try {
