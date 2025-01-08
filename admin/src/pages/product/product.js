@@ -64,6 +64,7 @@ const ProductCRUD = (props) => {
 
   // 상품 추가/수정 모달 열기
   const showModal = (product = null) => {
+    console.log(">>>>>>>>>>", product);
     setCurrentProduct(product);
     form.resetFields();
 
@@ -198,10 +199,7 @@ const ProductCRUD = (props) => {
 
   const { pagination, setPagination, handleTableChange } = usePagination(10); // Default page size is 10
 
-  const handleChange = (pagination, filters, sorter) => {
-    console.log("Various parameters", pagination, filters, sorter);
-  };
-
+  // 소비자 상품 명, 상품 가격 가져오기
   useEffect(() => {
     if (selectedMaterial)
       form.setFieldsValue({
@@ -274,21 +272,6 @@ const ProductCRUD = (props) => {
           </Popconfirm>
         </Space>
       ),
-
-      // render: (text, record) => (
-      //   <div>
-      //     <Button
-      //       icon={<EditOutlined />}
-      //       onClick={() => showModal(record)}
-      //       style={{ marginRight: 8 }}
-      //     />
-      //     <Button
-      //       icon={<DeleteOutlined />}
-      //       onClick={() => handleDelete(record.PK)}
-      //       danger
-      //     />
-      //   </div>
-      // ),
     },
   ];
 
@@ -300,41 +283,28 @@ const ProductCRUD = (props) => {
 
   return (
     <div>
-      <Row
-        style={{
-          display: "flex",
-          width: "100%",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 16,
-        }}
-      >
-        <Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => showModal()}
-          >
-            상품 추가
-          </Button>
-          <Button
-            style={{ float: "right" }}
-            icon={<DownloadOutlined />}
-            onClick={exportToExcel}
-          >
-            엑셀 다운로드
-          </Button>
-        </Space>
-      </Row>
+      <Space style={{ marginBottom: 16 }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => showModal()}
+        >
+          상품 추가
+        </Button>
+        <Button
+          style={{ float: "right" }}
+          icon={<DownloadOutlined />}
+          onClick={exportToExcel}
+        >
+          엑셀 다운로드
+        </Button>
+      </Space>
       <Table
         size="small"
         columns={columns}
         dataSource={products}
         rowKey="PK"
-        onChange={(pagination, filters, sorter) => {
-          handleTableChange(pagination);
-          handleChange(pagination, filters, sorter);
-        }}
+        onChange={(pagination) => handleTableChange(pagination)}
         pagination={{
           ...pagination,
           showSizeChanger: true,
@@ -342,271 +312,266 @@ const ProductCRUD = (props) => {
       />
 
       {/* 상품 추가/수정 모달 */}
-      <Modal
-        title={currentProduct ? "상품 수정" : "상품 추가"}
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        // okText={currentProduct ? "수정" : "추가"}
-        // cancelText="취소"
-        width={800}
-        footer={
-          <Space style={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button onClick={handleCancel}>취소</Button>
-            <Button type="primary" onClick={handleOk}>
-              {currentProduct ? "수정" : "추가"}
-            </Button>
-          </Space>
-        }
-      >
-        <Form form={form} layout="vertical" initialValues={currentProduct}>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                label="지점명"
-                // name="branch_id"
-                rules={[{ required: true, message: "지점 ID를 입력해주세요" }]}
-                tooltip={"현재 관리중인 지점명이 표시됩니다."}
-              >
-                <Input
-                  placeholder="지점명"
-                  readOnly
-                  value={selectedBranch?.branch_name}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          {selectedMaterial ? (
-            <Descriptions
-              title={
-                <SearchMaterial
-                  setSelectedProduct={(products) =>
-                    setSelectedMaterial(products[0])
-                  }
-                  setIsModalVisible={setIsModalVisible}
-                  multiple={false}
-                />
-              }
-              bordered
-              column={2}
-            >
-              <Descriptions.Item span={2} label="거래처명">
-                {selectedMaterial.provider_name}
-              </Descriptions.Item>
-              <Descriptions.Item span={2} label="상품명">
-                {selectedMaterial.product_name}
-              </Descriptions.Item>
-              <Descriptions.Item label="상품코드">
-                {selectedMaterial.product_code}
-              </Descriptions.Item>
-              <Descriptions.Item label="원가">
-                {selectedMaterial.product_sale} 원
-              </Descriptions.Item>
-              <Descriptions.Item label="이미지">
-                <Image
-                  src={selectedMaterial.original_image}
-                  width={150}
-                  height={150}
-                />
-              </Descriptions.Item>
-              <Descriptions.Item label="블라인드 이미지">
-                <Image
-                  src={selectedMaterial.blurred_image}
-                  width={150}
-                  height={150}
-                />
-              </Descriptions.Item>
-            </Descriptions>
-          ) : (
-            <SearchMaterial
-              setSelectedProduct={(products) =>
-                setSelectedMaterial(products[0])
-              }
-              setIsModalVisible={setIsModalVisible}
-              multiple={false}
-            />
-          )}
-
-          <Row gutter={16} style={{ marginTop: 16 }}>
-            <Col span={24}>
-              <Form.Item
-                tooltip={"소비자 페이지에 노출되는 상품명입니다."}
-                label="소비자 노출 상품명"
-                name="product_name"
-                rules={[{ required: true, message: "상품명을 입력해주세요" }]}
-              >
-                <Input placeholder="소비자 페이지에 노출되는 상품명을 입력해주세요." />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="소비자 판매 가격"
-                name="product_price"
-                rules={[
-                  { required: true, message: "판매 가격을 입력해주세요" },
-                  {
-                    pattern: /^[0-9]*$/,
-                    message: "판매 가격는 숫자만 입력 가능입니다.",
-                  },
-                ]}
-              >
-                <Input style={{ width: "100%" }} placeholder="1000" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                tooltip={"해당 지점 추가 매출"}
-                label="해당 지점 추가 수수료"
-                name="additional_fee"
-                rules={[
-                  {
-                    pattern: /^[0-9]*$/,
-                    message: "지점 추가 수수료는 숫자만 입력 가능입니다.",
-                  },
-                ]}
-              >
-                <Input style={{ width: "100%" }} placeholder="1000" />
-              </Form.Item>
-            </Col>
-
-            {/* <Col span={12}>
-              <Form.Item
-                label={
-                  <Space>
-                    <div>블라인드 이미지</div>
-                    <Switch
-                      checkedChildren="사용"
-                      unCheckedChildren="사용"
-                      checked={useBlurImage}
-                      onChange={(checked) => setUseBlurImage(!checked)}
-                    />
-                  </Space>
-                }
-                name="blurred_image"
-                tooltip={"미리보기 방지 이미지, 성인인증 전 노출됩니다."}
-              >
-                <>
-                  {useBlurImage && (
-                    <FileUpload url={blurred_image} setUrl={setBlurredImage} />
-                  )}
-                </>
-              </Form.Item>
-            </Col> */}
-
-            <Col span={24}>
-              <Form.Item label="상품 상세 설명" name="product_detail">
-                <ToastEditor initialValue={currentProduct?.product_detail} />
-              </Form.Item>
-            </Col>
-
-            <Col span={24}>
-              <Form.Item
-                label="상품 옵션"
-                tooltip="옵션 이름과 가격을 입력하세요."
-              >
-                <Form.List name="options">
-                  {(fields, { add, remove }) => (
-                    <>
-                      {fields.map(({ key, name, fieldKey, ...restField }) => (
-                        <Space
-                          key={key}
-                          style={{ display: "flex", marginBottom: 8 }}
-                          align="baseline"
-                        >
-                          <Form.Item
-                            {...restField}
-                            name={[name, "optionName"]}
-                            fieldKey={[fieldKey, "optionName"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "옵션 이름을 입력하세요.",
-                              },
-                            ]}
-                          >
-                            <Input placeholder="옵션 이름" />
-                          </Form.Item>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "optionPrice"]}
-                            fieldKey={[fieldKey, "optionPrice"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "옵션 가격을 입력하세요.",
-                              },
-                              {
-                                pattern: /^[0-9]*$/,
-                                message: "숫자만 입력 가능합니다.",
-                              },
-                            ]}
-                          >
-                            <InputNumber
-                              placeholder="옵션 가격"
-                              style={{ width: 120 }}
-                            />
-                          </Form.Item>
-                          <MinusCircleOutlined onClick={() => remove(name)} />
-                        </Space>
-                      ))}
-                      <Form.Item>
-                        <Button
-                          type="dashed"
-                          onClick={() => add()}
-                          block
-                          icon={<PlusOutlined />}
-                        >
-                          옵션 추가
-                        </Button>
-                      </Form.Item>
-                    </>
-                  )}
-                </Form.List>
-              </Form.Item>
-            </Col>
-
-            <Col span={24}>
-              <Form.Item
-                label="추가 판매 유도"
-                tooltip={"연관 상품으로 추천됩니다."}
-              >
-                <SearchProduct
-                  setSelectedProduct={(products) =>
-                    setRelatedProducts(products)
-                  }
-                  setIsModalVisible={setIsModalVisible}
-                  multiple={true}
-                />
-              </Form.Item>
-            </Col>
-
-            <Col span={24}>
-              <Table
-                size="small"
-                dataSource={relatedProducts}
-                columns={[
-                  {
-                    title: "상품 코드",
-                    dataIndex: "product_code",
-                    key: "product_code",
-                  },
-                  {
-                    title: "상품명",
-                    dataIndex: "product_name",
-                    key: "product_name",
-                  },
-                  {
-                    title: "소비자 판매 가격",
-                    dataIndex: "product_price",
-                    key: "product_price",
-                  },
-                ]}
-              />
-            </Col>
-          </Row>
-        </Form>
-      </Modal>
+      <ProductModal
+        open={isModalVisible} // 모달 열기
+        handleOk={handleOk} // 모달 추가 및 수정
+        handleCancel={handleCancel} // 모달 닫기
+        currentProduct={currentProduct} // 상품 정보
+        relatedProducts={relatedProducts} // 연관 상품 정보
+        setRelatedProducts={setRelatedProducts} // 연관 상품 선택
+        selectedMaterial={selectedMaterial} // 물자 정보
+        setSelectedMaterial={setSelectedMaterial} // 물자 선택
+        selectedBranch={selectedBranch} // 선택된 지점 정보
+      />
     </div>
+  );
+};
+
+const ProductModal = (props) => {
+  const {
+    open,
+    handleOk,
+    handleCancel,
+    currentProduct,
+    relatedProducts,
+    setRelatedProducts,
+    selectedMaterial,
+    setSelectedMaterial,
+    selectedBranch,
+  } = props;
+
+  const [form] = Form.useForm();
+  return (
+    <Modal
+      title={currentProduct ? "상품 수정" : "상품 추가"}
+      open={open}
+      onOk={handleOk}
+      onCancel={handleCancel}
+      width={800}
+      footer={
+        <Space style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={handleCancel}>취소</Button>
+          <Button type="primary" onClick={handleOk}>
+            {currentProduct ? "수정" : "추가"}
+          </Button>
+        </Space>
+      }
+    >
+      <Form form={form} layout="vertical" initialValues={currentProduct}>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              label="지점명"
+              // name="branch_id"
+              rules={[{ required: true, message: "지점 ID를 입력해주세요" }]}
+              tooltip={"현재 관리중인 지점명이 표시됩니다."}
+            >
+              <Input
+                placeholder="지점명"
+                readOnly
+                value={selectedBranch?.branch_name}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        {selectedMaterial ? (
+          <MaterialDescription
+            selectedMaterial={selectedMaterial}
+            setSelectedMaterial={setSelectedMaterial}
+          />
+        ) : (
+          <SearchMaterial
+            setSelectedProduct={(products) => setSelectedMaterial(products[0])}
+            multiple={false}
+          />
+        )}
+
+        <Row gutter={16} style={{ marginTop: 16 }}>
+          <Col span={24}>
+            <Form.Item
+              tooltip={"소비자 페이지에 노출되는 상품명입니다."}
+              label="소비자 노출 상품명"
+              name="product_name"
+              rules={[{ required: true, message: "상품명을 입력해주세요" }]}
+            >
+              <Input placeholder="소비자 페이지에 노출되는 상품명을 입력해주세요." />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label="소비자 판매 가격"
+              name="product_price"
+              rules={[
+                { required: true, message: "판매 가격을 입력해주세요" },
+                {
+                  pattern: /^[0-9]*$/,
+                  message: "판매 가격는 숫자만 입력 가능입니다.",
+                },
+              ]}
+            >
+              <Input style={{ width: "100%" }} placeholder="1000" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              tooltip={"해당 지점 추가 매출"}
+              label="해당 지점 추가 수수료"
+              name="additional_fee"
+              rules={[
+                {
+                  pattern: /^[0-9]*$/,
+                  message: "지점 추가 수수료는 숫자만 입력 가능입니다.",
+                },
+              ]}
+            >
+              <Input style={{ width: "100%" }} placeholder="1000" />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item label="상품 상세 설명" name="product_detail">
+              <ToastEditor initialValue={currentProduct?.product_detail} />
+            </Form.Item>
+          </Col>
+
+          <Col span={24}>
+            <Form.Item
+              label="상품 옵션"
+              tooltip="옵션 이름과 가격을 입력하세요."
+            >
+              <Form.List name="options">
+                {(fields, { add, remove }) => (
+                  <>
+                    {fields.map(({ key, name, fieldKey, ...restField }) => (
+                      <Space
+                        key={key}
+                        style={{ display: "flex", marginBottom: 8 }}
+                        align="baseline"
+                      >
+                        <Form.Item
+                          {...restField}
+                          name={[name, "optionName"]}
+                          fieldKey={[fieldKey, "optionName"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "옵션 이름을 입력하세요.",
+                            },
+                          ]}
+                        >
+                          <Input placeholder="옵션 이름" />
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, "optionPrice"]}
+                          fieldKey={[fieldKey, "optionPrice"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "옵션 가격을 입력하세요.",
+                            },
+                            {
+                              pattern: /^[0-9]*$/,
+                              message: "숫자만 입력 가능합니다.",
+                            },
+                          ]}
+                        >
+                          <InputNumber
+                            placeholder="옵션 가격"
+                            style={{ width: 120 }}
+                          />
+                        </Form.Item>
+                        <MinusCircleOutlined onClick={() => remove(name)} />
+                      </Space>
+                    ))}
+                    <Form.Item>
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
+                        icon={<PlusOutlined />}
+                      >
+                        옵션 추가
+                      </Button>
+                    </Form.Item>
+                  </>
+                )}
+              </Form.List>
+            </Form.Item>
+          </Col>
+
+          <Col span={24}>
+            <Form.Item
+              label="추가 판매 유도"
+              tooltip={"연관 상품으로 추천됩니다."}
+            >
+              <SearchProduct
+                setSelectedProduct={(products) => setRelatedProducts(products)}
+                multiple={true}
+              />
+            </Form.Item>
+          </Col>
+
+          <Col span={24}>
+            <Table
+              size="small"
+              dataSource={relatedProducts}
+              columns={[
+                {
+                  title: "상품 코드",
+                  dataIndex: "product_code",
+                  key: "product_code",
+                },
+                {
+                  title: "상품명",
+                  dataIndex: "product_name",
+                  key: "product_name",
+                },
+                {
+                  title: "소비자 판매 가격",
+                  dataIndex: "product_price",
+                  key: "product_price",
+                },
+              ]}
+            />
+          </Col>
+        </Row>
+      </Form>
+    </Modal>
+  );
+};
+
+const MaterialDescription = (props) => {
+  const { selectedMaterial, setSelectedMaterial } = props;
+  return (
+    <Descriptions
+      title={
+        <SearchMaterial
+          setSelectedProduct={(products) => setSelectedMaterial(products[0])}
+          multiple={false}
+        />
+      }
+      bordered
+      column={2}
+    >
+      <Descriptions.Item span={2} label="거래처명">
+        {selectedMaterial.provider_name}
+      </Descriptions.Item>
+      <Descriptions.Item span={2} label="상품명">
+        {selectedMaterial.product_name}
+      </Descriptions.Item>
+      <Descriptions.Item label="상품코드">
+        {selectedMaterial.product_code}
+      </Descriptions.Item>
+      <Descriptions.Item label="원가">
+        {selectedMaterial.product_sale} 원
+      </Descriptions.Item>
+      <Descriptions.Item label="이미지">
+        <Image src={selectedMaterial.original_image} width={150} height={150} />
+      </Descriptions.Item>
+      <Descriptions.Item label="블라인드 이미지">
+        <Image src={selectedMaterial.blurred_image} width={150} height={150} />
+      </Descriptions.Item>
+    </Descriptions>
   );
 };
 
