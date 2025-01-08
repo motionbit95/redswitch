@@ -187,7 +187,17 @@ const SearchMaterial = ({
         title="상품을 선택해주세요."
         trigger="click"
         visible={popoverVisible}
-        onVisibleChange={setPopoverVisible}
+        onVisibleChange={(visible) => {
+          if (visible) {
+            if (
+              window.confirm(
+                "상품을 불러오면 작업중인 데이터는 사라집니다. 계속하시겠습니까?"
+              )
+            ) {
+              setPopoverVisible(visible);
+            }
+          }
+        }}
         placement="bottomLeft" // 버튼 아래 왼쪽 정렬
       >
         <Button>{selectedProduct?.provider_name || "상품 선택"}</Button>

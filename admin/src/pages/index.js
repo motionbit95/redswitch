@@ -7,7 +7,7 @@ import Provider from "./admin/provider";
 import Branch from "./admin/branch";
 import Main from "./admin/main";
 import FranchisePost from "./admin/franchise_post";
-import Product from "./product/product";
+import Product from "./product/branch_product";
 import Inventory from "./product/inventory";
 import Purchase_order from "./product/purchase_order";
 import Order from "./order/order";
