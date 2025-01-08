@@ -138,10 +138,6 @@ function App(props) {
               element={<Inventory currentUser={currentUser} />}
             />
             <Route
-              path="/product/purchase_order"
-              element={<Purchase_order />}
-            />
-            <Route
               path="/order"
               element={<Order currentUser={currentUser} />}
             />
@@ -161,7 +157,7 @@ function App(props) {
           </>
         );
       default: // 권한이 없을 경우
-        return <Route path="*" element={<div>권한이 없습니다.</div>} />;
+        return;
     }
   };
 
