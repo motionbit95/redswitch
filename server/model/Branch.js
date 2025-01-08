@@ -11,7 +11,7 @@ class Branch {
     this.branch_room_cnt = data.branch_room_cnt;
     this.updated_at = data.updated_at || null;
     this.created_at = data.created_at || new Date().toISOString();
-    this.install_flag = data.install_flag || 1; // 기본값
+    this.install_flag = data.install_flag || "1"; // 기본값
     this.branch_image = data.branch_image || null;
     this.install_image = data.install_image || null;
     this.contract_image = data.contract_image || null;

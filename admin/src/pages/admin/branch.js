@@ -578,7 +578,7 @@ function Branch(props) {
         { text: "설치", value: "1" },
         { text: "미설치", value: "0" },
       ],
-      onFilter: (value, record) => record.install_flag.includes(value),
+      onFilter: (value, record) => record.install_flag === value,
     },
     {
       title: "자세히보기",
@@ -588,17 +588,6 @@ function Branch(props) {
       render: (_, record) => (
         <Button icon={<SearchOutlined />} onClick={() => handleEdit(record)} />
       ),
-      // render: (text, record) => (
-      //   <Space>
-      //     <a onClick={() => handleEdit(record)}>수정</a>
-      //     <Popconfirm
-      //       title="지점을 삭제하시겠습니까?"
-      //       onConfirm={() => handleDelete(record.id)}
-      //     >
-      //       <a>삭제</a>
-      //     </Popconfirm>
-      //   </Space>
-      // ),
     },
   ];
 
