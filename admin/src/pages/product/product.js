@@ -37,6 +37,7 @@ const ProductCRUD = (props) => {
   const { selectedBranch } = useSelectedBranch();
 
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]); // 연관 상품 리스트
 
   const [useBlurImage, setUseBlurImage] = useState(false);
@@ -202,12 +203,12 @@ const ProductCRUD = (props) => {
   };
 
   useEffect(() => {
-    if (selectedProduct)
+    if (selectedMaterial)
       form.setFieldsValue({
-        product_name: selectedProduct.product_name,
-        product_price: selectedProduct.product_sale,
+        product_name: selectedMaterial.product_name,
+        product_price: selectedMaterial.product_sale,
       });
-  }, [selectedProduct]);
+  }, [selectedMaterial]);
 
   // 테이블 컬럼 정의
   const columns = [
@@ -375,12 +376,12 @@ const ProductCRUD = (props) => {
               </Form.Item>
             </Col>
           </Row>
-          {selectedProduct ? (
+          {selectedMaterial ? (
             <Descriptions
               title={
                 <SearchMaterial
                   setSelectedProduct={(products) =>
-                    setSelectedProduct(products[0])
+                    setSelectedMaterial(products[0])
                   }
                   setIsModalVisible={setIsModalVisible}
                   multiple={false}
@@ -390,27 +391,27 @@ const ProductCRUD = (props) => {
               column={2}
             >
               <Descriptions.Item span={2} label="거래처명">
-                {selectedProduct.provider_name}
+                {selectedMaterial.provider_name}
               </Descriptions.Item>
               <Descriptions.Item span={2} label="상품명">
-                {selectedProduct.product_name}
+                {selectedMaterial.product_name}
               </Descriptions.Item>
               <Descriptions.Item label="상품코드">
-                {selectedProduct.product_code}
+                {selectedMaterial.product_code}
               </Descriptions.Item>
               <Descriptions.Item label="원가">
-                {selectedProduct.product_sale} 원
+                {selectedMaterial.product_sale} 원
               </Descriptions.Item>
               <Descriptions.Item label="이미지">
                 <Image
-                  src={selectedProduct.original_image}
+                  src={selectedMaterial.original_image}
                   width={150}
                   height={150}
                 />
               </Descriptions.Item>
               <Descriptions.Item label="블라인드 이미지">
                 <Image
-                  src={selectedProduct.blinded_image}
+                  src={selectedMaterial.blurred_image}
                   width={150}
                   height={150}
                 />
@@ -418,7 +419,9 @@ const ProductCRUD = (props) => {
             </Descriptions>
           ) : (
             <SearchMaterial
-              setSelectedProduct={(products) => setSelectedProduct(products[0])}
+              setSelectedProduct={(products) =>
+                setSelectedMaterial(products[0])
+              }
               setIsModalVisible={setIsModalVisible}
               multiple={false}
             />

@@ -152,6 +152,7 @@ class Material {
     this.product_sale = data.product_sale;
     this.provider_name = data.provider_name;
     this.original_image = data.original_image || null;
+    this.blurred_image = data.blurred_image || null;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || null;
     this.provider_code = data.provider_code;
@@ -166,6 +167,7 @@ class Material {
       product_sale: this.product_sale,
       provider_name: this.provider_name,
       original_image: this.original_image,
+      blurred_image: this.blurred_image,
       created_at: this.created_at,
       updated_at: this.updated_at,
       provider_code: this.provider_code,

@@ -306,11 +306,11 @@ const Material = ({ currentUser }) => {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item name="blind_image" label="블라인드 이미지">
+                  <Form.Item name="blurred_image" label="블라인드 이미지">
                     <FileUpload
-                      url={form.getFieldValue("blind_image")}
+                      url={form.getFieldValue("blurred_image")}
                       setUrl={(url) =>
-                        form.setFieldsValue({ blind_image: url })
+                        form.setFieldsValue({ blurred_image: url })
                       }
                     />
                   </Form.Item>
