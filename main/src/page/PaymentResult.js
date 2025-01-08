@@ -258,9 +258,7 @@ function PaymentResult(props) {
             {order.select_products?.map((product, index) => (
               <Space>
                 <Image
-                  src={
-                    product.blurred_image || "https://via.placeholder.com/120"
-                  }
+                  src={product.blind_image || "https://via.placeholder.com/120"}
                   alt={product.product_name}
                   width={60}
                   height={60}

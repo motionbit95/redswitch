@@ -34,8 +34,8 @@ const ProductCard = React.memo(({ product, theme, isCertified }) => {
 
   const productImage = isCertified
     ? product.original_image
-    : product.blurred_image
-    ? product.blurred_image
+    : product.blind_image
+    ? product.blind_image
     : product.original_image;
 
   return (

@@ -117,8 +117,8 @@ const SearchMaterial = ({
     },
     {
       title: "소비자가",
-      dataIndex: "product_sale",
-      key: "product_sale",
+      dataIndex: "product_price",
+      key: "product_price",
       render: (text) => `${text.toLocaleString("ko-KR")}원`,
     },
   ];

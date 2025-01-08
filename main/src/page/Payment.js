@@ -158,7 +158,7 @@ const Payment = () => {
                   <Col span={6}>
                     <Image
                       src={
-                        item.blurred_image ||
+                        item.blind_image ||
                         item.original_image ||
                         "https://via.placeholder.com/120"
                       }

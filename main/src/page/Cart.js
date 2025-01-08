@@ -249,9 +249,7 @@ const Cart = ({ token, theme }) => {
                   <Image
                     preview={false}
                     alt={item.product_name}
-                    src={
-                      item.blurred_image || "https://via.placeholder.com/120"
-                    }
+                    src={item.blind_image || "https://via.placeholder.com/120"}
                     style={cartStyles.image}
                   />
                   <div style={cartStyles.productInfo}>

@@ -41,7 +41,7 @@ const ProductCRUD = (props) => {
   const [relatedProducts, setRelatedProducts] = useState([]); // 연관 상품 리스트
 
   const [useBlurImage, setUseBlurImage] = useState(false);
-  const [blurred_image, setBlurredImage] = useState(null);
+  const [blind_image, setBlurredImage] = useState(null);
 
   const { getColumnSearchProps } = useSearchFilter();
 
@@ -79,9 +79,9 @@ const ProductCRUD = (props) => {
 
       console.log("선택된 상품 : ", product);
 
-      if (product.blurred_image) {
+      if (product.blind_image) {
         setUseBlurImage(true);
-        setBlurredImage(product.blurred_image);
+        setBlurredImage(product.blind_image);
       } else {
         setUseBlurImage(false);
         setBlurredImage(null);
@@ -131,12 +131,12 @@ const ProductCRUD = (props) => {
         const updatedProduct = {
           ...values, // 폼에서 입력된 데이터
           product_code: selectedProduct.product_code, // 상품 코드
-          origin_price: selectedProduct.product_sale, // 상품 원가
-          thumbnail: selectedProduct.original_image, // 상품 이미지
+          origin_price: selectedProduct.product_price, // 상품 원가
+          thumbnail: selectedProduct.product_image, // 상품 이미지
           material_id: selectedProduct.pk, // 물자 pk
-          blurred_image: selectedProduct.blurred_image
-            ? selectedProduct.blurred_image
-            : selectedProduct.original_image, // 수정할 이미지
+          blind_image: selectedProduct.blind_image
+            ? selectedProduct.blind_image
+            : selectedProduct.product_image, // 수정할 이미지
           branch_id: selectedBranch.id, // 지점 ID
           related_products: relatedProductPKs, // 관련 상품 ID 리스트
         };
@@ -160,10 +160,10 @@ const ProductCRUD = (props) => {
         const newProduct = {
           ...values, // 폼에 입력된 데이터
           product_code: selectedProduct.product_code,
-          origin_price: selectedProduct.product_sale,
-          thumbnail: selectedProduct.original_image,
+          origin_price: selectedProduct.product_price,
+          thumbnail: selectedProduct.product_image,
           material_id: selectedProduct.pk,
-          blurred_image: selectedProduct.blinded_image,
+          blind_image: selectedProduct.blinded_image,
           branch_id: selectedBranch.id,
           related_products: relatedProductPKs, // 추가된 관련 상품들
         };
@@ -204,7 +204,7 @@ const ProductCRUD = (props) => {
     if (selectedMaterial)
       form.setFieldsValue({
         product_name: selectedMaterial.product_name,
-        product_price: selectedMaterial.product_sale,
+        product_price: selectedMaterial.product_price,
       });
   }, [selectedMaterial]);
 
@@ -563,13 +563,13 @@ const MaterialDescription = (props) => {
         {selectedMaterial.product_code}
       </Descriptions.Item>
       <Descriptions.Item label="원가">
-        {selectedMaterial.product_sale} 원
+        {selectedMaterial.product_price} 원
       </Descriptions.Item>
       <Descriptions.Item label="이미지">
-        <Image src={selectedMaterial.original_image} width={150} height={150} />
+        <Image src={selectedMaterial.product_image} width={150} height={150} />
       </Descriptions.Item>
       <Descriptions.Item label="블라인드 이미지">
-        <Image src={selectedMaterial.blurred_image} width={150} height={150} />
+        <Image src={selectedMaterial.blind_image} width={150} height={150} />
       </Descriptions.Item>
     </Descriptions>
   );

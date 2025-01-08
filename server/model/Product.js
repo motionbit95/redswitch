@@ -149,9 +149,9 @@ class Material {
     this.pk = data.pk || null; // Firebase에서 자동 생성됨
     this.product_code = data.product_code || "A01010001"; // 기본 상품 코드
     this.product_name = data.product_name;
-    this.product_sale = data.product_sale;
+    this.product_price = data.product_price;
     this.provider_name = data.provider_name;
-    this.original_image = data.original_image || null;
+    this.product_image = data.product_image || null;
     this.blind_image = data.blind_image || null;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || null;
@@ -165,9 +165,9 @@ class Material {
     return {
       product_code: this.product_code,
       product_name: this.product_name,
-      product_sale: this.product_sale,
+      product_price: this.product_price,
       provider_name: this.provider_name,
-      original_image: this.original_image,
+      product_image: this.product_image,
       blind_image: this.blind_image,
       created_at: this.created_at,
       updated_at: this.updated_at,
@@ -320,13 +320,16 @@ class Product {
     this.branch_id = data.branch_id;
     this.product_name = data.product_name;
     this.product_price = data.product_price || 0;
-    this.product_detail = data.product_detail; // 상품 상세
-    this.blurred_image = data.blurred_image || null;
+    this.product_detail_image = data.product_detail_image; // 상품 상세
+    this.blind_image = data.blind_image || null;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || null;
     this.related_products = data.related_products || [];
     this.additional_fee = data.additional_fee || 0;
     this.options = data.options || [];
+    this.product_image = data.product_image || null;
+    this.product_category_code = data.product_category_code;
+    this.provider_id = data.provider_id || null;
   }
 
   toJSON() {
@@ -336,13 +339,16 @@ class Product {
       branch_id: this.branch_id,
       product_name: this.product_name,
       product_price: this.product_price,
-      product_detail: this.product_detail,
-      blurred_image: this.blurred_image,
+      product_detail_image: this.product_detail_image,
+      blind_image: this.blind_image,
       created_at: this.created_at,
       updated_at: this.updated_at,
       related_products: this.related_products,
       additional_fee: this.additional_fee,
       options: this.options,
+      product_image: this.product_image,
+      product_category_code: this.product_category_code,
+      provider_id: this.provider_id,
     };
   }
 

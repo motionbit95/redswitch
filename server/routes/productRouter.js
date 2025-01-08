@@ -364,7 +364,7 @@ router.delete("/categories/:pk", async (req, res) => {
  *             type: object
  *             required:
  *               - product_name
- *               - product_sale
+ *               - product_price
  *               - provider_name
  *               - provider_code
  *               - product_category_code
@@ -372,13 +372,13 @@ router.delete("/categories/:pk", async (req, res) => {
  *               product_name:
  *                 type: string
  *                 description: 제품명
- *               product_sale:
+ *               product_price:
  *                 type: string
  *                 description: 원가
  *               provider_name:
  *                 type: string
  *                 description: 거래처명
- *               original_image:
+ *               product_image:
  *                 type: string
  *                 description: 제품 이미지
  *               product_category_code:
@@ -402,16 +402,24 @@ router.post("/materials", async (req, res) => {
   try {
     const {
       product_name,
-      product_sale,
+      product_price,
       provider_name,
       product_category_code,
       provider_id,
       provider_code,
     } = req.body;
 
+    console.log("req.body: ", {
+      product_name,
+      product_price,
+      provider_name,
+      provider_id,
+      provider_code,
+    });
+
     if (
       !product_name ||
-      !product_sale ||
+      !product_price ||
       !provider_name ||
       !product_category_code ||
       !provider_code ||
@@ -490,13 +498,13 @@ router.get("/materials/:pk", async (req, res) => {
  *                 product_name:
  *                   type: string
  *                   description: 제품명
- *                 product_sale:
+ *                 product_price:
  *                   type: string
  *                   description: 원가
  *                 provider_name:
  *                   type: string
  *                   description: 거래처명
- *                 original_image:
+ *                 product_image:
  *                   type: string
  *                   description: 제품 이미지
  *                 provider_code:
@@ -556,13 +564,13 @@ router.get("/materials", async (req, res) => {
  *                 product_name:
  *                   type: string
  *                   description: 제품명
- *                 product_sale:
+ *                 product_price:
  *                   type: string
  *                   description: 원가
  *                 provider_name:
  *                   type: string
  *                   description: 거래처명
- *                 original_image:
+ *                 product_image:
  *                   type: string
  *                   description: 제품 이미지
  *                 provider_code:
@@ -619,13 +627,13 @@ router.get("/materials/search/:provider_id", async (req, res) => {
  *               product_name:
  *                 type: string
  *                 description: 제품명
- *               product_sale:
+ *               product_price:
  *                 type: string
  *                 description: 원가
  *               provider_name:
  *                 type: string
  *                 description: 거래처명
- *               original_image:
+ *               product_image:
  *                 type: string
  *                 description: 제품 이미지
  *               provider_code:
@@ -1501,7 +1509,7 @@ router.delete("/inventories/:pk", async (req, res) => {
  *               product_image:
  *                 type: string
  *                 description: 상품 이미지 URL
- *               blurred_image:
+ *               blind_image:
  *                 type: string
  *                 description: 미리보기 방지 이미지 URL
  *     responses:
@@ -1522,6 +1530,14 @@ router.post("/", async (req, res) => {
       material_id,
     } = req.body;
 
+    console.log("req.body: ", {
+      product_code,
+      branch_id,
+      product_name,
+      product_price,
+      material_id,
+    });
+
     if (
       !material_id ||
       !product_code ||
@@ -1539,6 +1555,25 @@ router.post("/", async (req, res) => {
   } catch (error) {
     console.error("상품 생성 오류:", error);
     res.status(500).json({ message: "상품 생성 실패", error: error.message });
+  }
+});
+
+// search
+router.get("/search", async (req, res) => {
+  try {
+    const { filter, keyword } = req.query;
+    console.log("filter: ", filter);
+    console.log("keyword: ", keyword);
+
+    if (filter === "branch") {
+      const products = await Product.searchByBranchId(keyword);
+      res.status(200).json(products);
+    } else {
+      res.status(400).json({ message: "필수 필드가 누락되었습니다." });
+    }
+  } catch (error) {
+    console.error("상품 검색 오류:", error);
+    res.status(500).json({ message: "상품 검색 실패", error: error.message });
   }
 });
 
@@ -1668,7 +1703,7 @@ router.get("/", async (req, res) => {
  *                 type: integer
  *               product_image:
  *                 type: string
- *               blurred_image:
+ *               blind_image:
  *                 type: string
  *     responses:
  *       200:

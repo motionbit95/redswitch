@@ -34,12 +34,13 @@ const MaterialModal = ({
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (initialValues) {
+    if (visible) {
+      console.log("initialValues", initialValues);
       form.setFieldsValue(initialValues);
     } else {
       form.resetFields();
     }
-  }, [initialValues, form]);
+  }, [visible]);
 
   return (
     <Modal
@@ -71,13 +72,16 @@ const MaterialModal = ({
               key={field.name}
               label={field.label}
             >
-              <Form.Item name={field.name} rules={field.rules}>
+              <Form.Item
+                name={field.name}
+                rules={field.rules}
+                initialValue={
+                  field.name === "product_category_code" ? "01" : ""
+                }
+              >
                 {field.type === "select" ? (
                   <Select
                     options={field.options}
-                    defaultValue={
-                      initialValues?.[field.name] || field.options?.[0]?.value
-                    }
                     onChange={(value) =>
                       form.setFieldsValue({ [field.name]: value })
                     }
@@ -112,11 +116,11 @@ const MaterialModal = ({
                           }
                         />
                       )}
-                      {field.name === "original_image" && (
+                      {field.name === "product_image" && (
                         <FileUpload
-                          url={form.getFieldValue("original_image")}
+                          url={form.getFieldValue("product_image")}
                           setUrl={(url) =>
-                            form.setFieldsValue({ original_image: url })
+                            form.setFieldsValue({ product_image: url })
                           }
                         />
                       )}
@@ -228,14 +232,21 @@ const Material = ({ currentUser }) => {
 
   const handleSubmit = async (values) => {
     try {
-      console.log({
+      console.log(currentMaterial, {
         ...values,
+        product_code: currentMaterial?.product_code,
         provider_id: selectedProvider.id,
         provider_name: selectedProvider.provider_name,
         provider_code: selectedProvider.provider_code,
       });
       const apiCall = currentMaterial
-        ? AxiosPut(`/products/materials/${currentMaterial.pk}`, values)
+        ? AxiosPut(`/products/materials/${currentMaterial.pk}`, {
+            ...values,
+            product_code: currentMaterial.product_code,
+            provider_id: selectedProvider.id,
+            provider_name: selectedProvider.provider_name,
+            provider_code: selectedProvider.provider_code,
+          })
         : AxiosPost("/products/materials", {
             ...values,
             provider_id: selectedProvider.id,
@@ -266,7 +277,7 @@ const Material = ({ currentUser }) => {
     },
     {
       title: "상품 이미지",
-      dataIndex: "original_image",
+      dataIndex: "product_image",
       render: (text) =>
         text ? (
           <Image src={text} alt="product" style={{ width: 40, height: 40 }} />
@@ -303,9 +314,9 @@ const Material = ({ currentUser }) => {
     },
     {
       title: "소비자가",
-      dataIndex: "product_sale",
+      dataIndex: "product_price",
       render: (text) => `${parseInt(text).toLocaleString("ko-KR")}원`,
-      sorter: (a, b) => a.product_sale - b.product_sale,
+      sorter: (a, b) => a.product_price - b.product_price,
     },
     {
       title: "동작",
@@ -387,7 +398,7 @@ const Material = ({ currentUser }) => {
                 rules: [{ required: true, message: "상품명을 입력해주세요" }],
               },
               {
-                name: "product_sale",
+                name: "product_price",
                 label: "소비자가",
                 rules: [{ required: true, message: "소비자가를 입력해주세요" }],
               },
@@ -404,7 +415,7 @@ const Material = ({ currentUser }) => {
             ]}
             extraFields={[
               {
-                name: "original_image",
+                name: "product_image",
                 label: "상품이미지",
                 type: "file",
               },

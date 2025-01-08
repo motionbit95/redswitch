@@ -88,7 +88,7 @@ const DetailModal = ({
           product_name: data[0].product_name,
           product_code: data[0].product_code,
           provider_name: data[0].provider_name,
-          product_sale: data[0].product_sale,
+          product_price: data[0].product_price,
         });
       }
     });
@@ -109,8 +109,8 @@ const DetailModal = ({
     },
     {
       title: "상품 금액",
-      dataIndex: "product_sale",
-      key: "product_sale",
+      dataIndex: "product_price",
+      key: "product_price",
     },
     {
       title: "발주 수량",

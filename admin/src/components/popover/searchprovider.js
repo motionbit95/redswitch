@@ -23,13 +23,21 @@ const SearchProvider = ({
   useEffect(() => {
     fetchProviders();
   }, [currentUser]);
+
   const fetchProviders = async () => {
     try {
       const response = await AxiosGet("/providers"); // Replace with your endpoint
       let total_provider = Array.from(response.data);
       if (currentUser.permission === "1") {
         // 본사관리자는 모든 지점을 관리할 수 있다.
-        setProviders(total_provider);
+        let newData = total_provider.map((provider) => {
+          return {
+            ...provider,
+            key: provider.id,
+          };
+        });
+
+        setProviders(newData);
       } else {
         // 지점관리자는 자신의 지점만 관리할 수 있다.
 
@@ -38,7 +46,14 @@ const SearchProvider = ({
           return currentUser?.provider_id?.includes(provider.id);
         });
 
-        setProviders(filtered_provider);
+        let newData = filtered_provider.map((provider) => {
+          return {
+            ...provider,
+            key: provider.id,
+          };
+        });
+
+        setProviders(newData);
       }
     } catch (error) {
       console.error("거래처 데이터를 가져오는 중 오류 발생:", error);

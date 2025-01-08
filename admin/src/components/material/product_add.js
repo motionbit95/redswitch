@@ -93,7 +93,7 @@ const Addproduct = ({
             </Col>
             <Col span={12}>
               <Form.Item
-                name="product_sale"
+                name="product_price"
                 label="소비자가"
                 tooltip={"상품 소비자가를 입력해주세요."}
                 rules={[{ required: true }]}
@@ -126,10 +126,10 @@ const Addproduct = ({
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="original_image" label="상품이미지">
+              <Form.Item name="product_image" label="상품이미지">
                 <FileUpload
-                  url={form.getFieldValue("original_image")}
-                  setUrl={(url) => form.setFieldsValue({ original_image: url })}
+                  url={form.getFieldValue("product_image")}
+                  setUrl={(url) => form.setFieldsValue({ product_image: url })}
                 />
               </Form.Item>
             </Col>

@@ -121,50 +121,49 @@ function Filter(props) {
 
   return (
     <div>
-      {Object.values(optionList).every((list) => list.length > 0) && (
-        <Space>
-          {/* First Select */}
+      <Space>
+        {/* First Select */}
+        <Select
+          style={{ width: 150 }}
+          defaultValue=""
+          popupMatchSelectWidth={false}
+          onChange={onChange}
+          value={value}
+        >
+          <Option value="">전체</Option>
+          <Option value="provider">거래처별</Option>
+          <Option value="branch">지점별</Option>
+          <Option value="company">지사별</Option>
+          <Option value="category">카테고리별</Option>
+          <Option value="material">상품코드별</Option>
+        </Select>
+
+        {/* Second Select based on first Select's value */}
+        {value && (
           <Select
             style={{ width: 150 }}
-            defaultValue="all"
-            popupMatchSelectWidth={false}
-            onChange={onChange}
-            value={value}
+            onChange={handleSecondSelectChange}
+            value={secondSelectValue}
+            placeholder="선택해주세요"
+            showSearch // This enables search functionality
+            filterOption={
+              (input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase()) // Search by option label
+            }
           >
-            <Option value="provider">거래처별</Option>
-            <Option value="branch">지점별</Option>
-            <Option value="company">지사별</Option>
-            <Option value="category">카테고리별</Option>
-            <Option value="material">상품코드별</Option>
+            {getOptionList(value).map((option, index) => (
+              <Select.Option key={index} value={option.value}>
+                {option.label}
+              </Select.Option>
+            ))}
           </Select>
-
-          {/* Second Select based on first Select's value */}
-          {value && (
-            <Select
-              style={{ width: 150 }}
-              onChange={handleSecondSelectChange}
-              value={secondSelectValue}
-              placeholder="선택해주세요"
-              showSearch // This enables search functionality
-              filterOption={
-                (input, option) =>
-                  option.children.toLowerCase().includes(input.toLowerCase()) // Search by option label
-              }
-            >
-              {getOptionList(value).map((option, index) => (
-                <Select.Option key={index} value={option.value}>
-                  {option.label}
-                </Select.Option>
-              ))}
-            </Select>
-          )}
-          <Button
-            type="primary"
-            onClick={() => onSearch(value, secondSelectValue)}
-            icon={<SearchOutlined />}
-          />
-        </Space>
-      )}
+        )}
+        <Button
+          type="primary"
+          onClick={() => onSearch(value, secondSelectValue)}
+          icon={<SearchOutlined />}
+        />
+      </Space>
     </div>
   );
 }
