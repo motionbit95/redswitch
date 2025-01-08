@@ -624,6 +624,8 @@ function Branch(props) {
               defaultPageSize: 10,
               showSizeChanger: true,
             }}
+            scroll={{ x: "max-content" }} // 가로 스크롤 활성화
+            className="no-wrap-table"
           />
 
           {/* Add Branch Modal */}

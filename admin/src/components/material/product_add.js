@@ -141,6 +141,16 @@ const Addproduct = ({
                 />
               </Form.Item>
             </Col>
+            <Col span={12}>
+              <Form.Item name="product_detail_image" label="블라인드 이미지">
+                <FileUpload
+                  url={form.getFieldValue("product_detail_image")}
+                  setUrl={(url) =>
+                    form.setFieldsValue({ product_detail_image: url })
+                  }
+                />
+              </Form.Item>
+            </Col>
           </Row>
         </Form>
       </Modal>

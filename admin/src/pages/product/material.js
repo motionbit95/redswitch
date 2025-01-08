@@ -1,9 +1,8 @@
-// Material.js - 물자 관리 화면 컴포넌트
 import {
   Alert,
   Button,
   Col,
-  DatePicker,
+  Descriptions,
   Form,
   Image,
   Input,
@@ -18,37 +17,161 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import Searchprovider from "../../components/popover/searchprovider";
-import Addproduct from "../../components/material/product_add";
 import ProductCategory from "../../components/material/product_category";
-import { AxiosDelete, AxiosGet, AxiosPut } from "../../api";
+import { AxiosDelete, AxiosGet, AxiosPut, AxiosPost } from "../../api";
 import usePagination from "../../hook/usePagination";
 import FileUpload from "../../components/button";
+import useSearchFilter from "../../hook/useSearchFilter";
+
+const MaterialModal = ({
+  visible,
+  onClose,
+  onSubmit,
+  initialValues,
+  formFields,
+  extraFields,
+}) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+    } else {
+      form.resetFields();
+    }
+  }, [initialValues, form]);
+
+  return (
+    <Modal
+      open={visible}
+      title={initialValues ? "상품 수정" : "상품 추가"}
+      width={800}
+      onCancel={onClose}
+      footer={
+        <Space>
+          <Button onClick={onClose}>취소</Button>
+          <Button
+            type="primary"
+            onClick={() => onSubmit(form.getFieldsValue())}
+          >
+            저장
+          </Button>
+        </Space>
+      }
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={() => onSubmit(form.getFieldsValue())}
+      >
+        <Descriptions column={2} bordered>
+          {formFields.map((field) => (
+            <Descriptions.Item
+              span={field.name === "product_name" ? 2 : 1}
+              key={field.name}
+              label={field.label}
+            >
+              <Form.Item name={field.name} rules={field.rules}>
+                {field.type === "select" ? (
+                  <Select
+                    options={field.options}
+                    defaultValue={
+                      initialValues?.[field.name] || field.options?.[0]?.value
+                    }
+                    onChange={(value) =>
+                      form.setFieldsValue({ [field.name]: value })
+                    }
+                  />
+                ) : (
+                  <Input
+                    type={field.type || "text"}
+                    defaultValue={initialValues?.[field.name] || ""}
+                    onChange={(e) =>
+                      form.setFieldsValue({ [field.name]: e.target.value })
+                    }
+                  />
+                )}
+              </Form.Item>
+            </Descriptions.Item>
+          ))}
+
+          {extraFields.map((field) => (
+            <>
+              <Descriptions.Item
+                key={field.name}
+                span={field.name === "product_detail_image" ? 2 : 1}
+                label={
+                  <Space direction="vertical">
+                    <div>{field.label}</div>
+                    <Form.Item name={field.name}>
+                      {field.name === "product_detail_image" && (
+                        <FileUpload
+                          url={form.getFieldValue("product_detail_image")}
+                          setUrl={(url) =>
+                            form.setFieldsValue({ product_detail_image: url })
+                          }
+                        />
+                      )}
+                      {field.name === "original_image" && (
+                        <FileUpload
+                          url={form.getFieldValue("original_image")}
+                          setUrl={(url) =>
+                            form.setFieldsValue({ original_image: url })
+                          }
+                        />
+                      )}
+                      {field.name === "blind_image" && (
+                        <FileUpload
+                          url={form.getFieldValue("blind_image")}
+                          setUrl={(url) =>
+                            form.setFieldsValue({ blind_image: url })
+                          }
+                        />
+                      )}
+                    </Form.Item>
+                  </Space>
+                }
+              >
+                <div
+                  style={{
+                    height: field.name === "product_detail_image" ? 300 : 100,
+                    overflow: "scroll",
+                  }}
+                >
+                  <Image
+                    preview={false}
+                    src={form.getFieldValue(field.name)}
+                    style={{
+                      objectFit: "contain",
+                      width:
+                        field.name === "product_detail_image" ? "100%" : 100,
+                    }}
+                  />
+                </div>
+              </Descriptions.Item>
+            </>
+          ))}
+        </Descriptions>
+      </Form>
+    </Modal>
+  );
+};
 
 const Material = ({ currentUser }) => {
-  // State 관리
   const [loading, setLoading] = useState(false);
-  const [form] = Form.useForm();
-  const [searchFilters, setSearchFilters] = useState({ provider: "" });
   const [materialList, setMaterialList] = useState([]);
   const [selectedProvider, setSelectedProvider] = useState(
     localStorage.getItem("selectedProvider")
       ? JSON.parse(localStorage.getItem("selectedProvider"))
       : null
   );
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [currentMaterial, setCurrentMaterial] = useState(null);
   const [categories, setCategories] = useState([]);
-  const [filteredInfo, setFilteredInfo] = useState({});
-  const [sortedInfo, setSortedInfo] = useState({});
+  const { pagination, handleTableChange } = usePagination();
 
-  const { pagination, setPagination, handleTableChange } = usePagination();
+  const { getColumnSearchProps } = useSearchFilter();
 
-  // 중복된 카테고리 코드 제거
-  const usedCodes = [
-    ...new Set(materialList.map((item) => item.product_category_code)),
-  ];
-
-  // 거래처 선택 시 데이터 로드
   useEffect(() => {
     if (selectedProvider) {
       localStorage.setItem(
@@ -59,12 +182,10 @@ const Material = ({ currentUser }) => {
     }
   }, [selectedProvider]);
 
-  // 카테고리 데이터 로드
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  // 물자 검색 API 호출
   const fetchMaterials = async () => {
     try {
       const response = await AxiosGet(
@@ -76,7 +197,6 @@ const Material = ({ currentUser }) => {
     }
   };
 
-  // 카테고리 API 호출
   const fetchCategories = async () => {
     try {
       const response = await AxiosGet("/products/categories");
@@ -86,7 +206,6 @@ const Material = ({ currentUser }) => {
     }
   };
 
-  // 상품 삭제 처리
   const handleDelete = async (pk) => {
     try {
       await AxiosDelete(`/products/materials/${pk}`);
@@ -97,33 +216,46 @@ const Material = ({ currentUser }) => {
     }
   };
 
-  // 수정 모달 열기
   const handleEdit = (material) => {
     setCurrentMaterial(material);
-    setEditModalOpen(true);
+    setModalOpen(true);
   };
 
-  // 상품 수정 API 호출
-  const handleUpdate = async (values) => {
+  const handleAdd = () => {
+    setCurrentMaterial(null);
+    setModalOpen(true);
+  };
+
+  const handleSubmit = async (values) => {
     try {
-      const response = await AxiosPut(
-        `/products/materials/${currentMaterial.pk}`,
-        values
-      );
-      if (response.status === 200) {
-        message.success("상품 수정 성공");
+      console.log({
+        ...values,
+        provider_id: selectedProvider.id,
+        provider_name: selectedProvider.provider_name,
+        provider_code: selectedProvider.provider_code,
+      });
+      const apiCall = currentMaterial
+        ? AxiosPut(`/products/materials/${currentMaterial.pk}`, values)
+        : AxiosPost("/products/materials", {
+            ...values,
+            provider_id: selectedProvider.id,
+            provider_name: selectedProvider.provider_name,
+            provider_code: selectedProvider.provider_code,
+          });
+
+      const response = await apiCall;
+      if (response.status === (currentMaterial ? 200 : 201)) {
+        message.success(currentMaterial ? "상품 수정 성공" : "상품 추가 성공");
         fetchMaterials();
+        setModalOpen(false);
       } else {
-        message.error("상품 수정 실패");
+        message.error("상품 처리 실패");
       }
     } catch (error) {
-      message.error("상품 수정 중 오류가 발생했습니다.");
-    } finally {
-      setEditModalOpen(false);
+      message.error("상품 처리 중 오류가 발생했습니다.");
     }
   };
 
-  // 테이블 컬럼 정의
   const columns = [
     {
       title: "No.",
@@ -147,10 +279,12 @@ const Material = ({ currentUser }) => {
     {
       title: "상품명",
       dataIndex: "product_name",
+      ...getColumnSearchProps("product_name"),
     },
     {
       title: "상품코드",
       dataIndex: "product_code",
+      ...getColumnSearchProps("product_code"),
     },
     {
       title: "카테고리",
@@ -161,11 +295,17 @@ const Material = ({ currentUser }) => {
         );
         return category ? category.product_category : "Unknown";
       },
+      filters: categories.map((category) => ({
+        text: category.product_category,
+        value: category.product_category_code,
+      })),
+      onFilter: (value, record) => record.product_category_code === value,
     },
     {
       title: "소비자가",
       dataIndex: "product_sale",
       render: (text) => `${parseInt(text).toLocaleString("ko-KR")}원`,
+      sorter: (a, b) => a.product_sale - b.product_sale,
     },
     {
       title: "동작",
@@ -204,14 +344,20 @@ const Material = ({ currentUser }) => {
             />
             <Space>
               <ProductCategory
-                usedCodes={usedCodes}
+                usedCodes={[
+                  ...new Set(
+                    materialList.map((item) => item.product_category_code)
+                  ),
+                ]}
                 materialList={materialList}
               />
-              <Addproduct
-                selectedProvider={selectedProvider}
-                categories={categories}
-                onComplete={fetchMaterials}
-              />
+              <Button
+                type="primary"
+                disabled={!selectedProvider}
+                onClick={handleAdd}
+              >
+                상품 추가
+              </Button>
             </Space>
           </Space>
 
@@ -229,95 +375,51 @@ const Material = ({ currentUser }) => {
             }}
           />
 
-          <Modal
-            centered
-            title="상품 수정"
-            open={editModalOpen}
-            onCancel={() => setEditModalOpen(false)}
-            footer={[
-              <Button key="cancel" onClick={() => setEditModalOpen(false)}>
-                취소
-              </Button>,
-              <Button
-                key="submit"
-                type="primary"
-                loading={loading}
-                onClick={() => form.submit()}
-              >
-                수정
-              </Button>,
+          <MaterialModal
+            visible={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onSubmit={handleSubmit}
+            initialValues={currentMaterial}
+            formFields={[
+              {
+                name: "product_name",
+                label: "상품명",
+                rules: [{ required: true, message: "상품명을 입력해주세요" }],
+              },
+              {
+                name: "product_sale",
+                label: "소비자가",
+                rules: [{ required: true, message: "소비자가를 입력해주세요" }],
+              },
+              {
+                name: "product_category_code",
+                label: "카테고리",
+                type: "select",
+                options: categories.map((category) => ({
+                  value: category.product_category_code,
+                  label: category.product_category,
+                })),
+                rules: [{ required: true }],
+              },
             ]}
-          >
-            <Form
-              form={form}
-              onFinish={handleUpdate}
-              initialValues={currentMaterial}
-              layout="vertical"
-            >
-              <Form.Item
-                label="상품명"
-                name="product_name"
-                rules={[{ required: true, message: "상품명을 입력해주세요" }]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="상품코드"
-                name="product_code"
-                rules={[{ required: true, message: "상품코드를 입력해주세요" }]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="소비자가"
-                name="product_sale"
-                rules={[{ required: true, message: "소비자가를 입력해주세요" }]}
-              >
-                <Input />
-              </Form.Item>
-              <Row gutter={16}>
-                <Col span={24}>
-                  <Form.Item
-                    label="카테고리"
-                    name="product_category_code"
-                    rules={[{ required: true }]}
-                  >
-                    <Select>
-                      {categories.map((category) => (
-                        <Select.Option
-                          key={category.product_category_code}
-                          value={category.product_category_code}
-                        >
-                          {category.product_category}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-
-                <Col span={12}>
-                  <Form.Item name="original_image" label="상품이미지">
-                    <FileUpload
-                      url={form.getFieldValue("original_image")}
-                      setUrl={(url) =>
-                        form.setFieldsValue({ original_image: url })
-                      }
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item name="blurred_image" label="블라인드 이미지">
-                    <FileUpload
-                      url={form.getFieldValue("blurred_image")}
-                      setUrl={(url) =>
-                        form.setFieldsValue({ blurred_image: url })
-                      }
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
-            </Form>
-          </Modal>
+            extraFields={[
+              {
+                name: "original_image",
+                label: "상품이미지",
+                type: "file",
+              },
+              {
+                name: "blind_image",
+                label: "블라인드 이미지",
+                type: "file",
+              },
+              {
+                name: "product_detail_image",
+                label: "상품상세이미지",
+                type: "file",
+              },
+            ]}
+          />
         </>
       )}
     </Space>

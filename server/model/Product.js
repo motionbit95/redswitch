@@ -152,12 +152,13 @@ class Material {
     this.product_sale = data.product_sale;
     this.provider_name = data.provider_name;
     this.original_image = data.original_image || null;
-    this.blurred_image = data.blurred_image || null;
+    this.blind_image = data.blind_image || null;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || null;
     this.provider_code = data.provider_code;
     this.product_category_code = data.product_category_code;
     this.provider_id = data.provider_id;
+    this.product_detail_image = data.product_detail_image || null;
   }
 
   toJSON() {
@@ -167,12 +168,13 @@ class Material {
       product_sale: this.product_sale,
       provider_name: this.provider_name,
       original_image: this.original_image,
-      blurred_image: this.blurred_image,
+      blind_image: this.blind_image,
       created_at: this.created_at,
       updated_at: this.updated_at,
       provider_code: this.provider_code,
       product_category_code: this.product_category_code,
       provider_id: this.provider_id,
+      product_detail_image: this.product_detail_image || null,
     };
   }
 
@@ -186,6 +188,8 @@ class Material {
 
       // product_code 생성
       this.product_code = `${this.provider_code}${this.product_category_code}${newIndex}`;
+
+      console.log("생성된 상품 코드:", this.product_code);
 
       // 새로운 데이터 저장
       await materialsRef.child(newIndex).set(this.toJSON());

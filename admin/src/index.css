@@ -22,3 +22,9 @@ code {
 .highlight-row {
   background-color: #ffe6e6; /* Light red background */
 }
+
+.no-wrap-table .ant-table-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

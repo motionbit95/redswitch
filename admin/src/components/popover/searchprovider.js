@@ -2,6 +2,7 @@ import { Button, Popover, Table, Form, Input, message, Space } from "antd";
 import React, { useEffect, useState } from "react";
 import { AxiosGet } from "../../api";
 import useSearchFilter from "../../hook/useSearchFilter";
+import useCurrentUser from "../../hook/useCurrentUser";
 
 const SearchProvider = ({
   selectedProvider,
@@ -16,21 +17,31 @@ const SearchProvider = ({
 
   const { getColumnSearchProps } = useSearchFilter();
 
+  const { currentUser } = useCurrentUser(); // 사용자 정보 가져오기
+
+  // Fetch provider data
   useEffect(() => {
     fetchProviders();
-  }, []);
-
-  const fetchProviders = async (search = "") => {
+  }, [currentUser]);
+  const fetchProviders = async () => {
     try {
       const response = await AxiosGet("/providers"); // Replace with your endpoint
+      let total_provider = Array.from(response.data);
+      if (currentUser.permission === "1") {
+        // 본사관리자는 모든 지점을 관리할 수 있다.
+        setProviders(total_provider);
+      } else {
+        // 지점관리자는 자신의 지점만 관리할 수 있다.
 
-      setProviders(
-        response.data
-          .map((item) => item)
-          .filter((item) => item.provider_name.includes(search))
-          .map((item) => ({ key: item.id, ...item }))
-      );
+        // `total_provider` 배열의 각 객체의 `id` 값이 `currentUser.provider_id` 배열에 포함되는지 확인하여 필터링
+        let filtered_provider = total_provider.filter((provider) => {
+          return currentUser?.provider_id?.includes(provider.id);
+        });
+
+        setProviders(filtered_provider);
+      }
     } catch (error) {
+      console.error("거래처 데이터를 가져오는 중 오류 발생:", error);
       message.error("거래처 데이터를 가져오는 데 실패했습니다.");
     } finally {
       setLoading(false);
