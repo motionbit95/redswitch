@@ -12,9 +12,15 @@ const SalesList = ({ selectedBranch, dateRange }) => {
 
   const [orders, setOrders] = useState([]);
   const [payments, setPayments] = useState([]);
-  const [groupedPayments, setGroupedPayments] = useState({}); // 그룹화된 결제 데이터 상태 추가
+  const [groupedPayments, setGroupedPayments] = useState([]); // 그룹화된 결제 데이터 상태 추가
   const [selectedRange, setSelectedRange] = useState(defaultRange);
 
+  useEffect(() => {
+    setSelectedRange([
+      dateRange ? dateRange.startOf("month") : dayjs().startOf("month"),
+      dateRange ? dateRange.endOf("month") : dayjs().endOf("month"),
+    ]);
+  }, [dateRange]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -36,13 +42,17 @@ const SalesList = ({ selectedBranch, dateRange }) => {
     if (!selectedBranch) return;
 
     const filteredPayments = filterPaymentsByBranch();
+    console.log("filteredPayments", filteredPayments);
     const dateFilteredPayments = filterPaymentsByDate(
       filteredPayments,
       selectedRange
     );
 
+    console.log("dateFilteredPayments", dateFilteredPayments);
+
     // 날짜별 결제 데이터 그룹화 후 상태 업데이트
     const groupedPayments = groupPaymentsByDate(dateFilteredPayments);
+    console.log("groupedPayments", groupedPayments);
     setGroupedPayments(groupedPayments); // 상태 업데이트
   }, [selectedBranch, selectedRange, payments]);
 
@@ -51,7 +61,7 @@ const SalesList = ({ selectedBranch, dateRange }) => {
     const branchOrders = orders.filter(
       (order) => order.branch_pk === selectedBranch.key
     );
-    return payments.filter((payment) =>
+    return payments?.filter((payment) =>
       branchOrders.some((order) => order.order_code === payment.ordNo)
     );
   };
@@ -65,7 +75,7 @@ const SalesList = ({ selectedBranch, dateRange }) => {
   };
 
   const groupPaymentsByDate = (payments) => {
-    return payments.reduce((acc, payment) => {
+    const grouped = payments.reduce((acc, payment) => {
       const date = dayjs(payment.ediDate, "YYYYMMDDHHmmss").format(
         "YYYY-MM-DD"
       );
@@ -73,12 +83,17 @@ const SalesList = ({ selectedBranch, dateRange }) => {
       acc[date].push(payment);
       return acc;
     }, {});
-  };
 
+    // Convert the grouped object into an array
+    return Object.entries(grouped).map(([date, payments]) => ({
+      date,
+      payments,
+    }));
+  };
   // 통계 계산
-  const stats = usePaymentStats(payments, selectedRange); // 통계 계산
+  const stats = usePaymentStats(groupedPayments, selectedRange); // 통계 계산
   // 금일 및 전일 매출 계산
-  const dailySales = useDailySales(payments);
+  const dailySales = useDailySales(groupedPayments);
 
   return (
     <Row gutter={[16, 16]}>

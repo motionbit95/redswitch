@@ -17,12 +17,15 @@ export const usePaymentStats = (payments, range) => {
       return ediDate.isBetween(startDate, endDate, "day", "[]");
     });
 
+    // 모든 payments를 펼쳐 하나의 배열로 만듦
+    const allPayments = filteredPayments.flatMap(({ payments }) => payments);
+
     // 통계 계산
-    const totalAmount = filteredPayments
+    const totalAmount = allPayments
       .filter((payment) => payment.cancelYN === "N")
       .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
 
-    const refundAmount = filteredPayments
+    const refundAmount = allPayments
       .filter((payment) => payment.cancelYN === "Y")
       .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
 

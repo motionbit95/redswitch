@@ -10,13 +10,11 @@ import {
   Row,
   Space,
 } from "antd";
-import { useNavigate } from "react-router-dom";
 import { AxiosPost } from "../api";
 
 const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
   const [form] = Form.useForm();
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoggedIn) setOpen(true);
@@ -39,7 +37,8 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
             console.log(response.data);
             setIsLoggedIn(true);
             setOpen(false);
-            navigate("/dashboard");
+            // navigate("/dashboard");
+            window.location.href = "/dashboard";
           }
         })
         .catch((error) => {
@@ -50,22 +49,6 @@ const LoginForm = ({ isLoggedIn, setIsLoggedIn }) => {
     } catch (error) {
       message.error(error.response?.data?.error || "로그인에 실패했습니다.");
     }
-    // try {
-    //   const response = await AxiosPost("/accounts/login", values);
-
-    //   if (response.status === 200) {
-    //     const { token, id } = response.data;
-    //     localStorage.setItem("authToken", token);
-    //     localStorage.setItem("id", id);
-
-    //     message.success("로그인 성공");
-    //     setIsLoggedIn(true);
-    //     setOpen(false);
-    //     window.location.href = "/dashboard";
-    //   }
-    // } catch (error) {
-    //   message.error(error.response?.data?.error || "로그인에 실패했습니다.");
-    // }
   };
 
   return (

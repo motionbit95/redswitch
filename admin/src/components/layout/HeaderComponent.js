@@ -72,11 +72,6 @@ const HeaderComponent = ({
           <SearchBranch
             setSelectedBranch={(branches) => {
               setSelectedBranch(branches[0]);
-              localStorage.setItem(
-                "selectedBranch",
-                JSON.stringify(branches[0])
-              );
-
               // 새로고침
               window.location.reload();
             }}
@@ -90,14 +85,14 @@ const HeaderComponent = ({
             handleAlarmClick={handleAlarmClick}
           />
         </Space>
-        <Button
+        {/* <Button
           icon={<LogoutOutlined />}
           onClick={handleLogout}
           type="text"
           style={{ color: "white" }}
         >
           로그아웃
-        </Button>
+        </Button> */}
       </Space>
     </Header>
   );
