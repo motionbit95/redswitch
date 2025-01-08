@@ -182,7 +182,6 @@ const FranchisePost = () => {
     <>
       <Table
         size="small"
-        style={{ marginTop: 48 }}
         columns={columns}
         dataSource={franchise_post}
         loading={loading}
@@ -205,10 +204,8 @@ export const PostDetailModal = ({
 }) => {
   const [form] = Form.useForm();
   const [memo, setMemo] = useState("");
-
   const [salesAccounts, setSalesAccounts] = useState([]);
 
-  // flag 값을 위한 선택 옵션
   const flagOptions = [
     { label: "상담요청", value: "0" },
     { label: "상담완료", value: "1" },
@@ -217,16 +214,29 @@ export const PostDetailModal = ({
   ];
 
   useEffect(() => {
+    if (currentPost) {
+      // 현재 포스트 정보로 폼 값 설정
+      form.setFieldsValue({
+        ...currentPost,
+        flag: currentPost.flag, // 'flag' 값도 명시적으로 설정
+        sales_manager: currentPost.sales_manager || null, // sales_manager가 없을 수도 있기 때문에 처리
+      });
+
+      // 메모 값도 초기화
+      setMemo(currentPost.memo);
+    }
+  }, [currentPost, form]);
+
+  useEffect(() => {
     AxiosGet("/accounts")
       .then((res) => {
-        console.log(res.data);
-        let salesAccount = res.data.filter(
+        const salesAccount = res.data.filter(
           (account) => account.permission === "2"
         );
         setSalesAccounts(salesAccount);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
       });
   }, []);
 
@@ -244,11 +254,10 @@ export const PostDetailModal = ({
           cancelText="닫기"
         >
           <Form form={form} layout="vertical" initialValues={currentPost}>
-            <Descriptions bordered column={3}>
-              <Descriptions.Item label="가맹점명" span={2}>
+            <Descriptions bordered column={2}>
+              <Descriptions.Item label="가맹점명">
                 {currentPost.franchise_name}
               </Descriptions.Item>
-              {/* 태그를 Select로 변경 */}
               <Descriptions.Item label="태그">
                 <Form.Item name="flag" style={{ marginBottom: 0 }}>
                   <Select defaultValue={currentPost.flag}>
@@ -263,7 +272,7 @@ export const PostDetailModal = ({
               <Descriptions.Item label="객실수">
                 {currentPost.franchise_room_cnt}
               </Descriptions.Item>
-              <Descriptions.Item label="가맹점 주소" span={2}>
+              <Descriptions.Item label="가맹점 주소">
                 {currentPost.franchise_address}
               </Descriptions.Item>
               <Descriptions.Item label="담당자">
@@ -275,13 +284,15 @@ export const PostDetailModal = ({
               <Descriptions.Item label="이메일">
                 {currentPost.franchise_manager_email}
               </Descriptions.Item>
-              <Descriptions.Item label="영업담당자" span={3}>
+              <Descriptions.Item label="영업담당자">
                 <Space>
                   <Form.Item name="sales_manager" style={{ marginBottom: 0 }}>
                     <Select
                       defaultValue={currentPost.sales_manager}
-                      style={{ width: "120px" }}
+                      style={{ width: "100%" }}
+                      popupMatchSelectWidth={false}
                     >
+                      <Option value={null}>선택</Option>
                       {salesAccounts.map(({ id, user_name }) => (
                         <Option key={id} value={user_name}>
                           {user_name}
@@ -289,9 +300,6 @@ export const PostDetailModal = ({
                       ))}
                     </Select>
                   </Form.Item>
-                  <Typography.Text type="secondary">
-                    지사관리자 중 선택가능합니다.
-                  </Typography.Text>
                 </Space>
               </Descriptions.Item>
             </Descriptions>

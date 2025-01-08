@@ -64,7 +64,7 @@ const HeaderComponent = ({
               ? "지사관리자"
               : "지점관리자"}
           </Tag>
-          <div style={{ color: "white" }}>{currentUser.user_id} 님</div>
+          <div style={{ color: "white" }}>{currentUser.user_name} 님</div>
         </Space>
       </Space>
       <Space size={50}>

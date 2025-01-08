@@ -12,6 +12,7 @@ import {
   message,
   Popconfirm,
   Descriptions,
+  Alert,
 } from "antd";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import { SearchOutlined, UploadOutlined } from "@ant-design/icons";
@@ -20,6 +21,8 @@ import FormItem from "antd/es/form/FormItem";
 import FileUpload from "../../components/button";
 import TextArea from "antd/es/input/TextArea";
 import usePagination from "../../hook/usePagination";
+import useCurrentUser from "../../hook/useCurrentUser";
+import useSearchFilter from "../../hook/useSearchFilter";
 
 const ProviderModal = ({
   visible,
@@ -329,15 +332,32 @@ const Provider = () => {
   const [filteredInfo, setFilteredInfo] = useState({});
   const [sortedInfo, setSortedInfo] = useState({});
 
+  const { currentUser } = useCurrentUser();
+  const { getColumnSearchProps } = useSearchFilter();
+
   // Fetch provider data
   useEffect(() => {
     fetchProviders();
-  }, []);
+  }, [currentUser]);
   const fetchProviders = async () => {
     try {
       const response = await AxiosGet("/providers"); // Replace with your endpoint
-      setProviders(response.data);
+      let total_provider = Array.from(response.data);
+      if (currentUser.permission === "1") {
+        // 본사관리자는 모든 지점을 관리할 수 있다.
+        setProviders(total_provider);
+      } else {
+        // 지점관리자는 자신의 지점만 관리할 수 있다.
+
+        // `total_provider` 배열의 각 객체의 `id` 값이 `currentUser.provider_id` 배열에 포함되는지 확인하여 필터링
+        let filtered_provider = total_provider.filter((provider) => {
+          return currentUser?.provider_id?.includes(provider.id);
+        });
+
+        setProviders(filtered_provider);
+      }
     } catch (error) {
+      console.error("거래처 데이터를 가져오는 중 오류 발생:", error);
       message.error("거래처 데이터를 가져오는 데 실패했습니다.");
     } finally {
       setLoading(false);
@@ -350,6 +370,7 @@ const Provider = () => {
       await AxiosDelete(`/providers/${id}`);
       setProviders(providers.filter((provider) => provider.id !== id));
       message.success("거래처 삭제 성공");
+      setIsModalVisible(false);
     } catch (error) {
       message.error("거래처 삭제 실패");
     }
@@ -374,8 +395,6 @@ const Provider = () => {
     try {
       let providerData = { ...values };
 
-      console.log(providerData);
-
       try {
         if (values.bankbook_file && values.bankbook_file.fileList.length > 0) {
           const file = values.bankbook_file.fileList[0].originFileObj;
@@ -391,7 +410,6 @@ const Provider = () => {
       }
 
       if (currentProvider) {
-        console.log(providerData);
         await AxiosPut(`/providers/${currentProvider.id}`, providerData, {
           headers: { "Content-Type": "application/json" },
         });
@@ -429,8 +447,6 @@ const Provider = () => {
     const fileData = new FormData();
     fileData.append("file", file);
 
-    console.log(fileData);
-
     return await AxiosPost("/upload", fileData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
@@ -439,7 +455,6 @@ const Provider = () => {
   const { pagination, setPagination, handleTableChange } = usePagination(10);
 
   const handleChange = (pagination, filters, sorter) => {
-    console.log("Various parameters", pagination, filters, sorter);
     setFilteredInfo(filters);
     setSortedInfo(sorter);
   };
@@ -456,6 +471,7 @@ const Provider = () => {
       title: "업체명",
       dataIndex: "provider_name",
       key: "provider_name",
+      ...getColumnSearchProps("provider_name"),
     },
     // {
     //   title: "대표자명",
@@ -471,21 +487,37 @@ const Provider = () => {
       title: "담당자명",
       dataIndex: "provider_manager_name",
       key: "provider_manager_name",
+      ...getColumnSearchProps("provider_manager_name"),
     },
     {
       title: "담당자 전화번호",
       dataIndex: "provider_manager_phone",
       key: "provider_manager_phone",
+      ...getColumnSearchProps("provider_manager_phone"),
     },
     {
       title: "사업자등록번호",
       dataIndex: "provider_brn",
       key: "provider_brn",
+      ...getColumnSearchProps("provider_brn"),
+    },
+    {
+      title: "대표자명",
+      dataIndex: "provider_ceo_name",
+      key: "provider_ceo_name",
+      ...getColumnSearchProps("provider_ceo_name"),
+    },
+    {
+      title: "대표자 전화번호",
+      dataIndex: "provider_ceo_phone",
+      key: "provider_ceo_phone",
+      ...getColumnSearchProps("provider_ceo_phone"),
     },
     {
       title: "이메일",
       dataIndex: "provider_email",
       key: "provider_email",
+      ...getColumnSearchProps("provider_email"),
     },
     {
       title: "자세히보기",
@@ -497,42 +529,53 @@ const Provider = () => {
   ];
 
   return (
-    <div style={{ textAlign: "right" }}>
-      <Button
-        type="primary"
-        style={{ marginBottom: 16 }}
-        onClick={handleAddProvider}
-      >
-        거래처 추가
-      </Button>
+    <div>
+      {/* 본사관리자만 거래처 추가 가능 */}
+      {currentUser.permission === "1" && (
+        <Button
+          type="primary"
+          style={{ marginBottom: 16 }}
+          onClick={handleAddProvider}
+        >
+          거래처 추가
+        </Button>
+      )}
 
-      <Table
-        size="small"
-        columns={columns}
-        dataSource={providers}
-        rowKey="id"
-        loading={loading}
-        onChange={(pagination, filters, sorter) => {
-          handleTableChange(pagination);
-          handleChange(pagination, filters, sorter);
-        }}
-        pagination={{
-          ...pagination,
-          defaultPageSize: 10,
-          showSizeChanger: true,
-        }}
-      />
+      {currentUser.permission === "3" ? (
+        <>
+          <Alert message="거래처 관리 권한이 없습니다." type="error" showIcon />
+        </>
+      ) : (
+        <>
+          <Table
+            size="small"
+            columns={columns}
+            dataSource={providers}
+            rowKey="id"
+            loading={loading}
+            onChange={(pagination, filters, sorter) => {
+              handleTableChange(pagination);
+              handleChange(pagination, filters, sorter);
+            }}
+            pagination={{
+              ...pagination,
+              defaultPageSize: 10,
+              showSizeChanger: true,
+            }}
+          />
 
-      {/* Reused Modal */}
-      <ProviderModal
-        visible={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        onSubmit={handleSubmit}
-        initialValues={!currentProvider ? currentProvider : {}}
-        form={form}
-        isEditMode={!!currentProvider}
-        onDelete={() => handleDelete(currentProvider.id)}
-      />
+          {/* Reused Modal */}
+          <ProviderModal
+            visible={isModalVisible}
+            onCancel={() => setIsModalVisible(false)}
+            onSubmit={handleSubmit}
+            initialValues={!currentProvider ? currentProvider : {}}
+            form={form}
+            isEditMode={!!currentProvider}
+            onDelete={() => handleDelete(currentProvider.id)}
+          />
+        </>
+      )}
     </div>
   );
 };

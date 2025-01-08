@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Checkbox,
   Col,
@@ -29,6 +30,8 @@ import {
 } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import usePagination from "../../hook/usePagination";
+import useSearchFilter from "../../hook/useSearchFilter";
+import useCurrentUser from "../../hook/useCurrentUser";
 
 const BranchModal = ({
   visible,
@@ -326,12 +329,21 @@ const BranchModal = ({
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item
+            label="지사명"
+            span={2}
+            labelStyle={{ whiteSpace: "nowrap" }}
+          >
+            <Form.Item name="company_name" style={{ marginBottom: 0 }}>
+              <Input />
+            </Form.Item>
+          </Descriptions.Item>
+          <Descriptions.Item
             label="담당자명"
             span={1}
             labelStyle={{ whiteSpace: "nowrap" }}
           >
             <Form.Item name="branch_manager_name" style={{ marginBottom: 0 }}>
-              <Input />
+              <Input defaultValue={""} />
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item
@@ -340,7 +352,7 @@ const BranchModal = ({
             labelStyle={{ whiteSpace: "nowrap" }}
           >
             <Form.Item name="branch_manager_phone" style={{ marginBottom: 0 }}>
-              <Input />
+              <Input defaultValue={""} />
             </Form.Item>
           </Descriptions.Item>
 
@@ -390,15 +402,32 @@ function Branch(props) {
   const [filteredInfo, setFilteredInfo] = useState({});
   const [sortedInfo, setSortedInfo] = useState({});
 
+  const { currentUser } = useCurrentUser();
+  const { getColumnSearchProps } = useSearchFilter();
+
   // Fetch branch data
   useEffect(() => {
     fetchBranchs();
-  }, []);
+  }, [currentUser]);
 
   const fetchBranchs = async () => {
     try {
       const response = await AxiosGet("/branches"); // Replace with your endpoint
-      setBranchs(response.data);
+
+      let total_branch = Array.from(response.data);
+      if (currentUser.permission === "1") {
+        // 본사관리자는 모든 지점을 관리할 수 있다.
+        setBranchs(total_branch);
+      } else {
+        // 지점관리자는 자신의 지점만 관리할 수 있다.
+
+        // `total_branch` 배열의 각 객체의 `id` 값이 `currentUser.branch_id` 배열에 포함되는지 확인하여 필터링
+        let filtered_branch = total_branch.filter((branch) => {
+          return currentUser?.branch_id?.includes(branch.id);
+        });
+
+        setBranchs(filtered_branch);
+      }
     } catch (error) {
       message.error("지점 데이터를 가져오는 데 실패했습니다..");
     } finally {
@@ -421,7 +450,6 @@ function Branch(props) {
 
   // Edit branch - Open modal
   const handleEdit = (branch) => {
-    console.log(branch);
     setCurrentBranch(branch);
     form.setFieldsValue(branch); // Set the form fields to current branch values
     setIsModalVisible(true);
@@ -436,14 +464,10 @@ function Branch(props) {
 
   // Handle form submit for branch creation or update
   const handleSubmit = async (values) => {
-    console.log("values", values);
     try {
       let branchData = { ...values };
 
-      console.log(branchData);
-
       if (currentBranch) {
-        console.log(branchData);
         await AxiosPut(`/branches/${currentBranch.id}`, branchData, {
           headers: { "Content-Type": "application/json" },
         });
@@ -469,7 +493,7 @@ function Branch(props) {
 
       setIsModalVisible(false);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       message.error("지점 처리 실패");
     }
   };
@@ -477,7 +501,6 @@ function Branch(props) {
   const { pagination, setPagination, handleTableChange } = usePagination(10);
 
   const handleChange = (pagination, filters, sorter) => {
-    console.log("Various parameters", pagination, filters, sorter);
     setFilteredInfo(filters);
     setSortedInfo(sorter);
   };
@@ -494,41 +517,49 @@ function Branch(props) {
       title: "지점명",
       dataIndex: "branch_name",
       key: "branch_name",
+      ...getColumnSearchProps("branch_name"),
     },
     {
       title: "객실 수",
       dataIndex: "branch_room_cnt",
       key: "branch_room_cnt",
+      sorter: (a, b) => a.branch_room_cnt - b.branch_room_cnt,
     },
     {
       title: "주소",
       dataIndex: "branch_address",
       key: "branch_address",
+      ...getColumnSearchProps("branch_address"),
     },
-    // {
-    //   title: "대표자명",
-    //   dataIndex: "branch_ceo_name",
-    //   key: "branch_ceo_name",
-    // },
+    {
+      title: "지사",
+      dataIndex: "company_name",
+      key: "company_name",
+      ...getColumnSearchProps("company_name"),
+    },
     {
       title: "담당자명",
       dataIndex: "branch_manager_name",
       key: "branch_manager_name",
+      ...getColumnSearchProps("branch_manager_name"),
     },
     {
       title: "담당자 전화번호",
       dataIndex: "branch_manager_phone",
       key: "branch_manager_phone",
+      ...getColumnSearchProps("branch_manager_phone"),
     },
     {
       title: "사업자등록번호",
       dataIndex: "branch_brn",
       key: "branch_brn",
+      ...getColumnSearchProps("branch_brn"),
     },
     {
       title: "이메일",
       dataIndex: "branch_email",
       key: "branch_email",
+      ...getColumnSearchProps("branch_email"),
     },
     {
       title: "설치여부",
@@ -542,6 +573,12 @@ function Branch(props) {
           </Tag>
         );
       },
+
+      filters: [
+        { text: "설치", value: "1" },
+        { text: "미설치", value: "0" },
+      ],
+      onFilter: (value, record) => record.install_flag.includes(value),
     },
     {
       title: "자세히보기",
@@ -566,43 +603,53 @@ function Branch(props) {
   ];
 
   return (
-    <div style={{ textAlign: "right" }}>
-      <Button
-        type="primary"
-        style={{ marginBottom: 16 }}
-        onClick={handleAddBranch}
-      >
-        지점 추가
-      </Button>
+    <div>
+      {/* 본사관리자만 거래처 추가 가능 */}
+      {currentUser.permission === "1" && (
+        <Button
+          type="primary"
+          style={{ marginBottom: 16 }}
+          onClick={handleAddBranch}
+        >
+          지점 추가
+        </Button>
+      )}
+      {currentUser.permission === "3" ? (
+        <>
+          <Alert message="지점 관리 권한이 없습니다." type="error" showIcon />
+        </>
+      ) : (
+        <>
+          <Table
+            size="small"
+            columns={columns}
+            dataSource={branchs}
+            rowKey="id"
+            loading={loading}
+            onChange={(pagination, filters, sorter) => {
+              handleTableChange(pagination);
+              handleChange(pagination, filters, sorter);
+            }}
+            pagination={{
+              ...pagination,
+              defaultPageSize: 10,
+              showSizeChanger: true,
+            }}
+          />
 
-      <Table
-        size="small"
-        columns={columns}
-        dataSource={branchs}
-        rowKey="id"
-        loading={loading}
-        onChange={(pagination, filters, sorter) => {
-          handleTableChange(pagination);
-          handleChange(pagination, filters, sorter);
-        }}
-        pagination={{
-          ...pagination,
-          defaultPageSize: 10,
-          showSizeChanger: true,
-        }}
-      />
+          {/* Add Branch Modal */}
 
-      {/* Add Branch Modal */}
-
-      <BranchModal
-        visible={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        onSubmit={handleSubmit}
-        initialValues={!currentBranch ? currentBranch : {}}
-        form={form}
-        isEditMode={!!currentBranch}
-        onDelete={() => handleDelete(currentBranch.id)}
-      />
+          <BranchModal
+            visible={isModalVisible}
+            onCancel={() => setIsModalVisible(false)}
+            onSubmit={handleSubmit}
+            initialValues={!currentBranch ? currentBranch : {}}
+            form={form}
+            isEditMode={!!currentBranch}
+            onDelete={() => handleDelete(currentBranch.id)}
+          />
+        </>
+      )}
     </div>
   );
 }

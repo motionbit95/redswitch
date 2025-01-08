@@ -6,6 +6,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import useSearchFilter from "../../hook/useSearchFilter";
 import isBetween from "dayjs/plugin/isBetween";
 import useSelectedBranch from "../../hook/useSelectedBranch";
+import { render } from "@testing-library/react";
 
 dayjs.extend(isBetween);
 
@@ -16,12 +17,25 @@ const Order = (props) => {
   const [orders, setOrders] = useState([]);
   const [payments, setPayments] = useState([]);
   const [branches, setBranches] = useState([]);
+  const [materials, setMaterials] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [dateRange, setDateRange] = useState([null, null]); // 시작일, 종료일
   const { selectedBranch } = useSelectedBranch();
 
   const { getColumnSearchProps } = useSearchFilter();
+
+  useEffect(() => {
+    const fetchMaterials = async () => {
+      try {
+        const res = await AxiosGet("/products/materials");
+        setMaterials(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchMaterials();
+  }, []);
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -167,6 +181,15 @@ const Order = (props) => {
       title: "상품코드",
       dataIndex: "product_code",
       key: "product_code",
+    },
+    {
+      title: "거래처",
+      render: (text, record) => {
+        const material = materials.find(
+          (material) => material.pk === record.material_id
+        );
+        return material ? material.provider_name : "";
+      },
     },
     {
       title: "상품명",
