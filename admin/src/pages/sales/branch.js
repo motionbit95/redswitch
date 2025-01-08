@@ -91,8 +91,33 @@ const PaymentSummaryByBranch = () => {
 
       setGroupedByBranch(dateFilteredPayments);
 
+      const paymentsWithOrders = dateFilteredPayments
+        .filter((payment) =>
+          orders.some((order) => order.order_code === payment.ordNo)
+        )
+        .map((payment) => {
+          // orders에서 해당 payment.ordNo와 일치하는 order를 찾음
+          const matchingOrder = orders.find(
+            (order) => order.order_code === payment.ordNo
+          );
+
+          let additional_fee = 0;
+          matchingOrder.select_products.forEach(
+            (product) => (additional_fee += Number(product.additional_fee))
+          );
+          return {
+            ...payment,
+            // order: matchingOrder || null, // 일치하는 order가 없을 경우 null
+            additional_fee,
+          };
+        });
+
+      console.log("paymentsWithOrders", paymentsWithOrders);
+
       // 날짜별로 결제 데이터를 지점별로 그룹화
-      const grouped = groupPaymentsByBranch(dateFilteredPayments);
+      const grouped = groupPaymentsByBranch(paymentsWithOrders);
+
+      console.log("grouped", grouped);
       setGroupedPayments(grouped);
     }
   };
@@ -135,18 +160,19 @@ const PaymentSummaryByBranch = () => {
           branchName,
           dateRange,
           total: 0,
+          additional_fee: 0,
         };
       }
 
       const branchData = acc[branchId];
 
-      console.log(branchData);
-
       // Calculate total amount for payments and refunds
       const amount = Number(payment.goodsAmt);
+      const additional_fee = Number(payment.additional_fee);
       if (payment.cancelYN === "N") {
         branchData.totalAmount += amount;
         branchData.totalTransactions += 1;
+        branchData.additional_fee += additional_fee;
       } else if (payment.cancelYN === "Y") {
         branchData.refundAmount += amount;
         branchData.refundTransactions += 1;
@@ -177,8 +203,13 @@ const PaymentSummaryByBranch = () => {
         : "",
       dateRange: branchData.dateRange,
       total: branchData.total,
+      additional_fee: branchData.additional_fee,
     };
   });
+
+  useEffect(() => {
+    if (groupedPayments) console.log("dataSource", groupedPayments);
+  }, [groupedPayments]);
 
   // 테이블 컬럼 정의
   const columns = [
@@ -212,29 +243,32 @@ const PaymentSummaryByBranch = () => {
     //   sorter: (a, b) => a.refundTransactions - b.refundTransactions,
     // },
     {
-      title: "결제금액",
+      title: "총 결제금액",
       dataIndex: "totalAmount",
       key: "totalAmount",
       render: (value) => `${value.toLocaleString("ko-KR")}원`,
       sorter: (a, b) => a.totalAmount - b.totalAmount,
     },
     {
-      title: "환불금액",
+      title: "총 환불금액",
       dataIndex: "refundAmount",
       key: "refundAmount",
       render: (value) => `${value.toLocaleString("ko-KR")}원`,
       sorter: (a, b) => a.refundAmount - b.refundAmount,
     },
     {
-      title: "총 매출",
+      title: "총 매출금액",
       dataIndex: "total",
       key: "total",
       render: (value) => `${value.toLocaleString("ko-KR")}원`,
       sorter: (a, b) => a.total - b.total,
     },
-    // 하단 부분 정의 필요
     {
       title: "지점추가매출",
+      dataIndex: "additional_fee",
+      key: "additional_fee",
+      render: (value) => `${value.toLocaleString("ko-KR")}원`,
+      sorter: (a, b) => a.additional_fee - b.additional_fee,
     },
     {
       title: "정산예정금",

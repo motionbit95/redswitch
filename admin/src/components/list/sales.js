@@ -42,17 +42,13 @@ const SalesList = ({ selectedBranch, dateRange }) => {
     if (!selectedBranch) return;
 
     const filteredPayments = filterPaymentsByBranch();
-    console.log("filteredPayments", filteredPayments);
     const dateFilteredPayments = filterPaymentsByDate(
       filteredPayments,
       selectedRange
     );
 
-    console.log("dateFilteredPayments", dateFilteredPayments);
-
     // 날짜별 결제 데이터 그룹화 후 상태 업데이트
     const groupedPayments = groupPaymentsByDate(dateFilteredPayments);
-    console.log("groupedPayments", groupedPayments);
     setGroupedPayments(groupedPayments); // 상태 업데이트
   }, [selectedBranch, selectedRange, payments]);
 

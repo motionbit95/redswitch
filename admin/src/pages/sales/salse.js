@@ -40,7 +40,6 @@ const PaymentSummary = (props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
-  // 금일 및 전일 매출 계산
   useEffect(() => {
     const calculateDailySales = () => {
       const today = dayjs().format("YYYY-MM-DD");
@@ -68,7 +67,7 @@ const PaymentSummary = (props) => {
           .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0) -
         todayRefunds;
 
-      const yesterdaySales = payments
+      const yesterdaySales = filteredPayments
         .filter(
           (payment) =>
             dayjs(payment.ediDate, "YYYYMMDDHHmmss").format("YYYY-MM-DD") ===
@@ -80,8 +79,10 @@ const PaymentSummary = (props) => {
       setDailySales({ today: todaySales, yesterday: yesterdaySales });
     };
 
-    calculateDailySales();
-  }, [orders]);
+    if (orders.length > 0 && payments.length > 0) {
+      calculateDailySales();
+    }
+  }, [selectedBranch]);
 
   // 초기 데이터 가져오기
   useEffect(() => {
@@ -110,10 +111,10 @@ const PaymentSummary = (props) => {
   }, []);
 
   useEffect(() => {
-    if (orders && payments && selectedBranch) {
+    if (orders.length > 0 && payments.length > 0 && selectedBranch) {
       handleDateChange(selectedRange);
     }
-  }, [orders, payments]);
+  }, [orders, payments, selectedBranch, selectedRange]);
 
   // 날짜 범위 변경 처리
   const handleDateChange = (dates) => {
@@ -136,8 +137,31 @@ const PaymentSummary = (props) => {
         );
       });
 
-      const grouped = groupPaymentsByDate(dateFilteredPayments);
+      const paymentsWithOrders = dateFilteredPayments
+        .filter((payment) =>
+          orders.some((order) => order.order_code === payment.ordNo)
+        )
+        .map((payment) => {
+          // orders에서 해당 payment.ordNo와 일치하는 order를 찾음
+          const matchingOrder = orders.find(
+            (order) => order.order_code === payment.ordNo
+          );
+
+          let additional_fee = 0;
+          matchingOrder.select_products.forEach(
+            (product) => (additional_fee += Number(product.additional_fee))
+          );
+          return {
+            ...payment,
+            // order: matchingOrder || null, // 일치하는 order가 없을 경우 null
+            additional_fee,
+          };
+        });
+
+      const grouped = groupPaymentsByDate(paymentsWithOrders);
       setGroupedPayments(grouped);
+
+      console.log("grouped", grouped);
     }
   };
 
@@ -167,9 +191,20 @@ const PaymentSummary = (props) => {
       );
     });
 
-    const paymentsWithOrders = filteredPayments.filter((payment) => {
-      return orders.some((order) => order.order_code === payment.ordNo);
-    });
+    const paymentsWithOrders = filteredPayments
+      .filter((payment) =>
+        orders.some((order) => order.order_code === payment.ordNo)
+      )
+      .map((payment) => {
+        // orders에서 해당 payment.ordNo와 일치하는 order를 찾음
+        const matchingOrder = orders.find(
+          (order) => order.order_code === payment.ordNo
+        );
+        return {
+          ...payment,
+          order: matchingOrder || null, // 일치하는 order가 없을 경우 null
+        };
+      });
 
     const totalTransactions = paymentsWithOrders.filter(
       (payment) => payment.cancelYN === "N"
@@ -186,11 +221,22 @@ const PaymentSummary = (props) => {
         .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0) -
       refundAmount;
 
+    const extraSales = paymentsWithOrders
+      .filter((payment) => payment.cancelYN === "Y")
+      .reduce((sum, payment) => {
+        let temp = 0;
+        Array.from(payment.order.select_products).forEach((product) => {
+          temp += Number(product.additional_fee);
+        });
+        return sum + temp;
+      }, 0);
+
     return {
       totalAmount,
       totalTransactions,
       refundTransactions,
       refundAmount,
+      extraSales,
     };
   };
 
@@ -223,6 +269,10 @@ const PaymentSummary = (props) => {
       .reduce((sum, payment) => sum + Number(payment.goodsAmt), 0);
     const total = totalAmount - refundAmount;
 
+    const extraSales = datePayments
+      .filter((payment) => payment.cancelYN === "Y")
+      .reduce((sum, payment) => sum + Number(payment.additional_fee), 0);
+
     return {
       key: date,
       date,
@@ -231,6 +281,7 @@ const PaymentSummary = (props) => {
       refundTransactions,
       refundAmount,
       total,
+      extraSales,
     };
   });
 
@@ -240,18 +291,18 @@ const PaymentSummary = (props) => {
       dataIndex: "date",
       key: "date",
     },
-    {
-      title: "결제건수",
-      dataIndex: "totalTransactions",
-      key: "totalTransactions",
-      sorter: (a, b) => a.totalTransactions - b.totalTransactions,
-    },
-    {
-      title: "환불건수",
-      dataIndex: "refundTransactions",
-      key: "refundTransactions",
-      sorter: (a, b) => a.refundTransactions - b.refundTransactions,
-    },
+    // {
+    //   title: "결제건수",
+    //   dataIndex: "totalTransactions",
+    //   key: "totalTransactions",
+    //   sorter: (a, b) => a.totalTransactions - b.totalTransactions,
+    // },
+    // {
+    //   title: "환불건수",
+    //   dataIndex: "refundTransactions",
+    //   key: "refundTransactions",
+    //   sorter: (a, b) => a.refundTransactions - b.refundTransactions,
+    // },
     {
       title: "총 결제금액",
       dataIndex: "totalAmount",
@@ -271,6 +322,23 @@ const PaymentSummary = (props) => {
       dataIndex: "total",
       key: "total",
       render: (value) => `${value.toLocaleString("ko-KR")}원`,
+      sorter: (a, b) => a.total - b.total,
+    },
+    {
+      title: "지점추가매출",
+      dataIndex: "extraSales",
+      key: "extraSales",
+      render: (value) => `${value.toLocaleString("ko-KR")}원`,
+      sorter: (a, b) => a.extraSales - b.extraSales,
+    },
+    {
+      title: "정산예정금",
+    },
+    {
+      title: "재고자산변동",
+    },
+    {
+      title: "수익금",
     },
     {
       title: "자세히보기",
@@ -387,7 +455,7 @@ const PaymentSummary = (props) => {
             <Col span={6}>
               <Card
                 size="small"
-                title="환불율"
+                title="지점추가매출"
                 bordered={false}
                 style={{ height: "100%" }}
                 bodyStyle={{
@@ -396,12 +464,7 @@ const PaymentSummary = (props) => {
                   justifyContent: "center",
                 }}
               >
-                <h3>
-                  {(stats.totalTransactions !== 0
-                    ? stats.refundTransactions / stats.totalTransactions
-                    : 0) * 100}
-                  %
-                </h3>
+                <h3>{parseInt(stats.extraSales).toLocaleString("ko-KR")}원</h3>
               </Card>
             </Col>
           </Row>
