@@ -15,6 +15,7 @@ import {
   Tag,
   Space,
   Popconfirm,
+  Tooltip,
 } from "antd";
 import {
   PlusOutlined,
@@ -22,6 +23,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   SaveOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import ToastEditor from "../../components/toasteditor";
 import { Link } from "react-router-dom";
@@ -40,11 +42,7 @@ const InquiryBoard = (props) => {
 
   const [branches, setBranches] = useState([]);
 
-  const [selectedBranch, setSelectedBranch] = useState(
-    localStorage.getItem("selectedBranch")
-      ? JSON.parse(localStorage.getItem("selectedBranch"))
-      : null
-  );
+  const [selectedBranch, setSelectedBranch] = useState();
 
   const { currentUser } = props;
 
@@ -85,19 +83,22 @@ const InquiryBoard = (props) => {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [currentInquiry, setCurrentInquiry] = useState(null);
   const [form] = Form.useForm();
-  const [ischecked, setIschecked] = useState(false); // 그룹 타입 설정
+  const [ischecked, setIschecked] = useState(false);
 
   const toggleChecked = () => {
-    setIschecked(!ischecked);
-    setSelectedBranch(null);
+    setIschecked(!ischecked); // 체크박스 상태 반전
+    setSelectedBranch(null); // 선택된 지점 초기화
   };
 
   // 게시판 추가/수정 모달 열기
   const showModal = (inquiry = null) => {
+    setIschecked(false);
     form.resetFields();
-    setIschecked(false); // 그룹 타입 초기화
     if (inquiry) {
       form.setFieldsValue({ ...inquiry, allowedUsers: inquiry.allowedUsers });
+      setIschecked(inquiry.allowedUsers?.length > 0);
+    } else {
+      setIschecked(false);
     }
     setCurrentInquiry(inquiry);
     setIsModalVisible(true);
@@ -107,7 +108,8 @@ const InquiryBoard = (props) => {
   const showDetailModal = (inquiry) => {
     const hasAccess =
       (inquiry.allowedUsers && inquiry.allowedUsers.includes(currentUser.id)) ||
-      inquiry.author === currentUser.user_id;
+      inquiry.author === currentUser.user_id ||
+      currentUser.permission === "1";
     if (!hasAccess) {
       message.error("열람 권한이 없습니다.");
       return;
@@ -178,6 +180,10 @@ const InquiryBoard = (props) => {
     });
   };
 
+  const onCancel = () => {
+    setIsModalVisible(false);
+  };
+
   // 게시판 삭제 처리
   const handleDelete = (id) => {
     AxiosDelete(`/posts/inquiries/${id}`)
@@ -232,19 +238,34 @@ const InquiryBoard = (props) => {
       },
     },
     {
-      title: "지점명",
-      dataIndex: "branch_id",
-      key: "branch_id",
-
-      render: (text, record) => {
-        return branches.find((branch) => branch.id === text)?.branch_name;
-      },
-    },
-    {
       title: "작성자",
       dataIndex: "author",
       key: "author",
       width: 150,
+    },
+    {
+      title: "지점/지사",
+      dataIndex: "branch_id",
+      key: "branch_id",
+
+      render: (text, record) => {
+        return (
+          <>
+            {record.allowedUsers ? (
+              <span>
+                {record.allowedUsers
+                  .map((userId) => users.find((user) => user.id === userId))
+                  .map((user) => (user ? user.company_name : ""))
+                  .join(", ")}
+              </span>
+            ) : (
+              <span>
+                {branches.find((branch) => branch.id === text)?.branch_name}
+              </span>
+            )}
+          </>
+        );
+      },
     },
     {
       title: "작성일시",
@@ -275,7 +296,7 @@ const InquiryBoard = (props) => {
             수정
           </a>
           <Popconfirm
-            title="계정을 삭제하시겠습니까?"
+            title="삭제하시겠습니까?"
             onConfirm={() => handleDelete(record.id)}
           >
             <a>삭제</a>
@@ -320,14 +341,19 @@ const InquiryBoard = (props) => {
       {/* 게시판 추가/수정 모달 */}
       <Modal
         title={currentInquiry ? "게시판 수정" : "게시판 추가"}
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={() => setIsModalVisible(false)}
-        cancelText="닫기"
-        okText={currentInquiry ? "수정" : "추가"}
+        open={isModalVisible}
+        onCancel={onCancel}
+        footer={[
+          <Button key="back" onClick={onCancel}>
+            닫기
+          </Button>,
+          <Button key="submit" type="primary" onClick={() => form.submit()}>
+            {currentInquiry ? "수정" : "추가"}
+          </Button>,
+        ]}
         width={800}
       >
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" onFinish={handleOk}>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -363,7 +389,18 @@ const InquiryBoard = (props) => {
 
           <Row gutter={8}>
             <Col span={4}>
-              <Checkbox onChange={toggleChecked}>직접 지정</Checkbox>
+              <Checkbox
+                checked={ischecked} // isChecked 상태를 반영
+                onChange={toggleChecked} // 체크박스 클릭 시 상태 변경
+              >
+                직접 지정
+              </Checkbox>
+              <Tooltip
+                placement="bottom"
+                title="특정 사용자에게만 열람 권한을 부여할 경우 체크해주세요."
+              >
+                <InfoCircleOutlined />
+              </Tooltip>
             </Col>
             <Col span={20}>
               {currentUser.permission === "1" && (
@@ -375,7 +412,6 @@ const InquiryBoard = (props) => {
                       rules={[
                         { required: true, message: "사용자를 선택해주세요" },
                       ]}
-                      tooltip="특정 사용자에게만 열람 권한을 부여할 경우 사용자를 선택해주세요."
                     >
                       <Select
                         mode="multiple"
@@ -408,15 +444,33 @@ const InquiryBoard = (props) => {
                 </>
               )}
               {!ischecked && (
-                <Form.Item label="지점 선택">
-                  <SearchBranch
-                    currentUser={currentUser}
-                    selectedBranch={selectedBranch}
-                    setSelectedBranch={(branches) => {
-                      setSelectedBranch(branches[0]);
-                    }}
-                    multiple={false}
-                  />
+                <Form.Item
+                  label="지점 선택"
+                  tooltip="게시물 내용의 주체가 되는 담당 지점을 선택해주세요."
+                  rules={[{ required: true, message: "지점을 선택해주세요" }]}
+                >
+                  {currentInquiry?.branch_id ? (
+                    <Space>
+                      {/* <div>{currentInquiry?.branch_id}</div> */}
+                      <SearchBranch
+                        currentUser={currentUser}
+                        selectedBranch={selectedBranch}
+                        setSelectedBranch={(branches) => {
+                          setSelectedBranch(branches[0]);
+                        }}
+                        multiple={false}
+                      />
+                    </Space>
+                  ) : (
+                    <SearchBranch
+                      currentUser={currentUser}
+                      selectedBranch={selectedBranch}
+                      setSelectedBranch={(branches) => {
+                        setSelectedBranch(branches[0]);
+                      }}
+                      multiple={false}
+                    />
+                  )}
                 </Form.Item>
               )}
             </Col>
