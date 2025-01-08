@@ -60,7 +60,6 @@ const InquiryBoard = (props) => {
 
     AxiosGet("/accounts")
       .then((res) => {
-        console.log(res.data);
         setUsers(res.data);
       })
       .catch((err) => {
@@ -69,7 +68,6 @@ const InquiryBoard = (props) => {
 
     AxiosGet("/branches")
       .then((res) => {
-        console.log(res.data);
         setBranches(res.data);
       })
       .catch((err) => {
@@ -87,12 +85,17 @@ const InquiryBoard = (props) => {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [currentInquiry, setCurrentInquiry] = useState(null);
   const [form] = Form.useForm();
-  const [groupType, setGroupType] = useState(""); // 그룹 타입 설정
+  const [ischecked, setIschecked] = useState(false); // 그룹 타입 설정
+
+  const toggleChecked = () => {
+    setIschecked(!ischecked);
+    setSelectedBranch(null);
+  };
 
   // 게시판 추가/수정 모달 열기
   const showModal = (inquiry = null) => {
     form.resetFields();
-    setGroupType(""); // 그룹 타입 초기화
+    setIschecked(false); // 그룹 타입 초기화
     if (inquiry) {
       form.setFieldsValue({ ...inquiry, allowedUsers: inquiry.allowedUsers });
     }
@@ -115,28 +118,18 @@ const InquiryBoard = (props) => {
 
   // 게시판 추가/수정 처리
   const handleOk = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        const { groups, allowedUsers } = values;
-
-        // 그룹 설정에 따른 사용자 권한 적용
-        let finalAllowedUsers = [];
-        if (groups.includes("직접설정")) {
-          finalAllowedUsers = allowedUsers;
-        } else {
-          finalAllowedUsers = users
-            .filter((user) => groups.includes(user.role))
-            .map((user) => user.id);
-        }
-
+    form.validateFields().then((values) => {
+      console.log("데이터 > ", values, selectedBranch?.id);
+      try {
+        // 수정
         if (currentInquiry) {
-          // 수정
-
-          AxiosPut(`/posts/inquiries/${currentInquiry.id}`, {
+          const updateData = {
             ...values,
-            allowedUsers: finalAllowedUsers,
+            branch_id: selectedBranch?.id || null,
             updatedAt: new Date().toISOString(),
+          };
+          AxiosPut(`/posts/inquiries/${currentInquiry.id}`, {
+            ...updateData,
           })
             .then((response) => {
               console.log(response.data);
@@ -145,9 +138,7 @@ const InquiryBoard = (props) => {
                   inquiry.id === currentInquiry.id
                     ? {
                         ...inquiry,
-                        ...values,
-                        allowedUsers: finalAllowedUsers,
-                        updatedAt: new Date().toISOString(),
+                        ...updateData,
                       }
                     : inquiry
                 )
@@ -161,10 +152,12 @@ const InquiryBoard = (props) => {
           // 추가
           const newInquiry = {
             ...values,
-            allowedUsers: finalAllowedUsers,
+            branch_id: selectedBranch?.id || null,
+            sticky: values.sticky || false,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
+          console.log(">>>>>>", newInquiry);
 
           // 호출
           AxiosPost("/posts/inquiries", newInquiry)
@@ -175,13 +168,14 @@ const InquiryBoard = (props) => {
             })
             .catch((error) => {
               console.error(error);
+              message.error("게시판 생성에 실패하였습니다.");
             });
         }
         setIsModalVisible(false);
-      })
-      .catch(() => {
-        message.error("게시판을 처리하는 데 실패했습니다.");
-      });
+      } catch (error) {
+        console.error(error);
+      }
+    });
   };
 
   // 게시판 삭제 처리
@@ -235,6 +229,15 @@ const InquiryBoard = (props) => {
         ) : (
           <span style={{ color: "#aaa", cursor: "not-allowed" }}>{text}</span>
         );
+      },
+    },
+    {
+      title: "지점명",
+      dataIndex: "branch_id",
+      key: "branch_id",
+
+      render: (text, record) => {
+        return branches.find((branch) => branch.id === text)?.branch_name;
       },
     },
     {
@@ -341,7 +344,7 @@ const InquiryBoard = (props) => {
             </Col>
 
             {currentUser.permission === "1" && (
-              <Col span={6}>
+              <Col span={12}>
                 {/* 상단 고정 체크박스 - 관리자만 가능 */}
                 <Form.Item
                   label="상단 고정 여부"
@@ -356,34 +359,66 @@ const InquiryBoard = (props) => {
                 </Form.Item>
               </Col>
             )}
-            <Col span={6}>
-              <Form.Item label="지점 선택" name="branch">
-                <SearchBranch
-                  currentUser={currentUser}
-                  selectedBranch={selectedBranch}
-                  setSelectedBranch={(branches) => {
-                    setSelectedBranch(branches[0]);
-                  }}
-                  multiple={false}
-                />
-                {/* <Select
-                style={{ width: "100%" }}
-                showSearch
-                placeholder="지점 선택"
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                  option.children
-                    .toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
-                }
-              >
-                {branches.map((branch) => (
-                  <Select.Option key={branch.id} value={branch.id}>
-                    {branch.branch_name}
-                  </Select.Option>
-                ))}
-              </Select> */}
-              </Form.Item>
+          </Row>
+
+          <Row gutter={8}>
+            <Col span={4}>
+              <Checkbox onChange={toggleChecked}>직접 지정</Checkbox>
+            </Col>
+            <Col span={20}>
+              {currentUser.permission === "1" && (
+                <>
+                  {ischecked && (
+                    <Form.Item
+                      label="열람 권한 사용자 선택"
+                      name="allowedUsers"
+                      rules={[
+                        { required: true, message: "사용자를 선택해주세요" },
+                      ]}
+                      tooltip="특정 사용자에게만 열람 권한을 부여할 경우 사용자를 선택해주세요."
+                    >
+                      <Select
+                        mode="multiple"
+                        placeholder="사용자를 선택하세요"
+                        optionLabelProp="label"
+                        showSearch
+                        filterOption={(input, option) =>
+                          option?.label
+                            ?.toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                      >
+                        {users?.map((user) => (
+                          <Option
+                            key={user.id}
+                            value={user.id}
+                            label={`${user.user_id} (${user.user_name})`}
+                          >
+                            {user.user_id} ({user.user_name}) -{" "}
+                            {user.permission === "1"
+                              ? "최고관리자"
+                              : user.permission === "2"
+                              ? "지사관리자"
+                              : "지점관리자"}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  )}
+                </>
+              )}
+              {!ischecked && (
+                <Form.Item label="지점 선택">
+                  <SearchBranch
+                    currentUser={currentUser}
+                    selectedBranch={selectedBranch}
+                    setSelectedBranch={(branches) => {
+                      setSelectedBranch(branches[0]);
+                    }}
+                    multiple={false}
+                  />
+                </Form.Item>
+              )}
             </Col>
           </Row>
 

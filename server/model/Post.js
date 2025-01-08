@@ -146,10 +146,10 @@ class Inquiry {
     this.title = data.title;
     this.content = data.content;
     this.author = data.author;
+    this.branch_id = data.branch_id || null;
+    this.allowedUsers = data.allowedUsers || [];
     this.createdAt = data.createdAt || new Date().toISOString();
     this.updatedAt = data.updatedAt || new Date().toISOString();
-    this.allowedUsers = data.allowedUsers || [];
-    this.groups = data.groups || [];
     this.sticky = data.sticky || false;
     this.comments = data.comments || [];
   }
@@ -159,11 +159,11 @@ class Inquiry {
       title: this.title,
       content: this.content,
       author: this.author,
+      branch_id: this.branch_id,
+      allowedUsers: this.allowedUsers,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       comments: this.comments,
-      allowedUsers: this.allowedUsers,
-      groups: this.groups,
       sticky: this.sticky,
       id: this.id,
     };

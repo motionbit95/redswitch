@@ -6,16 +6,21 @@ import {
   ShopOutlined,
   SolutionOutlined,
   TeamOutlined,
+  ReadOutlined,
+  DollarOutlined,
+  InboxOutlined,
+  TruckOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import useFirebase from "./hook/useFilrebase";
 import useSelectedBranch from "./hook/useSelectedBranch";
 import AdminRouter from "./pages";
-import menu_items from "./components/array/menu";
 import HeaderComponent from "./components/layout/HeaderComponent";
 import useCurrentUser from "./hook/useCurrentUser";
 import useAlarmManager from "./hook/useAlarmManager";
 import AlarmModal from "./components/modal/AlarmModal";
 import AppSider from "./components/layout/AppSider";
+import MenuItems from "./components/array/menu";
 
 const { Header, Content, Sider } = Layout;
 
@@ -82,6 +87,8 @@ const App = () => {
     textAlign: "center",
   };
 
+  const menu_items = MenuItems({ currentUser });
+
   return (
     <Router>
       {/* 주문 알람 모달입니다. */}
@@ -109,64 +116,7 @@ const App = () => {
             colorBgContainer={colorBgContainer}
             defaultSelectedKeys={defaultSelectedKeys}
             defaultOpenKeys={defaultOpenKeys}
-            menuItems={[
-              ...menu_items,
-              {
-                key: "provider",
-                icon: React.createElement(TeamOutlined),
-                label: <Link to="/provider/provider">거래처관리</Link>,
-                hidden: currentUser.permission === "3",
-              },
-              {
-                key: "branch",
-                icon: React.createElement(ShopOutlined),
-                label: <Link to="/branch/branch">지점관리</Link>,
-                hidden: currentUser.permission === "3",
-              },
-              {
-                key: "admin",
-                icon: React.createElement(SolutionOutlined),
-                label: "관리자 설정",
-                hidden: currentUser.permission !== "1",
-                children: [
-                  {
-                    key: "/provider/post",
-                    label: <Link to="/provider/post">가맹점 신청</Link>,
-                  },
-                  {
-                    key: "/admin/account",
-                    label: <Link to="/admin/account">계정관리</Link>,
-                  },
-                  {
-                    key: "homepage",
-                    label: <Link to="/admin/spot">홈페이지관리</Link>,
-                  },
-                  {
-                    key: "bdsm",
-                    // icon: React.createElement(DotChartOutlined),
-                    label: "BDSM",
-                    children: [
-                      {
-                        key: "/bdsm/questions",
-                        label: <Link to="/bdsm/questions">문항관리</Link>,
-                      },
-                      {
-                        key: "/bdsm/results",
-                        label: <Link to="/bdsm/results">성향관리</Link>,
-                      },
-                      {
-                        key: "/bdsm/advertise",
-                        label: <Link to="/bdsm/advertise">광고관리</Link>,
-                      },
-                      {
-                        key: "/bdsm/trend",
-                        label: <Link to="/bdsm/trend">통계관리</Link>,
-                      },
-                    ],
-                  },
-                ],
-              },
-            ]}
+            menuItems={menu_items}
             isLoggedIn={isLoggedIn}
             setIsLoggedIn={setIsLoggedIn}
             logout={logout}
