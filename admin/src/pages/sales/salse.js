@@ -79,10 +79,8 @@ const PaymentSummary = (props) => {
       setDailySales({ today: todaySales, yesterday: yesterdaySales });
     };
 
-    if (orders.length > 0 && payments.length > 0) {
-      calculateDailySales();
-    }
-  }, [selectedBranch]);
+    calculateDailySales();
+  }, [payments]);
 
   // 초기 데이터 가져오기
   useEffect(() => {
