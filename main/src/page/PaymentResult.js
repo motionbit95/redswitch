@@ -231,7 +231,7 @@ function PaymentResult(props) {
               <div>{branch.branch_name}</div>
             </div>
             <div style={{ opacity: "0.5", fontSize: "small" }}>
-              {order.customer_address}호실
+              {order.customer_address}
             </div>
             <div style={{ opacity: "0.5", fontSize: "medium" }}>
               {order.customer_phone}
@@ -258,7 +258,7 @@ function PaymentResult(props) {
             {order.select_products?.map((product, index) => (
               <Space>
                 <Image
-                  src={product.blind_image || "https://via.placeholder.com/120"}
+                  src={product.product_image || ""}
                   alt={product.product_name}
                   width={60}
                   height={60}

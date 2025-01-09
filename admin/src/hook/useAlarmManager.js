@@ -11,15 +11,15 @@ const useAlarmManager = (alarms) => {
 
   // 사운드 재생
   const playSound = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+    if (!audioRef.current) {
+      audioRef.current = new Audio(soundFile);
+      audioRef.current.loop = true;
     }
-    audioRef.current = new Audio(soundFile);
-    audioRef.current.loop = true;
-    audioRef.current
-      .play()
-      .catch((e) => console.error("Audio play failed:", e));
+    if (audioRef.current.paused) {
+      audioRef.current
+        .play()
+        .catch((e) => console.error("Audio play failed:", e));
+    }
   };
 
   // 사운드 정지
