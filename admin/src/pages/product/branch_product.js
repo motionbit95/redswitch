@@ -30,6 +30,7 @@ import useExportToExcel from "../../hook/useExportToExcel";
 import usePagination from "../../hook/usePagination";
 import useSearchFilter from "../../hook/useSearchFilter";
 import dayjs from "dayjs";
+import { render } from "@testing-library/react";
 
 const { Item } = Descriptions;
 const { Option } = Select;
@@ -42,6 +43,10 @@ function Product(props) {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
+
+  useEffect(() => {
+    onSearch(filter, keyword);
+  }, []);
 
   const onSearch = (value, record) => {
     if (value && record) {
@@ -123,6 +128,7 @@ function Product(props) {
       title: "소비자 판매 가격",
       dataIndex: "product_price",
       key: "product_price",
+      render: (text) => parseInt(text).toLocaleString("ko-KR"),
       sorter: (a, b) => a.product_price - b.product_price,
     },
     {
@@ -235,10 +241,12 @@ const ProductModal = (props) => {
 
   useEffect(() => {
     if (open) {
-      console.log("currentProduct", currentProduct);
-      form.setFieldsValue(currentProduct);
-      // setProduct(currentProduct);
-      // setSelectedMaterial(currentProduct);
+      if (!currentProduct) {
+        // 추가 모드
+        form.resetFields();
+        selectedMaterial && setSelectedMaterial(null);
+        setProduct(null);
+      }
     }
   }, [open]);
 

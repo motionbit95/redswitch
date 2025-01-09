@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Typography, Spin } from "antd";
+import { Row, Col, Typography, Spin, Empty } from "antd";
 import CategoryFilter from "../component/CategoryFilter";
 import ProductCard from "../component/ProductCard";
 
@@ -148,8 +148,17 @@ function ProductListPage(props) {
             <Spin size="large" />
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div style={{ width: "100%", textAlign: "center" }}>
-            <Typography.Text>상품이 없습니다.</Typography.Text>
+          <div
+            style={{
+              width: "100%",
+              textAlign: "center",
+              justifyContent: "center",
+              alignItems: "center",
+              display: "flex",
+              height: "300px",
+            }}
+          >
+            <Empty description="상품이 없습니다." />
           </div>
         ) : (
           <Row gutter={[16, 16]} justify="flex-start">

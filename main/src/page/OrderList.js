@@ -95,7 +95,7 @@ function OrderList(props) {
                         src={
                           materialList?.find(
                             (material) => material.pk === product.material_id
-                          ).original_image || "https://via.placeholder.com/120"
+                          ).product_image || "https://via.placeholder.com/120"
                         }
                         width={70}
                         height={70}

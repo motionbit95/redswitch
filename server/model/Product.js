@@ -391,7 +391,7 @@ class Product {
       snapshot.forEach((child) => {
         products.push({ PK: child.key, ...child.val() });
       });
-      return products;
+      return products.reverse();
     } catch (error) {
       console.error("Error fetching products:", error);
       throw new Error("Failed to fetch products");

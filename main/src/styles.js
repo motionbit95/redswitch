@@ -346,8 +346,8 @@ export const imageStyle = (isLarge, materialData) => ({
   aspectRatio: "1/1",
   maxWidth: "300px",
   backgroundImage: `url(${
-    materialData?.original_image
-      ? materialData?.original_image
+    materialData?.product_image
+      ? materialData?.product_image
       : "https://via.placeholder.com/150"
   })`,
   backgroundSize: "cover",

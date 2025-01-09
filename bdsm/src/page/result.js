@@ -134,7 +134,7 @@ function TestResult(props) {
                     aspectRatio: "1/1",
                     backgroundColor: "#d9d9d9",
                     backgroundSize: "cover",
-                    backgroundImage: `url(${material?.original_image})`,
+                    backgroundImage: `url(${material?.product_image})`,
                   }}
                 />
               </Col>

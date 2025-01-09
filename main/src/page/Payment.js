@@ -159,7 +159,7 @@ const Payment = () => {
                     <Image
                       src={
                         item.blind_image ||
-                        item.original_image ||
+                        item.product_image ||
                         "https://via.placeholder.com/120"
                       }
                     />

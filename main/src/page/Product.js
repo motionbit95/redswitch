@@ -5,6 +5,7 @@ import {
   Descriptions,
   Divider,
   InputNumber,
+  Image,
   message,
   Radio,
   Typography,
@@ -88,7 +89,7 @@ function Product({ branch, theme }) {
       return;
     }
 
-    message.success(`바로 구매: ${quantity}개`);
+    message.warning(`구현중인 기능입니다.`);
   };
 
   useEffect(() => {
@@ -183,7 +184,12 @@ function Product({ branch, theme }) {
       </div>
 
       {/* 상품 상세 정보 */}
-      <div
+      <Image
+        preview={false}
+        src={productData?.product_detail_image}
+        width="100%"
+      />
+      {/* <div
         style={{
           width: "100%",
           maxWidth: "770px",
@@ -201,7 +207,7 @@ function Product({ branch, theme }) {
           }}
           dangerouslySetInnerHTML={{ __html: productData?.product_detail }}
         ></div>
-      </div>
+      </div> */}
 
       <style jsx>{`
         div img {

@@ -44,9 +44,10 @@ const MaterialModal = ({
 
   return (
     <Modal
+      centered
       open={visible}
       title={initialValues ? "상품 수정" : "상품 추가"}
-      width={800}
+      width={900}
       onCancel={onClose}
       footer={
         <Space>
@@ -138,7 +139,7 @@ const MaterialModal = ({
               >
                 <div
                   style={{
-                    height: field.name === "product_detail_image" ? 300 : 100,
+                    height: field.name === "product_detail_image" ? 400 : 100,
                     overflow: "scroll",
                   }}
                 >

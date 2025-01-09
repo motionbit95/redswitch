@@ -200,7 +200,7 @@ function MainPage(props) {
           <Checkbox onChange={(e) => setIsAgree(e.target.checked)}>
             개인 정보 수집 및 이용동의
           </Checkbox>
-          <Eziok onCert={onCert} />
+          {isAgree && <Eziok onCert={onCert} />}
           {/* <Button
             disabled={!isAgree}
             type="primary"

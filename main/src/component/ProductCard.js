@@ -33,10 +33,10 @@ const ProductCard = React.memo(({ product, theme, isCertified }) => {
   }, [navigate, isCertified, product.PK]);
 
   const productImage = isCertified
-    ? product.original_image
+    ? product.product_image
     : product.blind_image
     ? product.blind_image
-    : product.original_image;
+    : product.product_image;
 
   return (
     <div style={productCardStyles.cardContainer} onClick={handleCardClick}>

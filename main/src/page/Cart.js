@@ -105,10 +105,10 @@ const Cart = ({ token, theme }) => {
             `${process.env.REACT_APP_SERVER_URL}/products/materials/${data.material_id}`
           );
           const material = await materialResponse.json();
-          return { ...data, original_image: material.original_image };
+          return { ...data, product_image: material.product_image };
         } catch (error) {
           console.error("Failed to fetch material:", error);
-          return { ...data, original_image: undefined }; // material이 없을 경우
+          return { ...data, product_image: undefined }; // material이 없을 경우
         }
       });
 
