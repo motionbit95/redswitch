@@ -12,7 +12,6 @@ import {
   Tag,
   Descriptions,
   Row,
-  Descriptions,
 } from "antd";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import SearchBranch from "../../components/popover/searchbranch";

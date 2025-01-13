@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link, BrowserRouter as Router } from "react-router-dom";
-import { Layout, theme } from "antd";
 import { Footer } from "antd/es/layout/layout";
 import useFirebase from "./hook/useFilrebase";
 import useSelectedBranch from "./hook/useSelectedBranch";
@@ -12,7 +11,6 @@ import AlarmModal from "./components/modal/AlarmModal";
 import AppSider from "./components/layout/AppSider";
 import MenuItems from "./components/array/menu";
 import { Layout, theme } from "antd";
-import { Footer } from "antd/es/layout/layout";
 
 const { Header, Content, Sider } = Layout;
 
