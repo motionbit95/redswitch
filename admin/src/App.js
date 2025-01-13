@@ -2,16 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Link, BrowserRouter as Router } from "react-router-dom";
 import { Layout, theme } from "antd";
 import { Footer } from "antd/es/layout/layout";
-import {
-  ShopOutlined,
-  SolutionOutlined,
-  TeamOutlined,
-  ReadOutlined,
-  DollarOutlined,
-  InboxOutlined,
-  TruckOutlined,
-  HomeOutlined,
-} from "@ant-design/icons";
 import useFirebase from "./hook/useFilrebase";
 import useSelectedBranch from "./hook/useSelectedBranch";
 import AdminRouter from "./pages";
@@ -21,6 +11,8 @@ import useAlarmManager from "./hook/useAlarmManager";
 import AlarmModal from "./components/modal/AlarmModal";
 import AppSider from "./components/layout/AppSider";
 import MenuItems from "./components/array/menu";
+import { Layout, theme } from "antd";
+import { Footer } from "antd/es/layout/layout";
 
 const { Header, Content, Sider } = Layout;
 

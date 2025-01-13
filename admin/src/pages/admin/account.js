@@ -12,13 +12,12 @@ import {
   Tag,
   Descriptions,
   Row,
+  Descriptions,
 } from "antd";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import SearchBranch from "../../components/popover/searchbranch";
 import SearchProvider from "../../components/popover/searchprovider";
 import useSearchFilter from "../../hook/useSearchFilter";
-import Filter from "../../components/filter";
-import { render } from "@testing-library/react";
 
 // 메인 Account 컴포넌트
 const Account = () => {
@@ -250,6 +249,8 @@ const Account = () => {
         visible={isAddModalVisible || isEditModalVisible}
         isEdit={isEditModalVisible}
         form={form}
+        centered
+        width={700}
         onCancel={() => {
           setIsAddModalVisible(false);
           setIsEditModalVisible(false);
