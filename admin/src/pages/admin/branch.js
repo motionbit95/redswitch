@@ -32,6 +32,7 @@ import TextArea from "antd/es/input/TextArea";
 import usePagination from "../../hook/usePagination";
 import useSearchFilter from "../../hook/useSearchFilter";
 import useCurrentUser from "../../hook/useCurrentUser";
+import { render } from "@testing-library/react";
 
 const BranchModal = ({
   visible,
@@ -512,6 +513,15 @@ function Branch(props) {
         (pagination.current - 1) * pagination.pageSize + index + 1,
       fixed: "left",
       width: 50,
+    },
+    {
+      title: "링크",
+      dataIndex: "id",
+      key: "id",
+      fixed: "left",
+      render: (text) => (
+        <a href={`${"http://localhost:3001"}/spot/${text}`}>바로가기</a>
+      ),
     },
     {
       title: "지점명",

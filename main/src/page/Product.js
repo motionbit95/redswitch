@@ -24,6 +24,8 @@ import {
   fixedBottomStyle,
 } from "../styles";
 
+import { useNavigate } from "react-router-dom";
+
 function Product({ branch, theme }) {
   const product_pk = window.location.pathname.split("/").pop();
   const [productData, setProductData] = useState(null);
@@ -35,6 +37,8 @@ function Product({ branch, theme }) {
 
   const handleDecrement = () => quantity > 1 && setQuantity(quantity - 1);
   const handleIncrement = () => setQuantity(quantity + 1);
+
+  const navigate = useNavigate();
 
   const handleOptionChange = (checkedValues) => {
     setSelectedOptions(
@@ -82,14 +86,67 @@ function Product({ branch, theme }) {
     }
   };
 
-  const handleBuyNow = () => {
-    if (productData?.options?.length && !selectedOptions) {
-      message.error("옵션을 선택해주세요.");
+  // 랜덤 Unique Code 생성
+  async function generateRandomCode(length = 8) {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // 사용할 문자 집합
+    let code = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      code += characters[randomIndex];
+    }
+
+    return code;
+  }
+
+  const handleBuyNow = async () => {
+    if (productData?.options?.length && !showOptions) {
+      // 옵션 선택이 필요한 경우 옵션 UI 표시
       setShowOptions(true);
       return;
     }
 
-    message.warning(`구현중인 기능입니다.`);
+    // 옵션 선택 완료 후 장바구니에 추가
+    try {
+      const cart = {
+        pk: "",
+        token: localStorage.getItem("token"),
+        product_pk,
+        count: quantity,
+        branch_pk: branch,
+        amount: parseInt(productData.product_price),
+        option: selectedOptions,
+      };
+
+      setShowOptions(false);
+
+      const order = {
+        products: [],
+        amt: productData.product_price,
+        ordNo: await generateRandomCode(),
+      };
+
+      order.products.push({
+        cart_pk: cart.pk,
+        product_pk: cart.product_pk,
+        count: cart.count,
+        amount:
+          (cart.amount +
+            (cart.option
+              ? cart.option.reduce(
+                  (total, option) => total + option.optionPrice,
+                  0
+                )
+              : 0)) *
+          cart.count,
+        option: cart.option,
+      });
+
+      navigate("/payment", { state: { order } });
+    } catch (error) {
+      console.error("장바구니 추가 오류", error);
+      message.error("장바구니에 상품을 추가하는데 실패했습니다.");
+    }
   };
 
   useEffect(() => {
@@ -175,7 +232,7 @@ function Product({ branch, theme }) {
                   onClick={handleBuyNow}
                   style={buyButtonStyle}
                 >
-                  바로 구매하기
+                  바로구매하기
                 </Button>
               </div>
             </div>
@@ -189,25 +246,6 @@ function Product({ branch, theme }) {
         src={productData?.product_detail_image}
         width="100%"
       />
-      {/* <div
-        style={{
-          width: "100%",
-          maxWidth: "770px",
-          minHeight: "100vh",
-          margin: "0 auto",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            overflowWrap: "break-word",
-            wordBreak: "break-word",
-            whiteSpace: "normal",
-          }}
-          dangerouslySetInnerHTML={{ __html: productData?.product_detail }}
-        ></div>
-      </div> */}
 
       <style jsx>{`
         div img {
@@ -233,70 +271,6 @@ function Product({ branch, theme }) {
             paddingBottom: isLarge ? "0" : "10px",
           }}
         >
-          {/* {showOptions && productData?.options?.length > 0 && (
-            <div
-              style={{
-                marginBottom: "10px",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <Typography.Text
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "large",
-                  marginBottom: "10px",
-                }}
-              >
-                옵션 선택
-              </Typography.Text>
-              <Checkbox.Group
-                style={{ width: "100%" }}
-                onChange={handleOptionChange}
-              >
-                {productData.options.map((option) => (
-                  <Checkbox key={option.id} value={option.id}>
-                    {option.optionName} (+
-                    {parseInt(option.optionPrice).toLocaleString()}원)
-                  </Checkbox>
-                ))}
-              </Checkbox.Group>
-              <Divider />
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Typography.Text
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "large",
-                    marginBottom: "10px",
-                  }}
-                >
-                  예상 결제금액
-                </Typography.Text>
-                <Typography.Text
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "large",
-                    marginBottom: "10px",
-                  }}
-                >
-                  {(
-                    parseInt(quantity) * parseInt(productData.product_price) +
-                    selectedOptions.reduce(
-                      (total, option) => total + option.optionPrice,
-                      0
-                    )
-                  ).toLocaleString()}
-                  원
-                </Typography.Text>
-              </div>
-            </div>
-          )} */}
           <Drawer
             title="옵션 선택"
             placement={isLarge ? "right" : "bottom"}
@@ -381,7 +355,7 @@ function Product({ branch, theme }) {
                   onClick={handleBuyNow}
                   style={{ width: "100%" }}
                 >
-                  바로 구매하기
+                  바로구매하기
                 </Button>
               </div>
             </div>
@@ -411,7 +385,7 @@ function Product({ branch, theme }) {
               onClick={handleBuyNow}
               style={{ width: "100%" }}
             >
-              바로 구매하기
+              바로구매하기
             </Button>
           </div>
         </div>
