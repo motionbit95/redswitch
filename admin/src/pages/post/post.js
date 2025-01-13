@@ -87,8 +87,13 @@ const NoticeBoard = (props) => {
   // 게시판 상세보기 모달 열기
   const showDetailModal = (notice) => {
     const hasAccess =
-      notice.allowedUsers.includes(currentUser.id) ||
-      notice.author === currentUser.user_id;
+      notice.allowedUsers?.includes(currentUser.id) ||
+      notice.author === currentUser.user_id ||
+      (notice.groups?.includes("본사관리자") &&
+        currentUser.permission === "1") ||
+      (notice.groups?.includes("지사관리자") &&
+        currentUser.permission === "2") ||
+      (notice.groups?.includes("지점관리자") && currentUser.permission === "3");
     if (!hasAccess) {
       message.error("열람 권한이 없습니다.");
       return;
