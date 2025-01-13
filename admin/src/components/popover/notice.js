@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NotificationOutlined, CloseOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -16,6 +16,16 @@ import NoticeList from "../list/notice";
 
 const NoticeDetail = (props) => {
   const { alarms, handleAlarmClick, openPopover, setOpenPopover } = props;
+  const [badge_cnt, setBadgeCnt] = React.useState(0);
+  useEffect(() => {
+    if (openPopover) {
+      alarms?.forEach((element) => {
+        if (element.alarm_status === 0) {
+          setBadgeCnt(badge_cnt + 1);
+        }
+      });
+    }
+  }, [openPopover]);
   return (
     <Space style={{ marginTop: "5px" }}>
       <Popover
@@ -91,7 +101,11 @@ const NoticeDetail = (props) => {
         }
         trigger="click"
       >
-        <Badge count={5} size="small" onClick={() => setOpenPopover(true)}>
+        <Badge
+          count={badge_cnt}
+          size="small"
+          onClick={() => setOpenPopover(true)}
+        >
           <NotificationOutlined
             style={{
               fontSize: "20px",
