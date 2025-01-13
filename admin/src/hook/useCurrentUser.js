@@ -32,6 +32,8 @@ const useCurrentUser = () => {
     localStorage.clear();
     setIsLoggedIn(false);
     setCurrentUser({});
+
+    window.location.href = "/dashboard";
   };
 
   return { currentUser, isLoggedIn, setIsLoggedIn, logout };

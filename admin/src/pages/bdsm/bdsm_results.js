@@ -179,6 +179,7 @@ const BDSMResults = () => {
         pagination={{
           defaultPageSize: 10,
           showSizeChanger: true,
+          position: ["bottomCenter"],
         }}
         size="small"
         columns={columns}

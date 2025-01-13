@@ -45,7 +45,6 @@ const App = () => {
   // Redirect logic
   useEffect(() => {
     if (window.location.pathname === "/") {
-      window.location.href = isLoggedIn ? "/dashboard" : "/login";
     }
   }, [isLoggedIn]);
 

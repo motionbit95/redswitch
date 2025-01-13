@@ -318,7 +318,11 @@ const BDSMAdvertisement = () => {
         dataSource={advertisementList}
         rowKey="pk"
         loading={loading}
-        pagination={{ defaultPageSize: 10, showSizeChanger: true }}
+        pagination={{
+          defaultPageSize: 10,
+          showSizeChanger: true,
+          position: ["bottomCenter"],
+        }}
       />
     </Space>
   );

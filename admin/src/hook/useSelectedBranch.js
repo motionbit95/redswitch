@@ -1,11 +1,24 @@
 import { useState, useEffect } from "react";
 
 const useSelectedBranch = () => {
-  const [selectedBranch, setSelectedBranch] = useState(() => {
-    // Initialize state from localStorage (if available)
-    const savedBranch = localStorage.getItem("selectedBranch");
-    return savedBranch ? JSON.parse(savedBranch) : null;
-  });
+  const [selectedBranch, setSelectedBranch] = useState(
+    () => {
+      // Initialize state from localStorage (if available)
+      const savedBranch = localStorage.getItem("selectedBranch");
+
+      try {
+        if (savedBranch) {
+          return JSON.parse(savedBranch);
+        }
+      } catch (error) {
+        console.error("Error parsing selectedBranch from localStorage:", error);
+        localStorage.removeItem("selectedBranch");
+      }
+      return null;
+    }
+
+    // return savedBranch ? JSON.parse(savedBranch) : null;
+  );
 
   useEffect(() => {
     // Effect to sync localStorage when selectedBranch changes

@@ -8,7 +8,6 @@ import {
   Form,
   Image,
   Input,
-  InputNumber,
   message,
   Modal,
   Popconfirm,
@@ -30,7 +29,6 @@ import useExportToExcel from "../../hook/useExportToExcel";
 import usePagination from "../../hook/usePagination";
 import useSearchFilter from "../../hook/useSearchFilter";
 import dayjs from "dayjs";
-import { render } from "@testing-library/react";
 
 const { Item } = Descriptions;
 const { Option } = Select;
@@ -63,7 +61,6 @@ function Product(props) {
     } else {
       AxiosGet(`/products`)
         .then((response) => {
-          console.log(response.data);
           setProducts(response.data);
         })
         .catch((error) => {
@@ -210,6 +207,7 @@ function Product(props) {
         pagination={{
           ...pagination,
           showSizeChanger: true,
+          position: ["bottomCenter"],
         }}
       />
 
@@ -233,6 +231,7 @@ const ProductModal = (props) => {
     currentProduct || null
   );
   const [product, setProduct] = useState(null);
+  const [providers, setProviders] = useState([]);
 
   const [categories, setCategories] = useState([]);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -246,8 +245,19 @@ const ProductModal = (props) => {
         form.resetFields();
         selectedMaterial && setSelectedMaterial(null);
         setProduct(null);
+        setRelatedProducts([]);
+      } else {
+        // 수정 모드
+        form.setFieldsValue(currentProduct);
+        setProduct(currentProduct);
+        setSelectedMaterial(currentProduct);
+        setRelatedProducts(currentProduct.related_products);
       }
     }
+  }, [open]);
+
+  useEffect(() => {
+    console.log(currentProduct);
   }, [open]);
 
   const extraFields = [
@@ -286,6 +296,17 @@ const ProductModal = (props) => {
       }
     };
     fetchCategories();
+
+    const fetchProviders = async () => {
+      try {
+        const response = await AxiosGet("/providers");
+        setProviders(response.data);
+        console.log(selectedMaterial, response.data);
+      } catch (error) {
+        message.error("거래처 불러오기 실패");
+      }
+    };
+    fetchProviders();
   }, []);
 
   useEffect(() => {
@@ -304,9 +325,13 @@ const ProductModal = (props) => {
   const onFinish = async (values) => {
     console.log("Success:", values);
 
+    console.log(relatedProducts);
     try {
       if (currentProduct) {
-        await AxiosPut(`/products/${currentProduct.PK}`, values)
+        await AxiosPut(`/products/${currentProduct.PK}`, {
+          ...values,
+          related_products: relatedProducts,
+        })
           .then((response) => {
             console.log("response", response);
             message.success("상품 수정 성공");
@@ -330,26 +355,21 @@ const ProductModal = (props) => {
     }
   };
 
+  const onClose = () => {
+    setOpen(false);
+    setSelectedMaterial(null);
+    setProduct(null);
+    setRelatedProducts([]);
+  };
+
   return (
     <div>
-      {/* <Button
-        type="primary"
-        onClick={() => {
-          if (!selectedBranch) {
-            message.error("지점을 선택해주세요.");
-            return;
-          }
-          setVisible(true);
-        }}
-      >
-        상품 추가
-      </Button> */}
       <Modal
-        visible={open}
-        onCancel={() => setOpen(false)}
+        open={open}
+        onCancel={onClose}
         title={currentProduct ? "상품 수정" : "상품 추가"}
         footer={[
-          <Button key="cancel" onClick={() => setOpen(false)}>
+          <Button key="cancel" onClick={onClose}>
             취소
           </Button>,
           <Button
@@ -400,17 +420,17 @@ const ProductModal = (props) => {
                 />
               </Form.Item>
             </Item>
-            <Item label="상품코드">
+            <Item label="상품코드" labelStyle={{ whiteSpace: "nowrap" }}>
               <Form.Item name="product_code" style={{ margin: 0 }}>
                 {selectedMaterial?.product_code}
               </Form.Item>
             </Item>
-            <Item label="거래처">
+            <Item label="거래처" labelStyle={{ whiteSpace: "nowrap" }}>
               <FormItem name="provider_name" style={{ margin: 0 }}>
                 {selectedMaterial?.provider_name}
               </FormItem>
             </Item>
-            <Item label="카테고리">
+            <Item label="카테고리" labelStyle={{ whiteSpace: "nowrap" }}>
               <Form.Item name="product_category_code" style={{ margin: 0 }}>
                 {
                   categories.find(
@@ -442,24 +462,28 @@ const ProductModal = (props) => {
                   label={
                     <Space direction="vertical">
                       <div>{field.label}</div>
-                      <Form.Item name={field.name}>
-                        {field.name === "product_detail_image" && (
-                          <FileUpload
-                            url={form.getFieldValue("product_detail_image")}
-                            setUrl={(url) =>
-                              form.setFieldsValue({ product_detail_image: url })
-                            }
-                          />
-                        )}
-                        {field.name === "product_image" && (
-                          <FileUpload
-                            url={form.getFieldValue("product_image")}
-                            setUrl={(url) =>
-                              form.setFieldsValue({ product_image: url })
-                            }
-                          />
-                        )}
-                        {/* {field.name === "blind_image" && (
+                      {(field.name === "product_detail_image" ||
+                        field.name === "product_image") && (
+                        <Form.Item name={field.name}>
+                          {field.name === "product_detail_image" && (
+                            <FileUpload
+                              url={form.getFieldValue("product_detail_image")}
+                              setUrl={(url) =>
+                                form.setFieldsValue({
+                                  product_detail_image: url,
+                                })
+                              }
+                            />
+                          )}
+                          {field.name === "product_image" && (
+                            <FileUpload
+                              url={form.getFieldValue("product_image")}
+                              setUrl={(url) =>
+                                form.setFieldsValue({ product_image: url })
+                              }
+                            />
+                          )}
+                          {/* {field.name === "blind_image" && (
                         <FileUpload
                           url={form.getFieldValue("blind_image")}
                           setUrl={(url) =>
@@ -467,14 +491,17 @@ const ProductModal = (props) => {
                           }
                         />
                       )} */}
-                      </Form.Item>
+                        </Form.Item>
+                      )}
                     </Space>
                   }
                 >
                   <div
                     style={{
+                      display: "flex",
+                      justifyContent: "center",
                       height: field.name === "product_detail_image" ? 300 : 100,
-                      overflow: "scroll",
+                      overflowY: "auto",
                     }}
                   >
                     <Image

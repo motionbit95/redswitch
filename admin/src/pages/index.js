@@ -23,16 +23,47 @@ import PaymentSummaryByBranch from "./sales/branch";
 function App(props) {
   const { currentUser } = props;
 
+  // 기본 라우트: 로그인하지 않은 상태에서 보이는 경로
+  const renderDefaultRoutes = () => (
+    <>
+      <Route path="/dashboard" element={<Main currentUser={currentUser} />} />
+      <Route
+        path="/product/product"
+        element={<Product currentUser={currentUser} />}
+      />
+      <Route
+        path="/product/inventory"
+        element={<Inventory currentUser={currentUser} />}
+      />
+      <Route path="/product/purchase_order" element={<Purchase_order />} />
+      <Route path="/order" element={<Order currentUser={currentUser} />} />
+      <Route
+        path="/post/notification"
+        element={<NoticeBoard currentUser={currentUser} />}
+      />
+      <Route
+        path="/post/inquiry"
+        element={<InquiryBoard currentUser={currentUser} />}
+      />
+      <Route
+        path="/sales/sales"
+        element={<PaymentSummary currentUser={currentUser} />}
+      />
+      <Route path="/sales/branch" element={<PaymentSummaryByBranch />} />
+    </>
+  );
+
+  // 로그인 상태일 때만 표시되는 라우트
   // 권한별 라우트 구성
   const renderRoutesByPermission = () => {
-    switch (currentUser?.permission) {
-      case "1": // 최고관리자
+    if (!currentUser) {
+      return renderDefaultRoutes(); // 로그인하지 않은 경우 기본 라우트만 렌더링
+    }
+
+    switch (currentUser.permission) {
+      case "1":
         return (
           <>
-            <Route
-              path="/dashboard"
-              element={<Main currentUser={currentUser} />}
-            />
             <Route path="/admin/account" element={<Account />} />
             <Route path="/admin/spot" element={<Spot />} />
             <Route path="/branch/branch" element={<Branch />} />
@@ -46,44 +77,12 @@ function App(props) {
               path="/product/material"
               element={<Material currentUser={currentUser} />}
             />
-            <Route
-              path="/product/product"
-              element={<Product currentUser={currentUser} />}
-            />
-            <Route
-              path="/product/inventory"
-              element={<Inventory currentUser={currentUser} />}
-            />
-            <Route
-              path="/product/purchase_order"
-              element={<Purchase_order />}
-            />
-            <Route
-              path="/order"
-              element={<Order currentUser={currentUser} />}
-            />
-            <Route
-              path="/post/notification"
-              element={<NoticeBoard currentUser={currentUser} />}
-            />
-            <Route
-              path="/post/inquiry"
-              element={<InquiryBoard currentUser={currentUser} />}
-            />
-            <Route
-              path="/sales/sales"
-              element={<PaymentSummary currentUser={currentUser} />}
-            />
-            <Route path="/sales/branch" element={<PaymentSummaryByBranch />} />
+            {renderDefaultRoutes()}
           </>
         );
-      case "2": // 지사관리자
+      case "2":
         return (
           <>
-            <Route
-              path="/dashboard"
-              element={<Main currentUser={currentUser} />}
-            />
             <Route path="/branch/branch" element={<Branch />} />
             <Route path="/provider/provider" element={<Provider />} />
             <Route path="/provider/post" element={<FranchisePost />} />
@@ -91,73 +90,11 @@ function App(props) {
               path="/product/material"
               element={<Material currentUser={currentUser} />}
             />
-            <Route
-              path="/product/product"
-              element={<Product currentUser={currentUser} />}
-            />
-            <Route
-              path="/product/inventory"
-              element={<Inventory currentUser={currentUser} />}
-            />
-            <Route
-              path="/product/purchase_order"
-              element={<Purchase_order />}
-            />
-            <Route
-              path="/order"
-              element={<Order currentUser={currentUser} />}
-            />
-            <Route
-              path="/post/notification"
-              element={<NoticeBoard currentUser={currentUser} />}
-            />
-            <Route
-              path="/post/inquiry"
-              element={<InquiryBoard currentUser={currentUser} />}
-            />
-            <Route
-              path="/sales/sales"
-              element={<PaymentSummary currentUser={currentUser} />}
-            />
-            <Route path="/sales/branch" element={<PaymentSummaryByBranch />} />
+            {renderDefaultRoutes()}
           </>
         );
-      case "3": // 지점관리자
-        return (
-          <>
-            <Route
-              path="/dashboard"
-              element={<Main currentUser={currentUser} />}
-            />
-            <Route
-              path="/product/product"
-              element={<Product currentUser={currentUser} />}
-            />
-            <Route
-              path="/product/inventory"
-              element={<Inventory currentUser={currentUser} />}
-            />
-            <Route
-              path="/order"
-              element={<Order currentUser={currentUser} />}
-            />
-            <Route
-              path="/post/notification"
-              element={<NoticeBoard currentUser={currentUser} />}
-            />
-            <Route
-              path="/post/inquiry"
-              element={<InquiryBoard currentUser={currentUser} />}
-            />
-            <Route
-              path="/sales/sales"
-              element={<PaymentSummary currentUser={currentUser} />}
-            />
-            <Route path="/sales/branch" element={<PaymentSummaryByBranch />} />
-          </>
-        );
-      default: // 권한이 없을 경우
-        return;
+      default:
+        return renderDefaultRoutes();
     }
   };
 

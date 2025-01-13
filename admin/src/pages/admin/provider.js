@@ -561,6 +561,7 @@ const Provider = () => {
               ...pagination,
               defaultPageSize: 10,
               showSizeChanger: true,
+              position: ["bottomCenter"],
             }}
           />
 

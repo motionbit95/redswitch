@@ -70,6 +70,12 @@ const SearchBranch = ({
     setPopoverVisible(false); // 팝오버 닫기
   };
 
+  const handleCancel = () => {
+    console.log("전체선택");
+    setSelectedRowKeys([]);
+    setPopoverVisible(false);
+  };
+
   const columns = [
     {
       title: "지점명",
@@ -147,6 +153,7 @@ const SearchBranch = ({
         <Button type="primary" onClick={handleOK}>
           선택
         </Button>
+        <Button onClick={handleCancel}>선택 초기화</Button>
       </Space>
     </div>
   );

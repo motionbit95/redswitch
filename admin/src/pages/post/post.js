@@ -248,7 +248,11 @@ const NoticeBoard = (props) => {
       render: (text, record) => (
         <Space
           style={{
-            display: record.author === currentUser.user_id ? "flex" : "none",
+            display:
+              record.author === currentUser.user_id ||
+              currentUser.permission === "1"
+                ? "flex"
+                : "none",
           }}
         >
           <a

@@ -2,6 +2,9 @@ import React from "react";
 import { Layout, Menu } from "antd";
 import { LogoutOutlined } from "@ant-design/icons";
 import LoginForm from "../login";
+import SearchBranch from "../popover/searchbranch";
+import useSelectedBranch from "../../hook/useSelectedBranch";
+import useCurrentUser from "../../hook/useCurrentUser";
 
 const { Sider } = Layout;
 
@@ -10,10 +13,10 @@ const AppSider = ({
   defaultSelectedKeys,
   defaultOpenKeys,
   menuItems,
-  isLoggedIn,
   setIsLoggedIn,
-  logout,
 }) => {
+  const { selectedBranch, setSelectedBranch } = useSelectedBranch();
+  const { currentUser, isLoggedIn, logout } = useCurrentUser();
   return (
     <Sider
       width={200}
@@ -28,6 +31,24 @@ const AppSider = ({
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
       }}
     >
+      <div
+        style={{
+          backgroundColor: "#f1f1f1",
+          padding: 16,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <SearchBranch
+          setSelectedBranch={(branches) => {
+            setSelectedBranch(branches[0]);
+            // 새로고침
+            window.location.reload();
+          }}
+          selectedBranch={selectedBranch}
+          currentUser={currentUser}
+        />
+      </div>
       <Menu
         mode="inline"
         defaultSelectedKeys={[defaultSelectedKeys]}

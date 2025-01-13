@@ -637,6 +637,7 @@ const BDSMQuestions = () => {
             defaultPageSize: 10,
             showSizeChanger: true,
             onChange: cancel,
+            position: ["bottomCenter"],
           }}
           components={{
             body: {

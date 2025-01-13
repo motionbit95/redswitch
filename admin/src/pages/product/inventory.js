@@ -471,6 +471,7 @@ const Inventory = (props) => {
           ...pagination,
           defaultPageSize: 10,
           showSizeChanger: true,
+          position: ["bottomCenter"],
         }}
       />
       {/* 발주 추가 모달 */}

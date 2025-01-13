@@ -237,7 +237,6 @@ const Material = ({ currentUser }) => {
         ...values,
         product_code: currentMaterial?.product_code,
         provider_id: selectedProvider.id,
-        provider_name: selectedProvider.provider_name,
         provider_code: selectedProvider.provider_code,
       });
       const apiCall = currentMaterial
@@ -245,7 +244,6 @@ const Material = ({ currentUser }) => {
             ...values,
             product_code: currentMaterial.product_code,
             provider_id: selectedProvider.id,
-            provider_name: selectedProvider.provider_name,
             provider_code: selectedProvider.provider_code,
           })
         : AxiosPost("/products/materials", {
@@ -384,6 +382,7 @@ const Material = ({ currentUser }) => {
               ...pagination,
               defaultPageSize: 10,
               showSizeChanger: true,
+              position: ["bottomCenter"],
             }}
           />
 

@@ -449,6 +449,7 @@ const Purchase_order = () => {
           ...pagination,
           defaultPageSize: 10,
           showSizeChanger: true,
+          position: ["bottomCenter"],
         }}
       />
 

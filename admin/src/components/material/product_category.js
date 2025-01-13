@@ -101,7 +101,7 @@ const ProductCategory = ({ materialList }) => {
   };
 
   const handleDelete = async (category) => {
-    const searchMaterialCode = materialList?.map(
+    const searchMaterialCode = materialList.map(
       (material) => material.product_category_code
     );
     try {
@@ -234,7 +234,7 @@ const ProductCategory = ({ materialList }) => {
       <Button onClick={() => setIsOpen(true)}>카테고리 설정</Button>
 
       <Drawer
-        visible={isOpen}
+        open={isOpen}
         size="large"
         onClose={() => setIsOpen(false)}
         extra={
@@ -243,7 +243,7 @@ const ProductCategory = ({ materialList }) => {
               content={addPopoverContent}
               title="카테고리 추가"
               trigger="click"
-              visible={isAddPopoverVisible}
+              open={isAddPopoverVisible}
               onVisibleChange={(visible) =>
                 visible ? handleAdd() : closeAddPopover()
               }

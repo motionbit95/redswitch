@@ -344,6 +344,7 @@ const Spot = () => {
           ...pagination,
           defaultPageSize: 10,
           showSizeChanger: true,
+          position: ["bottomCenter"],
         }}
       />
       {/* 스팟 추가 및 수정 모달 */}

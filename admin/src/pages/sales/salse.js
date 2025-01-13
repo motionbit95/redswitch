@@ -479,7 +479,7 @@ const PaymentSummary = (props) => {
         size="small"
         columns={columns}
         dataSource={dataSource}
-        pagination={{ pageSize: 5 }}
+        pagination={{ pageSize: 5, position: ["bottomCenter"] }}
       />
 
       <DetailModal

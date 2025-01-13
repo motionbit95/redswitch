@@ -18,7 +18,7 @@ const AlarmModal = ({ selectedAlarm, isVisible, onClose }) => {
     <Modal
       centered
       title={selectedAlarm?.alarm_title}
-      visible={isVisible}
+      open={isVisible}
       onCancel={onClose}
       footer={
         <>
