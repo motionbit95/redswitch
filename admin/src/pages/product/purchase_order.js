@@ -40,7 +40,20 @@ const DetailModal = ({
   const [orderDetails, setOrderDetails] = useState([]); // 발주 상세 데이터 상태 관리
   const [materials, setMaterials] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
+  const [providers, setProviders] = useState([]);
 
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const response = await AxiosGet("/providers"); // Replace with your endpoint
+        let total_provider = Array.from(response.data);
+        setProviders(total_provider);
+      } catch (error) {
+        message.error("거래처 데이터를 가져오는 데 실패했습니다.");
+      }
+    };
+    fetchProviders();
+  }, []);
   // 발주 내역 불러오기
   useEffect(() => {
     const fetchPurchaseOrder = async () => {
@@ -82,12 +95,14 @@ const DetailModal = ({
         (material) => material.pk === order.material_pk
       );
       if (data.length > 0) {
-        console.log(">>>>>>", data[0]);
         filteredOrders.push({
           ...order,
           product_name: data[0].product_name,
           product_code: data[0].product_code,
-          provider_name: data[0].provider_name,
+          provider_name:
+            providers.filter(
+              (provider) => provider.id === data[0].provider_id
+            )[0].provider_name || "",
           product_price: data[0].product_price,
         });
       }
@@ -118,7 +133,7 @@ const DetailModal = ({
       key: "ordered_cnt",
     },
     {
-      title: "거래처 명",
+      title: "거래처명",
       dataIndex: "provider_name",
       key: "provider_name",
     },
