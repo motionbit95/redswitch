@@ -215,7 +215,16 @@ const Payment = () => {
               <Form.Item label="배송 메세지" name="delivery_message">
                 <Input placeholder="배송시 요청사항을 입력해주세요." />
               </Form.Item>
-              <Form.Item label="연락처" name="customer_phone">
+              <Form.Item
+                label="연락처"
+                name="customer_phone"
+                help={
+                  <span style={{ fontSize: "12px", whiteSpace: "pre-line" }}>
+                    {`연락처 미기재시 주문내역을 확인할 수 없습니다. 
+                    주문내역 확인을 원하시면 결제 완료 후 결제링크를 저장을 클릭하세요.`}
+                  </span>
+                }
+              >
                 <Input placeholder="연락처를 입력해주세요.(선택)" />
               </Form.Item>
             </Form>

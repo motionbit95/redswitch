@@ -168,6 +168,7 @@ function ProductListPage(props) {
                   product={product}
                   theme={theme}
                   isCertified={isCertified}
+                  handleOpen={props.handleOpen}
                 />
               </Col>
             ))}

@@ -70,7 +70,7 @@ const App = (props) => {
 
   return (
     <div style={{ overflowX: "hidden", minHeight: "100vh" }}>
-      <AdCarousel position={0} />
+      {/* <AdCarousel position={0} /> */}
       <Space direction={size === "small" ? "vertical" : "horizontal"}>
         <Row>
           <Col
@@ -261,7 +261,11 @@ const App = (props) => {
             <div style={{ paddingBlock: 16 }}>
               <Row gutter={[16, 16]}>
                 <Col span={12}>
-                  <Button size="large" style={{ width: "100%" }}>
+                  <Button
+                    size="large"
+                    style={{ width: "100%" }}
+                    onClick={() => navigate("/spot")}
+                  >
                     설치지점찾기
                   </Button>
                 </Col>
@@ -372,14 +376,20 @@ const App = (props) => {
         <Typography.Title level={1} className={`title-${size}`}>
           당신의 BDSM 유형을 알아보세요
         </Typography.Title>
-        <Typography.Paragraph className={`text-${size}`}>
-          테스트는 100% 무료이며 익명으로 귀하의 정보가 필요하지 않습니다.
+        <Typography.Paragraph
+          className={`text-${size}`}
+          style={{ marginBottom: 0 }}
+        >
+          테스트는 100% 무료이며
         </Typography.Paragraph>
-        <Button size="large" type="primary" onClick={() => navigate("/test")}>
+        <Typography.Paragraph className={`text-${size}`}>
+          익명으로 귀하의 정보가 필요하지 않습니다.
+        </Typography.Paragraph>
+        {/* <Button size="large" type="primary" onClick={() => navigate("/test")}>
           🔥 BDSM 테스트하러 가기
-        </Button>
+        </Button> */}
       </div>
-      <AdCarousel position={1} />
+      {/* <AdCarousel position={1} /> */}
     </div>
   );
 };

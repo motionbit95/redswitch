@@ -4,7 +4,7 @@ import { InboxOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { productCardStyles } from "../styles"; // Import the styles
 
-const ProductCard = React.memo(({ product, theme, isCertified }) => {
+const ProductCard = React.memo(({ product, theme, isCertified, ...props }) => {
   const [imageState, setImageState] = useState({ loading: true, error: false });
   const navigate = useNavigate();
 
@@ -28,7 +28,8 @@ const ProductCard = React.memo(({ product, theme, isCertified }) => {
     if (isCertified) {
       navigate(`/product/${product.PK}`);
     } else {
-      message.warning("성인인증을 진행해주세요!");
+      // message.warning("성인인증을 진행해주세요!");
+      props.handleOpen();
     }
   }, [navigate, isCertified, product.PK]);
 

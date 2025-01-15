@@ -12,6 +12,8 @@ import {
   useNavigate,
 } from "react-router-dom";
 import TestResult from "./page/result";
+import Spot from "./page/spot";
+import AdCarousel from "./component/advertise";
 
 const darkTheme = {
   components: {
@@ -159,6 +161,7 @@ const App = () => {
           color: theme === "dark" ? "#fff" : "#000",
         }}
       >
+        <AdCarousel position={0} />
         <BrowserRouter>
           <Routes>
             <Route
@@ -172,6 +175,10 @@ const App = () => {
             <Route
               path="/view"
               element={<View theme={theme} setPage={setPage} />}
+            />
+            <Route
+              path="/spot"
+              element={<Spot theme={theme} setPage={setPage} />}
             />
             <Route
               path="/result/*"
@@ -189,6 +196,7 @@ const App = () => {
             right: "20px",
           }}
         /> */}
+        <AdCarousel position={1} />
       </div>
     </ConfigProvider>
   );

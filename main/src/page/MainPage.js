@@ -166,6 +166,7 @@ function MainPage(props) {
             theme={props.theme}
             branch={branchInfo}
             isCertified={isCertified}
+            handleOpen={() => setIsCertModalVisible(true)}
           />
         </>
       ) : (

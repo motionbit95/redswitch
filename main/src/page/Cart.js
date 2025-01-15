@@ -9,6 +9,7 @@ import {
   Image,
   InputNumber,
   Checkbox,
+  message,
 } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { cartStyles } from "../styles"; // Import the styles
@@ -196,6 +197,11 @@ const Cart = ({ token, theme }) => {
 
   // 주문서 저장
   const handleAddOrder = async () => {
+    if (selectedItems.length === 0 || totalAmount === 0) {
+      message.error("선택된 상품이 없습니다.");
+      return;
+    }
+
     const order = {
       products: [],
       amt: totalAmount,
