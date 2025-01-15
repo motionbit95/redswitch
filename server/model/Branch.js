@@ -7,6 +7,7 @@ class Branch {
     this.id = data.id || null; // 데이터베이스에서 자동 생성됨
     this.branch_name = data.branch_name;
     this.branch_address = data.branch_address;
+    this.branch_address_detail = data.branch_address_detail;
     this.branch_contact = data.branch_contact;
     this.branch_room_cnt = data.branch_room_cnt;
     this.updated_at = data.updated_at || null;
@@ -32,6 +33,7 @@ class Branch {
     return {
       branch_name: this.branch_name,
       branch_address: this.branch_address,
+      branch_address_detail: this.branch_address_detail,
       branch_contact: this.branch_contact,
       branch_room_cnt: this.branch_room_cnt,
       updated_at: this.updated_at,

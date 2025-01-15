@@ -190,29 +190,42 @@ const BranchModal = ({
             span={2}
             labelStyle={{ whiteSpace: "nowrap" }}
           >
-            <Form.Item
-              name="branch_address"
-              rules={[{ required: true, message: "지점 주소를 입력해주세요" }]}
-              style={{ marginBottom: 0 }}
-            >
-              <Row gutter={8} style={{ width: "100%" }}>
-                <Col span={18}>
-                  <Input readOnly value={address} />
-                </Col>
-                <Col span={6}>
-                  <KakaoAddressSearch
-                    onSelectAddress={(selectedAddress, sido, sigungu) => {
-                      form.setFieldsValue({
-                        branch_address: selectedAddress,
-                        branch_sido: sido,
-                        branch_sigungu: sigungu,
-                      });
-                      setAddress(selectedAddress);
-                    }}
-                  />
-                </Col>
-              </Row>
-            </Form.Item>
+            <Space direction="vertical" style={{ width: "100%" }}>
+              <Form.Item
+                name="branch_address"
+                rules={[
+                  { required: true, message: "지점 주소를 입력해주세요" },
+                ]}
+                style={{ marginBottom: 0 }}
+              >
+                <Row gutter={8} style={{ width: "100%" }}>
+                  <Col span={18}>
+                    <Input readOnly value={address} />
+                  </Col>
+                  <Col span={6}>
+                    <KakaoAddressSearch
+                      onSelectAddress={(selectedAddress, sido, sigungu) => {
+                        form.setFieldsValue({
+                          branch_address: selectedAddress,
+                          branch_sido: sido,
+                          branch_sigungu: sigungu,
+                        });
+                        setAddress(selectedAddress);
+                      }}
+                    />
+                  </Col>
+                </Row>
+              </Form.Item>
+              <Form.Item
+                name="branch_address_detail"
+                rules={[
+                  { required: true, message: "상세 주소를 입력해주세요" },
+                ]}
+                style={{ marginBottom: 0 }}
+              >
+                <Input placeholder="상세 주소를 입력해주세요." />
+              </Form.Item>
+            </Space>
           </Descriptions.Item>
           <Descriptions.Item
             label={
@@ -467,11 +480,13 @@ function Branch(props) {
   const handleSubmit = async (values) => {
     try {
       let branchData = { ...values };
+      console.log(branchData);
 
       if (currentBranch) {
-        await AxiosPut(`/branches/${currentBranch.id}`, branchData, {
-          headers: { "Content-Type": "application/json" },
-        });
+        AxiosPut(`branches/${currentBranch.id}`, branchData);
+        // await AxiosPut(`/branches/${currentBranch.id}`, branchData, {
+        //   headers: { "Content-Type": "application/json" },
+        // });
 
         setBranchs(
           branchs.map((branch) =>

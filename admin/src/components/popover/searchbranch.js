@@ -66,6 +66,7 @@ const SearchBranch = ({
 
     // console.log(selectedBranches); // selectedBranches는 선택된 지점들의 배열입니다.
     setSelectedBranch(selectedBranches); // 상태를 업데이트할 때 전체 배열로 설정
+    console.log(selectedBranch);
 
     setPopoverVisible(false); // 팝오버 닫기
   };

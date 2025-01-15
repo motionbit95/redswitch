@@ -230,10 +230,11 @@ export const PostDetailModal = ({
   useEffect(() => {
     AxiosGet("/accounts")
       .then((res) => {
-        const salesAccount = res.data.filter(
-          (account) => account.permission === "2"
-        );
-        setSalesAccounts(salesAccount);
+        // const salesAccount = res.data.filter(
+        //   (account) => account.permission === "2"
+        // );
+        // setSalesAccounts(salesAccount);
+        setSalesAccounts(res.data);
       })
       .catch((err) => {
         console.error(err);

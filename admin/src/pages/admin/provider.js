@@ -127,31 +127,42 @@ const ProviderModal = ({
             label="거래처 주소"
             labelStyle={{ whiteSpace: "nowrap" }}
           >
-            <Form.Item
-              name="provider_address"
-              rules={[
-                { required: true, message: "거래처 주소를 입력해주세요" },
-              ]}
-              style={{ marginBottom: 0 }}
-            >
-              <Row gutter={8} style={{ width: "100%" }}>
-                <Col span={18}>
-                  <Input readOnly value={address} />
-                </Col>
-                <Col span={6}>
-                  <KakaoAddressSearch
-                    onSelectAddress={(selectedAddress, sido, sigungu) => {
-                      form.setFieldsValue({
-                        provider_address: selectedAddress,
-                        provider_sido: sido,
-                        provider_sigungu: sigungu,
-                      });
-                      setAddress(selectedAddress);
-                    }}
-                  />
-                </Col>
-              </Row>
-            </Form.Item>
+            <Space direction="vertical" style={{ width: "100%" }}>
+              <Form.Item
+                name="provider_address"
+                rules={[
+                  { required: true, message: "거래처 주소를 입력해주세요" },
+                ]}
+                style={{ marginBottom: 0 }}
+              >
+                <Row gutter={8} style={{ width: "100%" }}>
+                  <Col span={18}>
+                    <Input readOnly value={address} />
+                  </Col>
+                  <Col span={6}>
+                    <KakaoAddressSearch
+                      onSelectAddress={(selectedAddress, sido, sigungu) => {
+                        form.setFieldsValue({
+                          provider_address: selectedAddress,
+                          provider_sido: sido,
+                          provider_sigungu: sigungu,
+                        });
+                        setAddress(selectedAddress);
+                      }}
+                    />
+                  </Col>
+                </Row>
+              </Form.Item>
+              <Form.Item
+                name="provider_address_detail"
+                rules={[
+                  { required: true, message: "상세 주소를 입력해주세요" },
+                ]}
+                style={{ marginBottom: 0 }}
+              >
+                <Input placeholder="상세 주소를 입력해주세요." />
+              </Form.Item>
+            </Space>
           </Descriptions.Item>
 
           <Descriptions.Item
@@ -393,6 +404,18 @@ const Provider = () => {
   // Handle form submit for provider creation or update
   const handleSubmit = async (values) => {
     try {
+      const isDuplicateCode = providers.some(
+        (provider) => provider.provider_code === values.provider_code
+      );
+
+      if (
+        isDuplicateCode &&
+        (!currentProvider ||
+          currentProvider.provider_code !== values.provider_code)
+      ) {
+        message.error("이미 존재하는 거래처 코드입니다.");
+        return;
+      }
       let providerData = { ...values };
 
       try {
