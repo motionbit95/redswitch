@@ -49,7 +49,8 @@ const SearchBranch = ({
 
   const handleOK = () => {
     if (!selectedRowKeys.length) {
-      message.warning("지점을 선택해주세요.");
+      // message.warning("지점을 선택해주세요.");
+      setSelectedBranch([]);
       return;
     }
 
@@ -69,12 +70,6 @@ const SearchBranch = ({
     console.log(selectedBranch);
 
     setPopoverVisible(false); // 팝오버 닫기
-  };
-
-  const handleCancel = () => {
-    console.log("전체선택");
-    setSelectedRowKeys([]);
-    setPopoverVisible(false);
   };
 
   const columns = [
@@ -118,7 +113,7 @@ const SearchBranch = ({
     onChange: onSelectChange,
   };
 
-  const searchProviders = (value) => {
+  const searchBranchs = (value) => {
     fetchBranches(value.search);
   };
 
@@ -128,7 +123,7 @@ const SearchBranch = ({
         form={form}
         layout="inline"
         style={{ marginBottom: 16 }}
-        onFinish={searchProviders}
+        onFinish={searchBranchs}
       >
         <Form.Item name="search" label="검색">
           <Input
@@ -154,7 +149,6 @@ const SearchBranch = ({
         <Button type="primary" onClick={handleOK}>
           선택
         </Button>
-        <Button onClick={handleCancel}>선택 초기화</Button>
       </Space>
     </div>
   );

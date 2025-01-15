@@ -26,17 +26,21 @@ const AppSider = ({
         left: 0,
         height: "calc(100vh - 64px)",
         background: colorBgContainer,
-        overflow: "auto",
+        overflowY: "auto",
         zIndex: 99,
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
       }}
     >
       <div
         style={{
+          position: "sticky", // 상단 고정
+          top: 0, // Sider 내부 상단 위치
           backgroundColor: "#f1f1f1",
           padding: 16,
+          zIndex: 100, // 다른 요소 위에 표시
           display: "flex",
           justifyContent: "center",
+          borderBottom: "1px solid #ddd", // 구분선 추가 (선택 사항)
         }}
       >
         <SearchBranch

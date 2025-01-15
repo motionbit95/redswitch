@@ -330,6 +330,7 @@ class Product {
     this.product_image = data.product_image || null;
     this.product_category_code = data.product_category_code;
     this.provider_id = data.provider_id || null;
+    this.provider_name = data.provider_name || null;
   }
 
   toJSON() {
@@ -349,6 +350,7 @@ class Product {
       product_image: this.product_image,
       product_category_code: this.product_category_code,
       provider_id: this.provider_id,
+      provider_name: this.provider_name,
     };
   }
 

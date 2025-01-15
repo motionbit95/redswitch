@@ -297,16 +297,15 @@ const ProductModal = (props) => {
     };
     fetchCategories();
 
-    const fetchProviders = async () => {
+    const fetchProviderNames = async () => {
       try {
         const response = await AxiosGet("/providers");
         setProviders(response.data);
-        console.log(selectedMaterial, response.data);
       } catch (error) {
         message.error("거래처 불러오기 실패");
       }
     };
-    fetchProviders();
+    fetchProviderNames();
   }, []);
 
   useEffect(() => {

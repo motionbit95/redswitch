@@ -66,18 +66,46 @@ const ProviderModal = ({
             >
               취소
             </Button>
-            <Button
-              key="submit"
-              type="primary"
-              onClick={() => {
-                form.submit();
-              }}
-            >
-              {isEditMode ? "수정 완료" : "추가 완료"}
-            </Button>
+            {isEditMode ? (
+              <Popconfirm
+                title="수정하시겠습니까?"
+                description={
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span>상품에 대한 정보는 수정되지않습니다.</span>
+                    <span>기존에 등록된 상품을 추가로 수정해주세요.</span>
+                  </div>
+                }
+                onconfirm={() => form.submit}
+              >
+                <Button key="submit" type="primary">
+                  수정 완료
+                </Button>
+              </Popconfirm>
+            ) : (
+              <Button
+                key="submit"
+                type="primary"
+                onClick={() => {
+                  form.submit();
+                }}
+              >
+                추가 완료
+              </Button>
+            )}
           </Space>
           {isEditMode && (
-            <Popconfirm title="거래처를 삭제하시겠습니까?" onConfirm={onDelete}>
+            <Popconfirm
+              title="거래처를 삭제하시겠습니까?"
+              description={
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <span>
+                    거래처 삭제 시 등록 되어있는 상품은 삭제되지않습니다.
+                  </span>
+                  <span>기존에 등록되어있는 상품을 제거해주세요.</span>
+                </div>
+              }
+              onConfirm={onDelete}
+            >
               <Button danger>삭제</Button>
             </Popconfirm>
           )}

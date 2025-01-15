@@ -65,7 +65,9 @@ const SearchProvider = ({
 
   const handleOK = () => {
     if (!selectedRowKeys.length) {
-      message.warning("거래처를 선택해주세요.");
+      // message.warning("거래처를 선택해주세요.");
+      setSelectedProvider([]);
+      setPopoverVisible(false);
       return;
     }
 
