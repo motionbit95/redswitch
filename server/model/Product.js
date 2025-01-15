@@ -315,7 +315,7 @@ class Material {
 class Product {
   constructor(data) {
     this.PK = data.PK || null; // 데이터베이스에서 자동 생성됨
-    this.material_id = data.material_id;
+    this.material_id = data.material_id || null;
     this.product_code = data.product_code;
     this.branch_id = data.branch_id;
     this.product_name = data.product_name;

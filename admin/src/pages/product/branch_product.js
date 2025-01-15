@@ -227,9 +227,8 @@ const ProductModal = (props) => {
   const { open, setOpen, currentProduct } = props;
   // const [visible, setVisible] = useState(false);
   const { selectedBranch } = useSelectedBranch();
-  const [selectedMaterial, setSelectedMaterial] = useState(
-    currentProduct || null
-  );
+  const [selectedMaterial, setSelectedMaterial] = useState();
+  // currentProduct || null
   const [product, setProduct] = useState(null);
   const [providers, setProviders] = useState([]);
 
@@ -243,14 +242,12 @@ const ProductModal = (props) => {
       if (!currentProduct) {
         // 추가 모드
         form.resetFields();
-        selectedMaterial && setSelectedMaterial(null);
         setProduct(null);
         setRelatedProducts([]);
       } else {
         // 수정 모드
         form.setFieldsValue(currentProduct);
         setProduct(currentProduct);
-        setSelectedMaterial(currentProduct);
         setRelatedProducts(currentProduct.related_products);
       }
     }
@@ -283,21 +280,13 @@ const ProductModal = (props) => {
       try {
         const response = await AxiosGet("/products/categories");
         setCategories(response.data);
-        console.log(
-          selectedMaterial?.product_category_code,
-          response.data.find(
-            (category) =>
-              category.product_category_code ===
-              selectedMaterial?.product_category_code
-          )
-        );
       } catch (error) {
         message.error("카테고리 불러오기 실패");
       }
     };
     fetchCategories();
 
-    const fetchProviderNames = async () => {
+    const fetchProviders = async () => {
       try {
         const response = await AxiosGet("/providers");
         setProviders(response.data);
@@ -305,24 +294,23 @@ const ProductModal = (props) => {
         message.error("거래처 불러오기 실패");
       }
     };
-    fetchProviderNames();
+    fetchProviders();
   }, []);
-
-  useEffect(() => {
-    if (selectedMaterial) {
-      form.setFieldsValue(selectedMaterial);
-    }
-  }, [selectedMaterial]);
 
   const copyMaterialToProduct = (material) => {
     console.log("copyMaterialToProduct", material);
     form.setFieldsValue(material);
     setProduct(material);
-    setSelectedMaterial(material);
   };
 
   const onFinish = async (values) => {
-    console.log("Success:", values);
+    console.log(
+      "Success:",
+      values,
+      selectedBranch.id,
+      product.provider_id,
+      product.blind_image
+    );
 
     console.log(relatedProducts);
     try {
@@ -330,6 +318,8 @@ const ProductModal = (props) => {
         await AxiosPut(`/products/${currentProduct.PK}`, {
           ...values,
           related_products: relatedProducts,
+          provider_id: product.provider_id,
+          blind_image: product.blind_image,
         })
           .then((response) => {
             console.log("response", response);
@@ -342,7 +332,9 @@ const ProductModal = (props) => {
         const response = await AxiosPost("/products", {
           ...values,
           branch_id: selectedBranch.id,
-          material_id: selectedMaterial.pk,
+          provider_id: product.provider_id,
+          material_id: product.pk,
+          blind_image: product.blind_image,
         });
         console.log("response", response);
         message.success("상품 추가 성공");
@@ -350,13 +342,13 @@ const ProductModal = (props) => {
 
       setOpen(false);
     } catch (error) {
+      console.log(error);
       message.error("상품 추가 실패");
     }
   };
 
   const onClose = () => {
     setOpen(false);
-    setSelectedMaterial(null);
     setProduct(null);
     setRelatedProducts([]);
   };
@@ -421,13 +413,8 @@ const ProductModal = (props) => {
             </Item>
             <Item label="상품코드" labelStyle={{ whiteSpace: "nowrap" }}>
               <Form.Item name="product_code" style={{ margin: 0 }}>
-                {selectedMaterial?.product_code}
+                {product?.product_code}
               </Form.Item>
-            </Item>
-            <Item label="거래처" labelStyle={{ whiteSpace: "nowrap" }}>
-              <FormItem name="provider_name" style={{ margin: 0 }}>
-                {selectedMaterial?.provider_name}
-              </FormItem>
             </Item>
             <Item label="카테고리" labelStyle={{ whiteSpace: "nowrap" }}>
               <Form.Item name="product_category_code" style={{ margin: 0 }}>
@@ -435,10 +422,19 @@ const ProductModal = (props) => {
                   categories.find(
                     (category) =>
                       category.product_category_code ===
-                      selectedMaterial?.product_category_code
+                      product?.product_category_code
                   )?.product_category
                 }
               </Form.Item>
+            </Item>
+            <Item label="거래처" labelStyle={{ whiteSpace: "nowrap" }}>
+              <FormItem name="provider_name" style={{ margin: 0 }}>
+                {
+                  providers.find(
+                    (provider) => provider.id === product?.provider_id
+                  )?.provider_name
+                }
+              </FormItem>
             </Item>
             <Item label="판매가격">
               <Form.Item name="product_price" style={{ margin: 0 }}>
