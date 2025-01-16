@@ -13,6 +13,7 @@ const InquiryList = ({ currentUser }) => {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false); // 상세 모달 가시성 상태
   const [currentInquiry, setCurrentInquiry] = useState(null); // 현재 선택된 문의
   const [loading, setLoading] = useState(true); // 로딩 상태 추가
+  const [filteredInquiries, setFilteredInquiries] = useState([]); // 계정권한 및 지점에 대해 필터된 게시판 목록
 
   // API를 통해 문의 데이터를 가져옵니다.
   useEffect(() => {
@@ -26,9 +27,33 @@ const InquiryList = ({ currentUser }) => {
         setLoading(false); // 로딩 상태 종료
       }
     };
-
     fetchInquiries();
   }, []);
+
+  useEffect(() => {
+    console.log(inquiries, currentUser);
+    if (inquiries.length > 0 && currentUser) {
+      const filtered = inquiries.filter((inquiry) => {
+        // 계정 권한 "1"인 경우 전체 목록을 불러옴
+        if (currentUser?.permission === "1") {
+          return true;
+        }
+
+        // 작성자 필터링: author와 현재 사용자 이름이 같은 경우
+        const isAuthorMatch = inquiry?.author === currentUser?.user_id;
+
+        // 지점 필터링: branch_id가 존재하면 현재 사용자의 branch_id와 같아야 함
+        const isBranchMatch =
+          !inquiry?.branch_id || inquiry?.branch_id === currentUser?.branch_id;
+
+        // 조건에 따라 필터링
+        return isAuthorMatch || isBranchMatch;
+      });
+
+      setFilteredInquiries(filtered);
+      console.log("filteredInquiries", filteredInquiries);
+    }
+  }, [inquiries, currentUser]); // inquiries와 currentUser가 변경될 때 필터링 실행
 
   /**
    * 더보기 버튼 클릭 시 처리
@@ -82,7 +107,7 @@ const InquiryList = ({ currentUser }) => {
             </div>
           )
         }
-        dataSource={inquiries}
+        dataSource={filteredInquiries}
         renderItem={(item) => (
           <List.Item>
             <Skeleton title={false} loading={loading} active>

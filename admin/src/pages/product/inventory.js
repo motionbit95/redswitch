@@ -439,16 +439,9 @@ const Inventory = (props) => {
   ];
 
   return (
-    <div>
-      <Row
-        style={{
-          display: "flex",
-          width: "100%",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 16,
-        }}
-      >
+    <Space direction="vertical" style={{ width: "100%" }}>
+      <Space style={{ width: "100%", justifyContent: "space-between" }}>
+        <div />
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -457,7 +450,7 @@ const Inventory = (props) => {
         >
           발주 추가
         </Button>
-      </Row>
+      </Space>
       <Table
         size="small"
         columns={columns}
@@ -484,7 +477,7 @@ const Inventory = (props) => {
           setSelectedRowKeys([]);
         }}
       />
-    </div>
+    </Space>
   );
 };
 

@@ -44,6 +44,8 @@ const InquiryBoard = (props) => {
 
   const [selectedBranch, setSelectedBranch] = useState();
 
+  const [filteredInquiries, setFilteredInquiries] = useState();
+
   const { currentUser } = props;
 
   useEffect(() => {
@@ -73,11 +75,35 @@ const InquiryBoard = (props) => {
       });
   }, []);
 
+  useEffect(() => {
+    if (inquiries.length > 0 && currentUser) {
+      const sortedinquiries = [
+        ...inquiries.filter((inquiry) => inquiry.sticky), // sticky가 true인 항목
+        ...inquiries.filter((inquiry) => !inquiry.sticky), // 나머지 항목들
+      ];
+      const filtered = sortedinquiries.filter((inquiry) => {
+        // 계정 권한 "1"인 경우 전체 목록을 불러옴
+        if (currentUser?.permission === "1") {
+          return true;
+        }
+
+        // 작성자 필터링: author와 현재 사용자 이름이 같은 경우
+        const isAuthorMatch = inquiry?.author === currentUser?.user_id;
+
+        // 지점 필터링: branch_id가 존재하면 현재 사용자의 branch_id와 같아야 함
+        const isBranchMatch =
+          !inquiry?.branch_id || inquiry?.branch_id === currentUser?.branch_id;
+
+        // 조건에 따라 필터링
+        return isAuthorMatch || isBranchMatch;
+      });
+
+      setFilteredInquiries(filtered);
+      console.log("filteredInquiries", filteredInquiries);
+    }
+  }, [inquiries, currentUser]); // inquiries와 currentUser가 변경될 때 필터링 실행
+
   // sticky 필드가 true인 항목들을 최상단에 배치
-  const sortedinquiries = [
-    ...inquiries.filter((inquiry) => inquiry.sticky), // sticky가 true인 항목
-    ...inquiries.filter((inquiry) => !inquiry.sticky), // 나머지 항목들
-  ];
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
@@ -106,19 +132,6 @@ const InquiryBoard = (props) => {
 
   // 게시판 상세보기 모달 열기
   const showDetailModal = (inquiry) => {
-    const hasAccess =
-      inquiry.allowedUsers?.includes(currentUser.id) ||
-      inquiry.author === currentUser.user_id ||
-      (inquiry.groups?.includes("본사관리자") &&
-        currentUser.permission === "1") ||
-      (inquiry.groups?.includes("지사관리자") &&
-        currentUser.permission === "2") ||
-      (inquiry.groups?.includes("지점관리자") &&
-        currentUser.permission === "3");
-    if (!hasAccess) {
-      message.error("열람 권한이 없습니다.");
-      return;
-    }
     setCurrentInquiry(inquiry);
     setIsDetailModalVisible(true);
   };
@@ -249,7 +262,7 @@ const InquiryBoard = (props) => {
       width: 150,
     },
     {
-      title: "지점/지사",
+      title: "지점",
       dataIndex: "branch_id",
       key: "branch_id",
 
@@ -342,7 +355,7 @@ const InquiryBoard = (props) => {
       <Table
         columns={columns}
         rowKey="id"
-        dataSource={sortedinquiries}
+        dataSource={filteredInquiries}
         rowClassName={rowClassName}
         size="small"
       />
@@ -397,20 +410,22 @@ const InquiryBoard = (props) => {
           </Row>
 
           <Row gutter={8}>
-            <Col span={4}>
-              <Checkbox
-                checked={ischecked} // isChecked 상태를 반영
-                onChange={toggleChecked} // 체크박스 클릭 시 상태 변경
-              >
-                직접 지정
-              </Checkbox>
-              <Tooltip
-                placement="bottom"
-                title="특정 사용자에게만 열람 권한을 부여할 경우 체크해주세요."
-              >
-                <InfoCircleOutlined />
-              </Tooltip>
-            </Col>
+            {currentUser.permission === "1" && (
+              <Col span={4}>
+                <Checkbox
+                  checked={ischecked} // isChecked 상태를 반영
+                  onChange={toggleChecked} // 체크박스 클릭 시 상태 변경
+                >
+                  직접 지정
+                </Checkbox>
+                <Tooltip
+                  placement="bottom"
+                  title="특정 사용자에게만 열람 권한을 부여할 경우 체크해주세요."
+                >
+                  <InfoCircleOutlined />
+                </Tooltip>
+              </Col>
+            )}
             <Col span={20}>
               {currentUser.permission === "1" && (
                 <>
