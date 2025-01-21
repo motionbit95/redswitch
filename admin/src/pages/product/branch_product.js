@@ -3,6 +3,7 @@ import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import Filter from "../../components/filter";
 import {
   Button,
+  Checkbox,
   Col,
   Descriptions,
   Form,
@@ -11,6 +12,7 @@ import {
   message,
   Modal,
   Popconfirm,
+  Row,
   Select,
   Space,
   Table,
@@ -230,10 +232,12 @@ const ProductModal = (props) => {
   const [selectedMaterial, setSelectedMaterial] = useState();
   // currentProduct || null
   const [product, setProduct] = useState(null);
+  const [materials, setMaterials] = useState([]);
   const [providers, setProviders] = useState([]);
 
   const [categories, setCategories] = useState([]);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [ischecked, setIschecked] = useState(false);
 
   const [form] = Form.useForm();
 
@@ -244,11 +248,19 @@ const ProductModal = (props) => {
         form.resetFields();
         setProduct(null);
         setRelatedProducts([]);
+        setIschecked(false);
       } else {
         // 수정 모드
         form.setFieldsValue(currentProduct);
         setProduct(currentProduct);
         setRelatedProducts(currentProduct.related_products);
+        if (currentProduct.product_code === "지점 전용 상품") {
+          setProduct((prevProduct) => ({
+            ...prevProduct,
+            product_code: "지점 전용 상품",
+            product_category_code: "기타",
+          }));
+        }
       }
     }
   }, [open]);
@@ -295,6 +307,16 @@ const ProductModal = (props) => {
       }
     };
     fetchProviders();
+
+    const fetchMaterials = async () => {
+      try {
+        const response = await AxiosGet("/products/materials");
+        setMaterials(response.data);
+      } catch (error) {
+        message.error("매린 불러오기 실패");
+      }
+    };
+    fetchMaterials();
   }, []);
 
   const copyMaterialToProduct = (material) => {
@@ -304,21 +326,12 @@ const ProductModal = (props) => {
   };
 
   const onFinish = async (values) => {
-    console.log(
-      "Success:",
-      values,
-      selectedBranch.id,
-      product.provider_id,
-      product.blind_image
-    );
-
-    console.log(relatedProducts);
+    console.log("values", values, product);
     try {
       if (currentProduct) {
         await AxiosPut(`/products/${currentProduct.PK}`, {
           ...values,
           related_products: relatedProducts,
-          provider_id: product.provider_id,
           blind_image: product.blind_image,
         })
           .then((response) => {
@@ -332,9 +345,12 @@ const ProductModal = (props) => {
         const response = await AxiosPost("/products", {
           ...values,
           branch_id: selectedBranch.id,
-          provider_id: product.provider_id,
-          material_id: product.pk,
-          blind_image: product.blind_image,
+          material_id: ischecked ? null : product.pk,
+          blind_image: product.blind_image || null,
+          product_code: ischecked ? "지점 전용 상품" : product.product_code,
+          product_category_code: ischecked
+            ? "기타"
+            : product.product_category_code,
         });
         console.log("response", response);
         message.success("상품 추가 성공");
@@ -351,6 +367,25 @@ const ProductModal = (props) => {
     setOpen(false);
     setProduct(null);
     setRelatedProducts([]);
+  };
+
+  const handleCheckboxChange = (e) => {
+    const check = e.target.checked;
+    setIschecked(check); // 상태 업데이트
+    setProduct((prevProduct) => ({
+      ...prevProduct,
+      product_code: check ? "지점 전용 상품" : null,
+      product_category_code: check
+        ? "기타"
+        : prevProduct?.product_category_code,
+    }));
+  };
+
+  const handleClear = () => {
+    // 입력 필드 값과 관련 데이터 초기화
+    setProduct(null); // 제품 정보 초기화
+    setRelatedProducts([]);
+    form.resetFields();
   };
 
   return (
@@ -375,9 +410,11 @@ const ProductModal = (props) => {
         ]} // footer를 비워줌
         width={800}
       >
-        {/* 상품 추가 컴포넌트 */}
-        {selectedBranch && <h3>{selectedBranch.branch_name}</h3>}
-
+        <Space style={{ width: "100%", justifyContent: "space-between" }}>
+          {/* 상품 추가 컴포넌트 */}
+          {selectedBranch && <h3>{selectedBranch.branch_name}</h3>}
+          <Checkbox onChange={handleCheckboxChange}>지점 전용 상품</Checkbox>
+        </Space>
         <Form form={form} layout="vertical">
           <Descriptions
             title=""
@@ -399,17 +436,28 @@ const ProductModal = (props) => {
                 </Space>
               }
             >
-              <Form.Item name="product_name" style={{ margin: 0 }}>
-                <Input
-                  value={product?.product_name}
-                  onChange={(e) =>
-                    setProduct({
-                      ...product,
-                      product_name: e.target.value,
-                    })
-                  }
-                />
-              </Form.Item>
+              <Row style={{ width: "100%" }} gutter={8}>
+                <Col span={20}>
+                  <Form.Item name="product_name" style={{ margin: 0 }}>
+                    <Input
+                      value={product?.product_name}
+                      onChange={(e) =>
+                        setProduct({
+                          ...product,
+                          product_name: e.target.value,
+                        })
+                      }
+                      // allowClear={product?.product_name ? true : false}
+                      // onClear={handleClear}
+                    />
+                  </Form.Item>
+                </Col>
+                {product?.product_name && (
+                  <Col>
+                    <Button onClick={handleClear}>Reset</Button>
+                  </Col>
+                )}
+              </Row>
             </Item>
             <Item label="상품코드" labelStyle={{ whiteSpace: "nowrap" }}>
               <Form.Item name="product_code" style={{ margin: 0 }}>
@@ -418,22 +466,28 @@ const ProductModal = (props) => {
             </Item>
             <Item label="카테고리" labelStyle={{ whiteSpace: "nowrap" }}>
               <Form.Item name="product_category_code" style={{ margin: 0 }}>
-                {
-                  categories.find(
-                    (category) =>
-                      category.product_category_code ===
-                      product?.product_category_code
-                  )?.product_category
-                }
+                {ischecked ? (
+                  product?.product_category_code
+                ) : (
+                  <>
+                    {
+                      categories.find(
+                        (category) =>
+                          category.product_category_code ===
+                          product?.product_category_code
+                      )?.product_category
+                    }
+                  </>
+                )}
               </Form.Item>
             </Item>
             <Item label="거래처" labelStyle={{ whiteSpace: "nowrap" }}>
               <FormItem name="provider_name" style={{ margin: 0 }}>
-                {
-                  providers.find(
-                    (provider) => provider.id === product?.provider_id
-                  )?.provider_name
-                }
+                {product?.provider_name
+                  ? product?.provider_name
+                  : materials.find(
+                      (material) => material.pk === product?.material_id
+                    )?.provider_name}
               </FormItem>
             </Item>
             <Item label="판매가격">

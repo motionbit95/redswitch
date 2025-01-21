@@ -311,6 +311,19 @@ const Inventory = (props) => {
     setEditedInventory({});
   };
 
+  const handleAdd = () => {
+    console.log(">>>>>>>>", selectedProducts);
+    const hasBranchOnlyProduct = selectedProducts.some(
+      (product) => product.product_code === "지점 전용 상품"
+    );
+
+    if (hasBranchOnlyProduct) {
+      message.error("지점전용상품이 포함되어있습니다.");
+    } else {
+      setIsModalOpen(true);
+    }
+  };
+
   // 페이지 변경 이벤트
   const handlePageChange = (pagination, filters, sorter) => {
     console.log("Various parameters", pagination, filters, sorter);
@@ -446,7 +459,7 @@ const Inventory = (props) => {
           type="primary"
           icon={<PlusOutlined />}
           disabled={selectedRowKeys.length === 0}
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleAdd}
         >
           발주 추가
         </Button>

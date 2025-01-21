@@ -227,39 +227,24 @@ const Purchase_order = () => {
           const responses = await Promise.all(promises);
 
           // 모든 응답 데이터를 합쳐서 setExcelOrder에 저장
-          const combinedData = responses.map((res, index) => {
-            const matchingOrder = orderHistory.find(
-              (order) => order.pk === excelPK[index] // excelPK와 pk를 매칭
-            );
-            return {
-              ...res.data, // 기존 응답 데이터
-              branch_id: matchingOrder?.branch_id || null, // branch_id 추가
-              key: excelPK[index],
-              date: matchingOrder?.created_at || null,
-            };
-          });
+          const combinedData = responses.map((res) => res.data);
           setExcelOrder(combinedData.flat()); // 데이터를 1차원 배열로 만듦
         } else {
           // 단일 값인 경우
           const response = await AxiosGet(
             `/products/ordering-products/history/${excelPK}`
           );
-
-          const matchingOrder = orderHistory.find(
-            (order) => order.pk === excelPK
-          );
-          setExcelOrder([
-            {
-              ...response.data,
-              branch_id: matchingOrder?.branch_id || null,
-            },
-          ]);
+          setExcelOrder(response.data); // 단일 데이터를 저장
         }
       } catch (error) {
         message.error("발주 내역을 불러오는 데 실패했습니다.");
       }
     };
 
+    // historyPK가 null 또는 undefined인 경우 종료
+    if (!excelPK) {
+      return;
+    }
     fetchExcelOrder();
   }, [excelPK]);
 
@@ -544,17 +529,66 @@ const Purchase_order = () => {
         materials={materials}
         providers={providers}
         branches={branches}
+        orderHistory={orderHistory}
       />
     </Space>
   );
 };
 
 const ExcelModal = (props) => {
-  const { open, onClose, data, materials, providers, branches } = props;
+  const { open, onClose, data, materials, providers, branches, orderHistory } =
+    props;
   const [branchData, setBranchData] = useState([]);
+  const [providerData, setProviderData] = useState([]);
 
   useEffect(() => {
-    console.log(data);
+    if (data && orderHistory) {
+      const filteredOrders = orderHistory.filter((item) =>
+        data.map((order) => order.history_pk).includes(item.pk)
+      );
+      const filteredMaterials = materials.filter((material) =>
+        data.map((order) => order.material_pk).includes(material.pk)
+      );
+      const groupedData = filteredOrders.map((order) => {
+        // 해당 branch_id에 포함된 data 아이템 필터링
+        const relatedItems = data.filter(
+          (item) => item.history_pk === order.pk
+        );
+
+        return {
+          ...order, // 기존 orderHistory 데이터
+          subItems: relatedItems, // 관련된 data 항목
+          key: order.pk, // rowKey로 사용
+        };
+      });
+      setBranchData(groupedData);
+
+      const groupedProviderData = providers
+        .map((provider) => {
+          // 해당 거래처(provider_id)에 포함된 material 찾기
+          const providerMaterials = filteredMaterials.filter(
+            (material) => material.provider_id === provider.id
+          );
+          console.log(providerMaterials, filteredMaterials);
+
+          // 해당 거래처와 관련된 data 필터링
+          const relatedOrders = data.filter((order) =>
+            providerMaterials
+              .map((material) => material.pk)
+              .includes(order.material_pk)
+          );
+
+          return {
+            provider_id: provider.id,
+            provider_name: provider.provider_name,
+            key: provider.id, // rowKey로 사용
+            subItems: relatedOrders, // 관련된 주문 데이터
+          };
+        })
+        .filter((group) => group.subItems.length > 0);
+      console.log(groupedProviderData);
+      setProviderData(groupedProviderData);
+    }
   }, [data]);
 
   const columns = [
@@ -562,15 +596,16 @@ const ExcelModal = (props) => {
       title: "지점",
       dataIndex: "branch_id",
       key: "branch_id",
-
-      render: (text, record) => {
-        const branch = branches.find((branch) => branch.id === text);
+      render: (text) => {
+        if (!branches || branches.length === 0) return "unknown";
+        const branch = branches.find((item) => item.id === text);
         return branch ? branch.branch_name : "unknown";
       },
     },
     {
       title: "발주일시",
-      dataIndex: "date",
+      dataIndex: "created_at",
+      key: "created_at",
 
       render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
     },
@@ -581,15 +616,19 @@ const ExcelModal = (props) => {
       title: "상품코드",
       dataIndex: "material_pk",
       key: "material_pk",
+
+      render: (text) => {
+        const material = materials.find((item) => item.pk === text);
+        return material ? material.product_code : "unknown";
+      },
     },
     {
       title: "상품명",
-      key: "material_name",
-      render: (_, record) => {
-        const material = materials.find(
-          (item) => item.pk === record.material_pk
-        );
-        return material ? material.name : "unknown";
+      dataIndex: "material_pk",
+      key: "material_pk",
+      render: (text) => {
+        const material = materials.find((item) => item.pk === text);
+        return material ? material.product_name : "unknown";
       },
     },
     {
@@ -599,15 +638,61 @@ const ExcelModal = (props) => {
     },
     {
       title: "거래처",
-      key: "provider_name",
-      render: (_, record) => {
-        const provider = providers.find(
-          (item) => item.pk === record.material_pk
-        );
-        return provider ? provider.name : "unknown";
+      dataIndex: "material_pk",
+      key: "material_pk",
+      render: (text) => {
+        const material = materials.find((item) => item.pk === text);
+        return material ? material.provider_name : "unknown";
       },
     },
   ];
+
+  const columns_2 = [
+    {
+      title: "거래처",
+      dataIndex: "provider_name",
+      key: "provider_name",
+    },
+  ];
+
+  const subColumns_2 = [
+    {
+      title: "상품코드",
+      dataIndex: "material_pk",
+      key: "material_pk",
+
+      render: (text) => {
+        const material = materials.find((item) => item.pk === text);
+        return material ? material.product_code : "unknown";
+      },
+    },
+    {
+      title: "상품명",
+      dataIndex: "material_pk",
+      key: "material_pk",
+      render: (text) => {
+        const material = materials.find((item) => item.pk === text);
+        return material ? material.product_name : "unknown";
+      },
+    },
+    {
+      title: "수량",
+      dataIndex: "ordered_cnt",
+      key: "ordered_cnt",
+    },
+    {
+      title: "지점",
+      dataIndex: "history_pk",
+      key: "history_pk",
+      render: (text) => {
+        const order = orderHistory.find((item) => item.pk === text);
+        if (!branches || branches.length === 0) return "unknown";
+        const branch = branches.find((item) => item.id === order.branch_id);
+        return branch ? branch.branch_name : "unknown";
+      },
+    },
+  ];
+
   return (
     <Modal
       title="발주 내역"
@@ -625,34 +710,45 @@ const ExcelModal = (props) => {
           <Table
             size="small"
             columns={columns}
-            dataSource={data.map((item) => [item])}
+            dataSource={branchData}
             rowKey={(record) => record.key}
             expandable={{
-              expandedRowRender: (record) => (
-                <Table
-                  size="small"
-                  columns={subColumns}
-                  dataSource={record[0]}
-                  rowKey={(item) => item.pk}
-                  pagination={false}
-                />
-              ),
+              expandedRowRender: (record) => {
+                return (
+                  <Table
+                    size="small"
+                    columns={subColumns}
+                    dataSource={record.subItems}
+                    rowKey={(item) => item.material_pk}
+                    pagination={false}
+                  />
+                );
+              },
             }}
           />
         </TabPane>
         <TabPane tab="거래처 별" key="2">
-          <Table size="small" columns={columns} dataSource={[]} />
+          <Table
+            size="small"
+            columns={columns_2}
+            dataSource={providerData}
+            rowKey={(record) => record.key}
+            expandable={{
+              expandedRowRender: (record) => {
+                return (
+                  <Table
+                    size="small"
+                    columns={subColumns_2}
+                    dataSource={record.subItems}
+                    rowKey={(item) => item.material_pk}
+                    pagination={false}
+                  />
+                );
+              },
+            }}
+          />
         </TabPane>
       </Tabs>
-      {/* <Descriptions
-        size="small"
-        bordered
-        column={2}
-        style={{ marginBottom: 16 }}
-      >
-        <Descriptions.Item label="발주지점"></Descriptions.Item>
-        <Descriptions.Item label="발주 일자"></Descriptions.Item>
-      </Descriptions> */}
     </Modal>
   );
 };

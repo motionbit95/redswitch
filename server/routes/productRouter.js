@@ -1538,13 +1538,7 @@ router.post("/", async (req, res) => {
       material_id,
     });
 
-    if (
-      !material_id ||
-      !product_code ||
-      !branch_id ||
-      !product_name ||
-      !product_price
-    ) {
+    if (!product_code || !branch_id || !product_name || !product_price) {
       return res.status(400).json({ message: "필수 필드가 누락되었습니다." });
     }
 

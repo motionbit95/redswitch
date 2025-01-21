@@ -320,7 +320,7 @@ class Product {
     this.branch_id = data.branch_id;
     this.product_name = data.product_name;
     this.product_price = data.product_price || 0;
-    this.product_detail_image = data.product_detail_image; // 상품 상세
+    this.product_detail_image = data.product_detail_image || null; // 상품 상세
     this.blind_image = data.blind_image || null;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || null;
@@ -328,7 +328,7 @@ class Product {
     this.additional_fee = data.additional_fee || 0;
     this.options = data.options || [];
     this.product_image = data.product_image || null;
-    this.product_category_code = data.product_category_code;
+    this.product_category_code = data.product_category_code || null;
     this.provider_id = data.provider_id || null;
     this.provider_name = data.provider_name || null;
   }
