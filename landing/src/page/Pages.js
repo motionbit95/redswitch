@@ -119,71 +119,81 @@ export function Customer(props) {
             marginBottom: "60px",
           }}
         >
-          <Space
-            direction="vertical"
-            align="center"
-            size={"large"}
-            style={{ width: "100%" }}
-          >
-            <Space
-              style={{
-                display: "flex",
-              }}
+          <Space direction="vertical" align="center">
+            <Button
+              // onClick={() =>
+              //   window.open(`/https://redswitch-bdsm.netlify.app/spot`)
+              // }
+              style={{ backgroundColor: "#333333", color: "white" }}
             >
-              <Button
-                style={{ borderRadius: "50%" }}
-                icon={<LeftOutlined />}
-                onClick={handlePrev}
-              />
-              <Space style={{ padding: size === "mobile" ? "10px" : "20px" }}>
-                {visibleLogos.map((spot, idx) => (
-                  <Image
-                    style={{
-                      width: size === "mobile" ? "50px" : "100px",
-                      height: size === "mobile" ? "50px" : "100px",
-                      borderRadius: "50%",
-                    }}
-                    preview={false}
-                    src={spot.spot_logo}
-                  />
-                ))}
-              </Space>
-              <Button
-                style={{ borderRadius: "50%" }}
-                icon={<RightOutlined />}
-                onClick={handleNext}
-              />
-            </Space>
+              주변 설치 지점 검색
+            </Button>
             <Space
-              style={{
-                display: "flex",
-              }}
+              direction="vertical"
+              align="center"
+              size={size === "mobile" ? "large" : "medium"}
+              style={{ width: "100%" }}
             >
-              <Button
-                style={{ borderRadius: "50%" }}
-                icon={<LeftOutlined />}
-                onClick={handlePrevImage}
-              />
-              <Space style={{ padding: size === "mobile" ? 0 : "20px" }}>
-                {visibleImages.map((spot, idx) => (
-                  <Image
-                    style={{
-                      width: size === "mobile" ? "80px" : "120px",
-                      height: size === "mobile" ? "80px" : "120px",
-                      backgroundColor: "#f1f1f1",
-                      borderRadius: "20%",
-                      border: "1px solid #f1f1f1",
-                    }}
-                    preview={false}
-                    src={spot.spot_image}
-                  />
-                ))}
+              <Space
+                style={{
+                  display: "flex",
+                }}
+              >
+                <Button
+                  style={{ borderRadius: "50%" }}
+                  icon={<LeftOutlined />}
+                  onClick={handlePrev}
+                />
+                <Space style={{ padding: size === "mobile" ? "10px" : "20px" }}>
+                  {visibleLogos.map((spot, idx) => (
+                    <Image
+                      style={{
+                        width: size === "mobile" ? "50px" : "100px",
+                        height: size === "mobile" ? "50px" : "100px",
+                        borderRadius: "50%",
+                      }}
+                      preview={false}
+                      src={spot.spot_logo}
+                    />
+                  ))}
+                </Space>
+                <Button
+                  style={{ borderRadius: "50%" }}
+                  icon={<RightOutlined />}
+                  onClick={handleNext}
+                />
               </Space>
-              <Button
-                style={{ borderRadius: "50%" }}
-                icon={<RightOutlined />}
-                onClick={handleNextImage}
-              ></Button>
+              <Space
+                style={{
+                  display: "flex",
+                }}
+              >
+                <Button
+                  style={{ borderRadius: "50%" }}
+                  icon={<LeftOutlined />}
+                  onClick={handlePrevImage}
+                />
+                <Space style={{ padding: size === "mobile" ? 0 : "20px" }}>
+                  {visibleImages.map((spot, idx) => (
+                    <Image
+                      style={{
+                        width: size === "mobile" ? "80px" : "120px",
+                        height: size === "mobile" ? "80px" : "120px",
+                        backgroundColor: "#f1f1f1",
+                        borderRadius: "20%",
+                        border: "1px solid #f1f1f1",
+                      }}
+                      preview={false}
+                      src={spot.spot_image}
+                    />
+                  ))}
+                </Space>
+                <Button
+                  style={{ borderRadius: "50%" }}
+                  icon={<RightOutlined />}
+                  onClick={handleNextImage}
+                />
+              </Space>
             </Space>
           </Space>
         </Col>

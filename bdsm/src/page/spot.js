@@ -1,5 +1,5 @@
 import React from "react";
-import { Space, Button, Input, Card, Image, Row, Col, Select } from "antd";
+import { Space, Button, Input, Card, Image, Row, Col, Drawer } from "antd";
 import { AxiosGet } from "../api";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -16,82 +16,261 @@ const Spot = (props) => {
 
   const size = isSmallScreen ? "small" : isMediumScreen ? "medium" : "large";
   const [spots, setSpots] = useState([]);
+  const [branches, setBranches] = useState([]);
+
+  const [filteredSpots, setFilteredSpots] = useState([]);
+  const [searchInputs, setSearchInputs] = useState({
+    branch_sido: "",
+    branch_sigungu: "",
+    company_name: "",
+  });
+
+  const [isvisible, setIsvisible] = useState(false);
+  const [details, setDetails] = useState();
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSpots = async () => {
-      try {
-        const response = await AxiosGet("/spots");
-        console.log("Spot fetched:", response.data);
-        setSpots(response.data);
-      } catch (error) {
-        console.error("Error fetching Spot:", error);
-      }
-    };
-    // 상품 가지고 오기
-    fetchSpots();
+    AxiosGet("/spots")
+      .then((res) => {
+        setSpots(res.data);
+        setFilteredSpots(res.data);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    AxiosGet("/branches")
+      .then((res) => {
+        setBranches(res.data);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setSearchInputs((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const onSearch = () => {
+    const { branch_sido, branch_sigungu, branch_name } = searchInputs;
+
+    console.log(searchInputs);
+    // Branches 데이터 필터링
+    const filteredBranches = branches.filter((branch) => {
+      return (
+        (!branch_sido || branch.branch_sido.includes(branch_sido)) &&
+        (!branch_sigungu || branch.branch_sigungu.includes(branch_sigungu)) &&
+        (!branch_name || branch.branch_name.includes(branch_name))
+      );
+    });
+
+    // Branches에서 id 추출
+    const branchIds = filteredBranches.map((branch) => branch.id);
+
+    // Spots 데이터 필터링
+    const filtered = spots.filter((spot) => branchIds.includes(spot.spot_id));
+    setFilteredSpots(filtered);
+  };
+
+  const handleDetail = (spot) => {
+    console.log("detail", spot);
+    setIsvisible(true);
+    setDetails(spot);
+  };
+
   return (
-    <div
-      style={{
-        overflowX: "hidden",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-      }}
-    >
-      <Space
-        direction={size === "small" ? "vertical" : "horizontal"}
-        style={{ width: "100%" }}
-      >
-        <Row>
-          <Col
-            span={size === "small" ? 24 : 12}
+    <div style={{ minHeight: "100vh" }}>
+      <Row>
+        <Col
+          span={size === "small" ? 24 : 12}
+          className={`container-${size}`}
+          style={{
+            backgroundColor: theme === "dark" ? "black" : "#f1f1f1",
+            height: size === "small" ? "100vh" : "100vh",
+          }}
+        >
+          <Space direction="vertical" size={"middle"} style={{ width: "100%" }}>
+            <Row gutter={8}>
+              <Col span={12}>
+                <Input
+                  name="branch_sido"
+                  value={searchInputs.branch_sido}
+                  onChange={handleInputChange}
+                  placeholder="시, 도"
+                  className="search_input"
+                />
+              </Col>
+              <Col span={12}>
+                <Input
+                  name="branch_sigungu"
+                  value={searchInputs.branch_sigungu}
+                  onChange={handleInputChange}
+                  placeholder="시, 군, 구"
+                  className="search_input"
+                />
+              </Col>
+            </Row>
+            <Row gutter={8}>
+              <Col span={19}>
+                <Input
+                  name="branch_name"
+                  value={searchInputs.branch_name}
+                  onChange={handleInputChange}
+                  placeholder="매장명"
+                  className="search_input"
+                />
+              </Col>
+              <Col span={5}>
+                <Button style={{ width: "100%" }} onClick={onSearch}>
+                  검색
+                </Button>
+              </Col>
+            </Row>
+          </Space>
+          <Space
+            direction="vertical"
             style={{
-              padding: "16px",
+              width: "100%",
               display: "flex",
-              gap: "10px",
-              // backgroundColor: "#f0f0f0",
+              flexDirection: "column",
+              justifyContent: "space-between",
             }}
           >
-            <Button></Button>
-            <Select style={{ width: "100%" }} />
-            <Select style={{ width: "100%" }} />
-            <Button>검색</Button>
-          </Col>
-          <Col span={size === "small" ? 24 : 12}>
-            <Space direction="vertical" style={{ padding: "16px" }}>
-              <Card
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-                color="#f0f0f0"
-              >
-                <Space direction="vertical" style={{ gap: "3px" }}>
-                  <div>spot_name</div>
-                  <div>spot_address</div>
-                  <div>spot_address_detail</div>
+            <Col
+              style={{
+                width: "100%",
+                padding: "16px",
+                // minHeight: "80vh",
+              }}
+            >
+              {filteredSpots.map((spot) => (
+                <Space
+                  direction="vertical"
+                  style={{ width: "100%", marginBottom: "16px" }}
+                  key={spot.id}
+                >
+                  {/* <div style={{ padding: "16px" }}> */}
+                  <Card color="#f0f0f0" onClick={() => handleDetail(spot)}>
+                    <Space style={{ display: "flex", gap: "15px" }}>
+                      <Image
+                        src={spot.spot_logo}
+                        style={{ width: "36px", overflow: "hidden" }}
+                        alt="spot"
+                      />
+                      <Space
+                        direction="vertical"
+                        style={{
+                          gap: "3px",
+                          textAlign: "left",
+                        }}
+                      >
+                        <div>{spot.spot_name}</div>
+                        <div>{spot.branch_address}</div>
+                        <div>{spot.branch_address_detail}</div>
+                      </Space>
+                    </Space>
+                  </Card>
+                  {/* </div> */}
                 </Space>
-              </Card>
+              ))}
+            </Col>
+            <Space>
+              <Button
+                size="large"
+                style={{ width: "100%" }}
+                onClick={() => window.history.back()}
+              >
+                뒤로가기
+              </Button>
             </Space>
-          </Col>
-        </Row>
-      </Space>
-      <Space style={{ width: "100%", padding: "16px" }}>
-        <Row>
-          <Col>
-            <Button size="large">뒤로가기</Button>
-          </Col>
-          <Col>
-            <Button size="large">테스트하러가기</Button>
-          </Col>
-        </Row>
-      </Space>
+          </Space>
+        </Col>
+        <Col
+          span={size === "small" ? 24 : 12}
+          className={`container-${size}`}
+          style={{
+            display: size === "small" ? "none" : "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          {isvisible ? (
+            <Space direction="vertical" style={{ width: "100%" }}>
+              <span>매장명: {details?.spot_name}</span>
+              <span>매장주소: {details?.branch_address}</span>
+              <span>매장주소: {details?.branch_address_detail}</span>
+              <Image
+                src={details?.spot_image}
+                style={{
+                  width: "300px",
+                  maxHeight: "500px",
+                  aspectRatio: "1/1",
+                  objectFit: "cover",
+                }}
+                alt="spot"
+              />
+            </Space>
+          ) : (
+            <span>매장을 선택해주세요</span>
+          )}
+        </Col>
+        {size === "small" && (
+          <Drawer
+            title={details?.spot_name}
+            placement="right"
+            onClose={() => setIsvisible(false)}
+            height={"auto"}
+            open={isvisible}
+            mask={false}
+            style={{
+              backgroundColor: theme === "dark" ? "#1e1e1e" : "#f1f1f1",
+              color: theme === "dark" ? "white" : "black",
+            }}
+            closeIcon={
+              <div style={{ color: theme === "dark" ? "white" : "black" }}>
+                X
+              </div>
+            }
+            bodyStyle={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
+            <Space direction="vertical">
+              <Button
+                onClick={() =>
+                  window.open(
+                    `https://spot.redswitch.kr/spot/${details?.spot_id}`
+                    // `https://redswitch-customer.netlify.app/spot/${details?.spot_id}`
+                  )
+                }
+              >
+                샵으로 이동
+              </Button>
+              <div>매장명: {details?.spot_name}</div>
+              <div>매장주소: {details?.branch_address}</div>
+              {details?.branch_address_detail && (
+                <div>매장주소: {details?.branch_address_detail}</div>
+              )}
+              <Image
+                src={details?.spot_image}
+                style={{
+                  maxHeight: "500px",
+                  aspectRatio: "1/1",
+                  objectFit: "cover",
+                }}
+                alt="spot"
+              />
+            </Space>
+          </Drawer>
+        )}
+      </Row>
     </div>
   );
 };

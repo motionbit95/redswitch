@@ -12,6 +12,7 @@ import {
   Tag,
   Input,
   Tooltip,
+  Rate,
 } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ import FileUpload from "../../components/button";
 import SearchBranch from "../../components/popover/searchbranch";
 import { AxiosDelete, AxiosGet, AxiosPost } from "../../api";
 import usePagination from "../../hook/usePagination";
+import { useNavigate } from "react-router-dom";
 
 const AddModal = ({
   isModalOpen,
@@ -29,6 +31,7 @@ const AddModal = ({
   currentSpot,
 }) => {
   const [form] = Form.useForm();
+  const navigate = useNavigate();
   const [selectedBranch, setSelectedBranch] = useState(
     localStorage.getItem("selectedBranch")
       ? JSON.parse(localStorage.getItem("selectedBranch"))
@@ -39,12 +42,25 @@ const AddModal = ({
     const spot_name = selectedBranch?.branch_name;
     const branch_address = selectedBranch?.branch_address;
     const install_flag = selectedBranch?.install_flag;
+    const spot_id = selectedBranch.id;
+    const branch_address_detail = selectedBranch?.branch_address_detail;
 
-    const spot_image = values.spot_image;
-    const spot_logo = values.spot_logo;
-
+    if (install_flag === "0") {
+      return message.warning(
+        "미설치 된 지점은 등록할수 없습니다. 여부를 변경 후 등록해주세요."
+      );
+    }
     try {
-      let spotData = { ...values, spot_name, branch_address, install_flag };
+      let spotData = {
+        ...values,
+        spot_name,
+        branch_address,
+        install_flag,
+        spot_id,
+        branch_address_detail,
+      };
+
+      console.log("spotID", spot_id, spotData);
 
       const response = isEditMode
         ? await AxiosPost(`/spots/${currentSpot.id}`, spotData) // 수정 API 호출
@@ -74,21 +90,39 @@ const AddModal = ({
         setSelectedBranch(null);
         setIsModalOpen(false);
       }}
-      footer={[
-        <Button
-          key="back"
-          onClick={() => {
-            form.resetFields();
-            setSelectedBranch(null);
-            setIsModalOpen(false);
+      footer={
+        <Space
+          style={{
+            width: "100%",
+            justifyContent: "space-between",
+            direction: "rtl",
           }}
         >
-          취소
-        </Button>,
-        <Button key="submit" type="primary" onClick={() => form.submit()}>
-          {isEditMode ? "수정" : "등록"}
-        </Button>,
-      ]}
+          <Space style={{ direction: "ltr" }}>
+            <Button
+              key="back"
+              onClick={() => {
+                form.resetFields();
+                setSelectedBranch(null);
+                setIsModalOpen(false);
+              }}
+            >
+              취소
+            </Button>
+            <Button key="submit" type="primary" onClick={() => form.submit()}>
+              {isEditMode ? "수정" : "등록"}
+            </Button>
+          </Space>
+          {selectedBranch?.install_flag === "0" && (
+            <Popconfirm
+              title="설치여부 수정"
+              onConfirm={() => navigate("/branch/branch")}
+            >
+              <Button>설치여부 수정</Button>
+            </Popconfirm>
+          )}
+        </Space>
+      }
     >
       <Form
         form={form}
@@ -117,7 +151,12 @@ const AddModal = ({
                 labelStyle={{ whiteSpace: "nowrap" }}
                 span={3}
               >
-                {data?.branch_address}
+                <Space>
+                  {data?.branch_address}
+                  {data?.branch_address_detail && (
+                    <div>{data?.branch_address_detail}</div>
+                  )}
+                </Space>
               </Descriptions.Item>
             </>
           ) : (
@@ -152,12 +191,35 @@ const AddModal = ({
               {selectedBranch && (
                 <Descriptions.Item label="주소" span={3}>
                   {selectedBranch && (
-                    <div>{selectedBranch?.branch_address}</div>
+                    <Space>
+                      <div>{selectedBranch?.branch_address}</div>
+                      <div>{selectedBranch?.branch_address_detail}</div>
+                    </Space>
                   )}
                 </Descriptions.Item>
               )}
             </>
           )}
+
+          {/* <Descriptions.Item
+            label={
+              <Space>
+                별점 등록
+                <Tooltip
+                  placement="bottom"
+                  title="임의로 표기할 점수를 등록해주세요."
+                >
+                  <InfoCircleOutlined />
+                </Tooltip>
+              </Space>
+            }
+            labelStyle={{ whiteSpace: "nowrap" }}
+            span={3}
+          >
+            <Form.Item name="spot_score" style={{ marginBottom: 0 }}>
+              <Rate allowHalf />
+            </Form.Item>
+          </Descriptions.Item> */}
 
           <Descriptions.Item
             label={

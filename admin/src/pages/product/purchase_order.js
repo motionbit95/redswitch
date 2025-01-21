@@ -591,6 +591,12 @@ const ExcelModal = (props) => {
     }
   }, [data]);
 
+  const handleDownload = () => {
+    console.log("지점별 데이터", branchData);
+    console.log("거래처별 데이터", providerData);
+    console.log("전체 데이터", data);
+  };
+
   const columns = [
     {
       title: "지점",
@@ -702,7 +708,9 @@ const ExcelModal = (props) => {
       onCancel={onClose}
       footer={[
         <Button onClick={onClose}>닫기</Button>,
-        <Button type="primary">다운로드</Button>,
+        <Button type="primary" onClick={handleDownload}>
+          다운로드
+        </Button>,
       ]}
     >
       <Tabs defaultActiveKey="1">

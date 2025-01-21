@@ -108,3 +108,8 @@ code {
 .ant-progress-inner {
   border-radius: 0 !important;
 }
+
+.search_input::placeholder {
+  color: #f1f1f1; /* 원하는 색상 */
+  opacity: 0.8; /* 투명도 */
+}
