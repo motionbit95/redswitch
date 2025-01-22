@@ -716,23 +716,106 @@ const ExcelModal = (props) => {
   const exportToExcel = useExportToExcel2();
 
   const handleDownload = () => {
-    console.log("지점별 데이터", branchData);
-    console.log("거래처별 데이터", providerData);
-    console.log("data", data);
+    const processedBranchData = branchData.flatMap((branch) =>
+      branch.subItems.map((product) => ({
+        지점명: branches.find((branch) => branch.pk === branch.branch_id)
+          ?.branch_name,
+        발주일시: new Date(branch.created_at).toLocaleString(),
+        상품코드: materials.find(
+          (material) => material.pk === product.material_pk
+        )?.product_code,
+        상품명: materials.find(
+          (material) => material.pk === product.material_pk
+        )?.product_name,
+        수량: product.ordered_cnt,
+        거래처: materials.find(
+          (material) => material.pk === product.material_pk
+        )?.provider_name, // 거래처 데이터가 없으므로 기본값 설정
+      }))
+    );
+
+    const processedProviderData = providerData.flatMap((provider) =>
+      provider.subItems.map((product) => ({
+        거래처: provider.provider_name,
+        상품코드: materials.find(
+          (material) => material.pk === product.material_pk
+        )?.product_code,
+        상품명: materials.find(
+          (material) => material.pk === product.material_pk
+        )?.product_name,
+        수량: product.ordered_cnt,
+      }))
+    );
+
+    // console.log("지점별 데이터", processedBranchData);
+    // console.log("거래처별 데이터", processedProviderData);
+
     const sheets = [
       {
         sheetName: "지점별 데이터",
-        data: branchData,
-        columns: [...columns, ...subColumns],
+        data: processedBranchData,
+        columns: [
+          {
+            title: "지점명",
+            dataIndex: "지점명",
+            key: "지점명",
+          },
+          {
+            title: "발주일시",
+            dataIndex: "발주일시",
+            key: "발주일시",
+          },
+          {
+            title: "상품코드",
+            dataIndex: "상품코드",
+            key: "상품코드",
+          },
+          {
+            title: "상품명",
+            dataIndex: "상품명",
+            key: "상품명",
+          },
+          {
+            title: "수량",
+            dataIndex: "수량",
+            key: "수량",
+          },
+          {
+            title: "거래처",
+            dataIndex: "거래처",
+            key: "거래처",
+          },
+        ],
       },
       {
         sheetName: "거래처별 데이터",
-        data: providerData,
-        columns: [...columns, ...subColumns],
+        data: processedProviderData,
+        columns: [
+          {
+            title: "거래처",
+            dataIndex: "거래처",
+            key: "거래처",
+          },
+          {
+            title: "상품코드",
+            dataIndex: "상품코드",
+            key: "상품코드",
+          },
+          {
+            title: "상품명",
+            dataIndex: "상품명",
+            key: "상품명",
+          },
+          {
+            title: "수량",
+            dataIndex: "수량",
+            key: "수량",
+          },
+        ],
       },
     ];
 
-    exportToExcel(sheets, "발주 내역");
+    exportToExcel(sheets, "발주내역");
   };
 
   return (
