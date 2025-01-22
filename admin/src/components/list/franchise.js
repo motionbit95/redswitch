@@ -28,11 +28,12 @@ function FranchiseList(props) {
   // 더보기 버튼 클릭 시 처리
   const onLoadMore = () => {
     // 현재는 5개만 표시되므로 더보기 버튼을 클릭하면 나머지 항목을 불러옴
-    AxiosGet("/posts/franchises")
-      .then((res) => {
-        setFranchisePosts(res.data); // 전체 데이터를 업데이트 (페이지네이션 로직을 추가할 수 있음)
-      })
-      .catch((err) => console.log(err));
+    // AxiosGet("/posts/franchises")
+    //   .then((res) => {
+    //     setFranchisePosts(res.data); // 전체 데이터를 업데이트 (페이지네이션 로직을 추가할 수 있음)
+    //   })
+    //   .catch((err) => console.log(err));
+    window.location.replace("/provider/post");
   };
 
   const loadMore =

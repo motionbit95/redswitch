@@ -716,6 +716,9 @@ const ExcelModal = (props) => {
   const exportToExcel = useExportToExcel2();
 
   const handleDownload = () => {
+    console.log("지점별 데이터", branchData);
+    console.log("거래처별 데이터", providerData);
+    console.log("data", data);
     const sheets = [
       {
         sheetName: "지점별 데이터",

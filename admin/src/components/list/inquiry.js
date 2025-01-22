@@ -20,7 +20,7 @@ const InquiryList = ({ currentUser }) => {
     const fetchInquiries = async () => {
       try {
         const res = await AxiosGet("/posts/inquiries");
-        setInquiries(res.data);
+        setInquiries(res.data.slice(0, 5)); // 처음 5개만 가져옴
       } catch (err) {
         console.error("문의 데이터를 가져오는 중 오류 발생:", err);
       } finally {
