@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { AxiosGet, AxiosPut } from "../../api";
 import { Button, Card, DatePicker, Input, Space, Table, Tag } from "antd";
 import dayjs from "dayjs";
-import { SearchOutlined } from "@ant-design/icons";
+import { EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import useSearchFilter from "../../hook/useSearchFilter";
 import isBetween from "dayjs/plugin/isBetween";
 import useSelectedBranch from "../../hook/useSelectedBranch";
@@ -97,9 +97,9 @@ const Order = (props) => {
     }
 
     // 지점 필터링
-    if (selectedBranch.length > 0) {
-      filtered = filtered.filter((order) =>
-        selectedBranch.some((branch) => branch.id === order.branch_pk)
+    if (selectedBranch) {
+      filtered = filtered.filter(
+        (order) => selectedBranch.id === order.branch_pk
       );
     }
 
@@ -112,7 +112,6 @@ const Order = (props) => {
       });
     }
 
-    console.log("filtered", filtered);
     if (selectedBranch) {
       setFilteredOrders(filtered);
     } else {
@@ -223,11 +222,21 @@ const Order = (props) => {
     }
   };
 
+  const onReload = () => {
+    const totalOrders = orders.filter((order) => order.order_status !== 0);
+    setFilteredOrders(totalOrders);
+  };
+
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
       <Card>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Space>
+            {currentUser.permission === "1" && (
+              <Button icon={<EyeOutlined />} onClick={onReload}>
+                전체보기
+              </Button>
+            )}
             <RangePicker
               onChange={(dates) => setDateRange(dates)}
               style={{ marginLeft: 10 }}
