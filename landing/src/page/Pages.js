@@ -121,9 +121,10 @@ export function Customer(props) {
         >
           <Space direction="vertical" align="center">
             <Button
-              // onClick={() =>
-              //   window.open(`/https://redswitch-bdsm.netlify.app/spot`)
-              // }
+              onClick={() => {
+                // 나중에 추가할것!
+                // window.open("https://redswitch-bdsm.netlify.app/spot");
+              }}
               style={{ backgroundColor: "#333333", color: "white" }}
             >
               주변 설치 지점 검색
