@@ -1,4 +1,11 @@
-import { Calendar, ConfigProvider, Space, Typography, Badge } from "antd";
+import {
+  Calendar,
+  ConfigProvider,
+  Space,
+  Typography,
+  Badge,
+  Button,
+} from "antd";
 import React, { useEffect, useState } from "react";
 import locale from "antd/lib/locale/ko_KR"; // 한국어 로케일 설정
 import dayjs from "dayjs";
@@ -106,10 +113,29 @@ const RCalendar = ({ setDateRange }) => {
     );
   };
 
+  const dateCellRender = (date) => {
+    // 특정 날짜에 문구를 추가
+    const customData = [
+      { date: "2025-01-22", text: "중요 일정", type: "warning" },
+      { date: "2025-01-25", text: "회의 예정", type: "success" },
+    ];
+
+    // 현재 셀의 날짜와 customData의 날짜를 비교
+    const matchingData = customData.find(
+      (item) => item.date === date.format("YYYY-MM-DD")
+    );
+
+    return matchingData ? (
+      <div>
+        <Badge status={matchingData.type} text={matchingData.text} />
+      </div>
+    ) : null;
+  };
+
   return (
     <ConfigProvider locale={locale}>
       <Calendar
-        // dateCellRender={cellRender} // 날짜 셀 커스텀 렌더링
+        // dateCellRender={dateCellRender} // 날짜 셀 커스텀 렌더링
         onSelect={setSelectedDate} // 날짜 선택 이벤트 핸들러
       />
     </ConfigProvider>

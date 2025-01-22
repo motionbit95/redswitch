@@ -144,6 +144,8 @@ const Account = () => {
       title: "생성일자",
       dataIndex: "created_at",
       key: "created_at",
+      fixed: "left",
+      width: 100,
       sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
       render: (text) => text.slice(0, 10),
     },
@@ -151,12 +153,14 @@ const Account = () => {
       title: "ID",
       dataIndex: "user_id",
       key: "user_id",
+      fixed: "left",
       ...getColumnSearchProps("user_id"),
     },
     {
       title: "이름",
       dataIndex: "user_name",
       key: "user_name",
+      fixed: "left",
       ...getColumnSearchProps("user_name"),
     },
     {
@@ -176,6 +180,10 @@ const Account = () => {
       dataIndex: "user_phone",
       key: "user_phone",
       ...getColumnSearchProps("user_phone"),
+
+      render: (text) => {
+        return <span style={{ whiteSpace: "nowrap" }}>{text}</span>;
+      },
     },
     {
       title: "권한",
@@ -209,14 +217,20 @@ const Account = () => {
     {
       title: "동작",
       key: "actions",
+      fixed: "right",
       render: (text, record) => (
         <Space>
-          <a onClick={() => handleEdit(record)}>수정</a>
+          <a
+            style={{ whiteSpace: "nowrap" }}
+            onClick={() => handleEdit(record)}
+          >
+            수정
+          </a>
           <Popconfirm
             title="계정을 삭제하시겠습니까?"
             onConfirm={() => handleDelete(record.id)}
           >
-            <a>삭제</a>
+            <a style={{ whiteSpace: "nowrap" }}>삭제</a>
           </Popconfirm>
         </Space>
       ),
@@ -243,6 +257,7 @@ const Account = () => {
         rowKey="id"
         loading={loading}
         pagination={{ pageSize: 10 }}
+        scroll={{ x: "max-content" }}
       />
       <AccountModal
         visible={isAddModalVisible || isEditModalVisible}

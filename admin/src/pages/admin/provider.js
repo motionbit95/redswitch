@@ -99,7 +99,7 @@ const ProviderModal = ({
               description={
                 <div style={{ display: "flex", flexDirection: "column" }}>
                   <span>
-                    거래처 삭제 시 등록 되어있는 상품은 삭제되지않습니다.
+                    거래처 삭제 시 등록되어있는 상품은 삭제되지 않습니다.
                   </span>
                   <span>기존에 등록되어있는 상품을 제거해주세요.</span>
                 </div>
@@ -130,7 +130,7 @@ const ProviderModal = ({
               rules={[{ required: true, message: "거래처명을 입력해주세요" }]}
               style={{ marginBottom: 0 }}
             >
-              <Input />
+              <Input disabled={isEditMode ? true : false} />
             </Form.Item>
           </Descriptions.Item>
 
@@ -146,7 +146,7 @@ const ProviderModal = ({
               ]}
               style={{ marginBottom: 0 }}
             >
-              <Input />
+              <Input disabled={isEditMode ? true : false} />
             </Form.Item>
           </Descriptions.Item>
 

@@ -32,6 +32,7 @@ import dayjs from "dayjs";
 import usePagination from "../../hook/usePagination";
 import useExportToExcel from "../../hook/useExportToExcel";
 import TabPane from "antd/es/tabs/TabPane";
+import useExportToExcel2 from "../../hook/useExportToExcel2";
 
 const DetailModal = ({
   open,
@@ -248,7 +249,7 @@ const Purchase_order = () => {
     fetchExcelOrder();
   }, [excelPK]);
 
-  // 발주 내역 엑셀 다운로드 버튼
+  // 발주 내역 모달 - 엑셀 다운로드 용
   const handleExcel = () => {
     setExcelPK(selectedRowKeys);
     setExcelModalOpen(true);
@@ -563,13 +564,26 @@ const ExcelModal = (props) => {
       });
       setBranchData(groupedData);
 
+      // const groupedProviderData = providers
+      //   .map((provider) => {
+      //     // 해당 거래처(provider_id)에 포함된 material 찾기
+      //     const providerMaterials = filteredMaterials.filter(
+      //       (material) => material.provider_id === provider.id
+      //     );
+      //     console.log(providerMaterials, filteredMaterials);
+
+      //     // 해당 거래처와 관련된 data 필터링
+      //     const relatedOrders = data.filter((order) =>
+      //       providerMaterials
+      //         .map((material) => material.pk)
+      //         .includes(order.material_pk)
+      //     );
       const groupedProviderData = providers
         .map((provider) => {
           // 해당 거래처(provider_id)에 포함된 material 찾기
           const providerMaterials = filteredMaterials.filter(
             (material) => material.provider_id === provider.id
           );
-          console.log(providerMaterials, filteredMaterials);
 
           // 해당 거래처와 관련된 data 필터링
           const relatedOrders = data.filter((order) =>
@@ -578,11 +592,28 @@ const ExcelModal = (props) => {
               .includes(order.material_pk)
           );
 
+          // 상품별로 수량 합산
+          const mergedItems = relatedOrders.reduce((acc, curr) => {
+            const existingItem = acc.find(
+              (item) => item.material_pk === curr.material_pk
+            );
+
+            if (existingItem) {
+              // 동일한 상품이면 수량을 합산
+              existingItem.ordered_cnt += curr.ordered_cnt;
+            } else {
+              // 새로운 상품이면 추가
+              acc.push({ ...curr });
+            }
+
+            return acc;
+          }, []);
+
           return {
             provider_id: provider.id,
             provider_name: provider.provider_name,
             key: provider.id, // rowKey로 사용
-            subItems: relatedOrders, // 관련된 주문 데이터
+            subItems: mergedItems, // 관련된 주문 데이터
           };
         })
         .filter((group) => group.subItems.length > 0);
@@ -590,13 +621,7 @@ const ExcelModal = (props) => {
       setProviderData(groupedProviderData);
     }
   }, [data]);
-
-  const handleDownload = () => {
-    console.log("지점별 데이터", branchData);
-    console.log("거래처별 데이터", providerData);
-    console.log("전체 데이터", data);
-  };
-
+  // Table columns
   const columns = [
     {
       title: "지점",
@@ -686,18 +711,26 @@ const ExcelModal = (props) => {
       dataIndex: "ordered_cnt",
       key: "ordered_cnt",
     },
-    {
-      title: "지점",
-      dataIndex: "history_pk",
-      key: "history_pk",
-      render: (text) => {
-        const order = orderHistory.find((item) => item.pk === text);
-        if (!branches || branches.length === 0) return "unknown";
-        const branch = branches.find((item) => item.id === order.branch_id);
-        return branch ? branch.branch_name : "unknown";
-      },
-    },
   ];
+
+  const exportToExcel = useExportToExcel2();
+
+  const handleDownload = () => {
+    const sheets = [
+      {
+        sheetName: "지점별 데이터",
+        data: branchData,
+        columns: [...columns, ...subColumns],
+      },
+      {
+        sheetName: "거래처별 데이터",
+        data: providerData,
+        columns: [...columns, ...subColumns],
+      },
+    ];
+
+    exportToExcel(sheets, "발주 내역");
+  };
 
   return (
     <Modal
