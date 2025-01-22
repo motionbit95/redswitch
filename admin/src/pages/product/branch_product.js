@@ -313,7 +313,7 @@ const ProductModal = (props) => {
         const response = await AxiosGet("/products/materials");
         setMaterials(response.data);
       } catch (error) {
-        message.error("매린 불러오기 실패");
+        message.error("물자 불러오기 실패");
       }
     };
     fetchMaterials();

@@ -8,6 +8,7 @@ const {
   OrderingProduct,
   Inventory,
 } = require("../model/Product");
+const Branch = require("../model/Branch");
 
 const router = express.Router();
 
@@ -1559,15 +1560,46 @@ router.get("/search", async (req, res) => {
     console.log("filter: ", filter);
     console.log("keyword: ", keyword);
 
-    if (filter === "branch") {
-      const products = await Product.searchByBranchId(keyword);
-      res.status(200).json(products);
-    } else {
-      res.status(400).json({ message: "필수 필드가 누락되었습니다." });
+    const column =
+      filter === "branch"
+        ? "branch_id"
+        : filter === "provider"
+        ? "provider_name"
+        : filter === "category"
+        ? "product_category_code"
+        : filter === "material"
+        ? "product_code"
+        : null;
+
+    if (filter !== "company") {
+      const products = await Product.search(column, keyword);
+      return res.status(200).json(products); // 응답 후 함수 종료
     }
+
+    if (filter === "company") {
+      // 만약 지사일 경우 지점 검색을 한번 더 거쳐야함
+      const branchList = await Branch.getAll();
+      const filteredList = branchList.filter(
+        (branch) => branch.company_name === keyword
+      );
+
+      let result = [];
+      // 비동기 루프를 Promise.all로 처리
+      for (const branch of filteredList) {
+        const products = await Product.search("branch_id", branch.id);
+        result = [...result, ...products];
+      }
+
+      return res.status(200).json(result); // 응답 후 함수 종료
+    }
+
+    // 필수 필드 누락 시
+    return res.status(400).json({ message: "필수 필드가 누락되었습니다." });
   } catch (error) {
     console.error("상품 검색 오류:", error);
-    res.status(500).json({ message: "상품 검색 실패", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "상품 검색 실패", error: error.message });
   }
 });
 

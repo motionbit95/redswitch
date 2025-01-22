@@ -443,15 +443,16 @@ class Product {
   }
 
   // search products by branch_id
-  static async searchByBranchId(branch_id) {
+  static async search(column, value) {
     try {
       const snapshot = await productsRef
-        .orderByChild("branch_id")
-        .equalTo(branch_id)
+        .orderByChild(column)
+        .equalTo(value)
         .once("value");
       if (!snapshot.exists()) {
         return [];
       }
+
       const products = [];
       snapshot.forEach((child) => {
         products.push({ PK: child.key, ...child.val() });

@@ -90,7 +90,7 @@ function Filter(props) {
       } else if (key === "provider") {
         if (item.provider_name) {
           label = item.provider_name;
-          value = item.id;
+          value = item.provider_name; // id에서 name으로 변경 - sjpark
         }
       } else if (key === "category") {
         if (item.product_category) {
@@ -127,7 +127,10 @@ function Filter(props) {
           style={{ width: 150 }}
           defaultValue=""
           popupMatchSelectWidth={false}
-          onChange={onChange}
+          onChange={(e) => {
+            onChange(e);
+            setSecondSelectValue(null);
+          }}
           value={value}
         >
           <Option value="">전체</Option>
