@@ -26,11 +26,11 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import SearchProduct from "../../components/popover/searchproduct";
-import FormItem from "antd/es/form/FormItem";
 import useExportToExcel from "../../hook/useExportToExcel";
 import usePagination from "../../hook/usePagination";
 import useSearchFilter from "../../hook/useSearchFilter";
 import dayjs from "dayjs";
+import useCurrentUser from "../../hook/useCurrentUser";
 
 const { Item } = Descriptions;
 const { Option } = Select;
@@ -40,36 +40,66 @@ function Product(props) {
   const [filter, setFilter] = useState(""); // 필터 상태 추가
   const [keyword, setKeyword] = useState(null); // 검색어 상태 추가
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const { currentUser } = useCurrentUser();
 
   useEffect(() => {
-    onSearch(filter, keyword);
-  }, []);
-
-  const onSearch = (value, record) => {
-    if (value && record) {
-      console.log(value, record);
-      AxiosGet(`/products/search?keyword=${record}&filter=${value}`)
-        .then((response) => {
-          console.log(response.data);
-          setProducts(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-          setProducts([]);
-        });
-    } else {
-      AxiosGet(`/products`)
-        .then((response) => {
-          setProducts(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-          setProducts([]);
-        });
+    console.log(currentUser);
+    if (currentUser) {
+      onSearch(filter, keyword);
     }
+  }, [currentUser]);
+
+  // 판매 상품 데이터 불러오기 - 검색기능 및 지점에 따라 상품 불러오기 기능 추가
+  const onSearch = (value, record) => {
+    const searchData = value && record;
+    setLoading(true); // 로딩 시작
+
+    const fetchProducts = async () => {
+      try {
+        if (searchData) {
+          const response = await AxiosGet(
+            `/products/search?keyword=${record}&filter=${value}`
+          );
+          if (!currentUser.branch_id) {
+            setProducts(response.data);
+            console.log("1");
+          } else {
+            const filteredProducts = response.data.filter((product) => {
+              return currentUser.branch_id.includes(product.branch_id);
+            });
+            setProducts(filteredProducts);
+            console.log("2");
+          }
+        } else {
+          const response = await AxiosGet(`/products`);
+          if (currentUser.branch_id) {
+            const filteredProducts = response.data.filter((product) => {
+              return currentUser.branch_id.includes(product.branch_id);
+            });
+            setProducts(filteredProducts);
+            console.log("3");
+          } else {
+            if (currentUser.permission === "1") {
+              setProducts(response.data);
+              console.log("4");
+            }
+          }
+        }
+      } catch (error) {
+        console.log(error);
+        setProducts([]); // 에러 발생 시 빈 배열로 초기화
+      } finally {
+        setLoading(false); // 로딩 종료
+      }
+    };
+
+    fetchProducts();
   };
 
   const showModal = (product = null) => {
@@ -204,6 +234,7 @@ function Product(props) {
         size="small"
         columns={columns}
         dataSource={products}
+        loading={loading}
         rowKey="PK"
         onChange={(pagination) => handleTableChange(pagination)}
         pagination={{
@@ -482,13 +513,13 @@ const ProductModal = (props) => {
               </Form.Item>
             </Item>
             <Item label="거래처" labelStyle={{ whiteSpace: "nowrap" }}>
-              <FormItem name="provider_name" style={{ margin: 0 }}>
+              <Form.Item name="provider_name" style={{ margin: 0 }}>
                 {product?.provider_name
                   ? product?.provider_name
                   : materials.find(
                       (material) => material.pk === product?.material_id
                     )?.provider_name}
-              </FormItem>
+              </Form.Item>
             </Item>
             <Item label="판매가격">
               <Form.Item name="product_price" style={{ margin: 0 }}>

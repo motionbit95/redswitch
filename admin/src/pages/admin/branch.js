@@ -45,6 +45,7 @@ const BranchModal = ({
 }) => {
   const [address, setAddress] = useState();
   const [isChecked, setIsChecked] = useState(true);
+  const [isChecked2, setIsChecked2] = useState(true);
 
   const handleCheck = (e) => {
     setIsChecked(e.target.checked);
@@ -53,9 +54,17 @@ const BranchModal = ({
     }
   };
 
+  const handleCheck2 = (e) => {
+    setIsChecked2(e.target.checked);
+    if (!e.target.checked) {
+      form.resetFields(["company_name"]); // 체크 해제시 'delivery_fee' 필드를 초기화
+    }
+  };
+
   useEffect(() => {
     if (visible) {
       setIsChecked(form.getFieldValue("delivery_fee") !== 0); // 모달이 열릴 때 체크박스 상태 설정
+      setIsChecked2(form.getFieldValue("company_name") !== undefined);
     }
   }, [visible, form]);
 
@@ -343,12 +352,29 @@ const BranchModal = ({
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item
-            label="지사명"
+            label={
+              <Space direction="horizontal">
+                <div>지사명</div>
+                <Tooltip
+                  placement="right"
+                  title="지사명을 정확히 입력해주세요."
+                >
+                  <InfoCircleOutlined />
+                </Tooltip>
+                <Checkbox
+                  onChange={handleCheck2}
+                  checked={isChecked2}
+                  style={{ transform: "scale(0.8)" }}
+                >
+                  지사여부
+                </Checkbox>
+              </Space>
+            }
             span={2}
             labelStyle={{ whiteSpace: "nowrap" }}
           >
             <Form.Item name="company_name" style={{ marginBottom: 0 }}>
-              <Input />
+              <Input disabled={!isChecked2} />
             </Form.Item>
           </Descriptions.Item>
           <Descriptions.Item

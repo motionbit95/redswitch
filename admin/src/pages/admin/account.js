@@ -13,6 +13,7 @@ import {
   Descriptions,
   Row,
 } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { AxiosDelete, AxiosGet, AxiosPost, AxiosPut } from "../../api";
 import SearchBranch from "../../components/popover/searchbranch";
 import SearchProvider from "../../components/popover/searchprovider";
@@ -280,6 +281,8 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
   const [selectedBranch, setSelectedBranch] = useState([]);
   const [selectedProvider, setSelectedProvider] = useState([]);
   const [selectedPermissions, setSelectedPermissions] = useState("1");
+  const [companies, setCompanies] = useState([]);
+  const [branches, setBranches] = useState([]);
 
   useEffect(() => {
     if (isEdit) {
@@ -291,6 +294,26 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
       });
     }
   }, [isEdit, form]);
+
+  // 지사 및 지점 목록 불러오기
+  useEffect(() => {
+    AxiosGet("/branches")
+      .then((response) => {
+        setBranches(response.data);
+        const companyNames = response.data
+          .map((branch) => branch.company_name) // company_name 추출
+          .filter((name) => name !== undefined && name !== null); // undefined와 null 제거
+
+        // 중복 제거
+        const uniqueCompanyNames = [...new Set(companyNames)];
+
+        console.log(uniqueCompanyNames); // 결과 확인
+        setCompanies(uniqueCompanyNames);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
 
   const fetchBranchAndProviderData = (account) => {
     // 지점 데이터 가져오기
@@ -328,9 +351,30 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
   };
 
   const onSubmit = () => {
+    const formValues = form.getFieldsValue();
+    const { company_name } = formValues;
+
+    console.log(company_name);
+
+    let branchIds = [];
+
+    // company_name이 있으면, company_name에 해당하는 branch.id를 가져옴
+    if (company_name) {
+      // selectedBranches에서 company_name에 해당하는 모든 branch를 찾아 branch.id를 가져오기
+      const branchesMatchingCompany = branches.filter(
+        (branch) => branch.company_name === company_name
+      );
+
+      if (branchesMatchingCompany.length > 0) {
+        branchIds = branchesMatchingCompany.map((branch) => branch.id); // 해당하는 branch.id들을 배열로 설정
+      }
+    } else {
+      // company_name이 없으면 기존 방식대로 branch.id들을 가져옴
+      branchIds = selectedBranch.map((branch) => branch.id);
+    }
     onFinish({
       ...form.getFieldsValue(),
-      branch_id: selectedBranch.map((branch) => branch.id),
+      branch_id: branchIds,
       provider_id: selectedProvider.map((provider) => provider.id),
     });
   };
@@ -453,28 +497,14 @@ const AccountModal = ({ visible, isEdit, form, onCancel, onFinish }) => {
                   <Descriptions.Item label="지사" span={2}>
                     <Space direction="vertical">
                       <Form.Item name="company_name">
-                        <Input placeholder="지사명을 입력해주세요." />
-                      </Form.Item>
-                      <Space direction="vertical">
-                        <SearchBranch
-                          selectedBranch={selectedBranch}
-                          setSelectedBranch={setSelectedBranch}
-                          multiple
-                        />
-                        <Row>
-                          {selectedBranch.map((branch) => (
-                            <Tag
-                              key={branch?.id}
-                              closable
-                              onClose={() =>
-                                handleCloseBranch(branch?.branch_name)
-                              }
-                            >
-                              {branch?.branch_name || "[Unknown]"}
-                            </Tag>
+                        <Select style={{ width: "300px" }}>
+                          {companies.map((company) => (
+                            <Select.Option key={company} value={company}>
+                              {company}
+                            </Select.Option>
                           ))}
-                        </Row>
-                      </Space>
+                        </Select>
+                      </Form.Item>
                     </Space>
                   </Descriptions.Item>
                   <Descriptions.Item label="거래처" span={2}>
