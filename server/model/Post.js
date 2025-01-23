@@ -3,6 +3,7 @@ const database = admin.database();
 const postsRef = database.ref("posts"); // 'posts' 경로 참조
 const franchisesRef = database.ref("franchises"); // 'franchises' 경로 참조
 const inquiryRef = database.ref("inquiries"); // 'inquiries' 경로 참조
+const calendarRef = database.ref("calendars"); // 'calendars' 경로 참조
 
 class Post {
   constructor(data) {
@@ -430,4 +431,97 @@ class Franchise {
   }
 }
 
-module.exports = { Post, Inquiry, Franchise };
+class Calendar {
+  constructor(data) {
+    this.id = data.id || null;
+    this.title = data.title;
+    this.content = data.content || null;
+    this.type = data.type || null;
+    this.start_date = data.start_date || null;
+    this.end_date = data.end_date || null;
+    this.createdAt = data.createdAt || new Date().toISOString();
+    this.updatedAt = data.updatedAt || new Date().toISOString();
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      title: this.title,
+      content: this.content,
+      type: this.type,
+      start_date: this.start_date,
+      end_date: this.end_date,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
+  async create() {
+    try {
+      const newCalendarRef = await calendarRef.push(this.toJSON());
+      this.id = newCalendarRef.key;
+      await newCalendarRef.update({ id: this.id });
+      return this;
+    } catch (error) {
+      console.error("Error creating calendar:", error);
+      throw new Error("Failed to create calendar");
+    }
+  }
+
+  static async getById(id) {
+    try {
+      const calendarRef = calendarRef.child(id);
+      const snapshot = await calendarRef.once("value");
+      if (snapshot.exists()) {
+        return snapshot.val();
+      } else {
+        throw new Error("Calendar not found");
+      }
+    } catch (error) {
+      console.error("Error retrieving calendar:", error);
+      throw new Error("Failed to retrieve calendar");
+    }
+  }
+
+  static async getAll() {
+    try {
+      const snapshot = await calendarRef.once("value");
+      if (!snapshot.exists()) {
+        return [];
+      }
+      const calendars = [];
+      snapshot.forEach((child) => {
+        calendars.push({ id: child.key, ...child.val() });
+      });
+      return calendars.reverse();
+    } catch (error) {
+      console.error("Error fetching calendars:", error);
+      throw new Error("Failed to fetch calendars");
+    }
+  }
+  async update() {
+    try {
+      if (!this.id) {
+        throw new Error("Calendar ID is required for update");
+      }
+      this.updatedAt = new Date().toISOString();
+      const postData = this.toJSON();
+      await calendarRef.child(this.id).update(postData);
+      return this;
+    } catch (error) {
+      console.error("Error updating calendar:", error);
+      throw new Error("Failed to update calendar");
+    }
+  }
+
+  static async delete(id) {
+    try {
+      await calendarRef.child(id).remove();
+      return true;
+    } catch (error) {
+      console.error("Error deleting calendar:", error);
+      throw new Error("Failed to delete calendar");
+    }
+  }
+}
+
+module.exports = { Post, Inquiry, Franchise, Calendar };

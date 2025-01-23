@@ -53,7 +53,7 @@ const Main = ({ currentUser }) => {
         <Row gutter={[16, 16]}>
           {/* 캘린더 */}
           <Col span={24}>
-            <RCalendar setDateRange={setDateRange} />
+            <RCalendar currentUser={currentUser} setDateRange={setDateRange} />
           </Col>
         </Row>
       </Col>

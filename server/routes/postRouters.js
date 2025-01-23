@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Franchise, Post, Inquiry } = require("../model/Post");
+const { Franchise, Post, Inquiry, Calendar } = require("../model/Post");
 
 const cors = require("cors");
 router.use(cors());
@@ -84,6 +84,12 @@ router.use(cors());
  *         description: 서버 오류
  */
 
+/**
+ * @swagger
+ * tags:
+ *   name: Calendars
+ *   description: 대시보드 일정 관리 API
+ */
 router.post("/franchises", async (req, res) => {
   try {
     const newFranchise = new Franchise(req.body);
@@ -1385,6 +1391,56 @@ router.delete("/:id/comments/:commentId", async (req, res) => {
     await post.update();
 
     res.status(200).json({ message: "댓글이 성공적으로 삭제되었습니다." });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.post("/calendars", async (req, res) => {
+  try {
+    const newPost = new Calendar(req.body);
+    const createdCalendar = await newPost.create();
+    res.status(200).json(createdCalendar);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.get("/calendars", async (req, res) => {
+  try {
+    const calendars = await Calendar.getAll();
+    res.status(200).json(calendars);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.get("/calendars/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const calendars = await Calendar.getById(id);
+    res.status(200).json(calendars);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.put("/calendars/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date, title, content } = req.body;
+    const calendars = await Calendar.updateById(id, date, title, content);
+    res.status(200).json(calendars);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.delete("/calendars/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const calendars = await Calendar.deleteById(id);
+    res.status(200).json(calendars);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
