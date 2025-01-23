@@ -119,8 +119,14 @@ function PaymentResult(props) {
 
   // 주문번호 저장
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(queryParams?.ordNo);
-    message.success("주문번호가 클립보드에 복사되었습니다.");
+    if (queryParams) {
+      navigator.clipboard.writeText(
+        `/spot.redswitch.kr/order/${queryParams?.ordNo}`
+      );
+      message.success("주문번호가 클립보드에 복사되었습니다.");
+    } else {
+      message.error("결제 데이터를 확인할 수 없습니다..");
+    }
   };
 
   // 주문 취소

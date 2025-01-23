@@ -15,6 +15,7 @@ import OrderList from "./page/OrderList";
 
 import Eziok from "./eziok/eziok_react_index";
 import EziokStdRedirect from "./eziok/eziok_react_redirect";
+import OrderDetails from "./page/OrderDetails";
 
 const darkTheme = {
   components: {
@@ -198,6 +199,10 @@ function App() {
                 }
               />
               <Route path="/order" element={<OrderList theme={theme} />} />
+              <Route
+                path="/order/:orderId"
+                element={<OrderDetails theme={theme} />}
+              />
               <Route
                 path="/*"
                 element={
