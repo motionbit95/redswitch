@@ -15,6 +15,7 @@ import {
   Col,
   Select,
   message,
+  Modal,
 } from "antd";
 import React, { useEffect, useState } from "react";
 import locale from "antd/lib/locale/ko_KR"; // 한국어 로케일 설정
@@ -76,6 +77,8 @@ const RCalendar = ({ setDateRange, currentUser }) => {
   const [visible, setVisible] = useState(false); // Drawer의 시퀀스
   const [calendars, setCalendars] = useState([]);
   const [form] = Form.useForm();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState({});
 
   // 결제 데이터를 API에서 불러옵니다.
   useEffect(() => {
@@ -109,18 +112,6 @@ const RCalendar = ({ setDateRange, currentUser }) => {
     setDateRange(selectedDate);
   }, [selectedDate, setDateRange]);
 
-  useEffect(() => {
-    AxiosGet("/posts/calendars")
-      .then((response) => {
-        console.log("response", response);
-        setCalendars(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching calendars:", error);
-        message.error("가져오기 실패");
-      });
-  }, []);
-
   // 캘린더의 날짜 셀을 커스텀 렌더링합니다.
   const cellRender = (value) => {
     const listData = getListData(value, groupedPayments);
@@ -138,29 +129,28 @@ const RCalendar = ({ setDateRange, currentUser }) => {
     );
   };
 
+  // 더미
+  const customData = [
+    {
+      start_date: "2025-01-20",
+      end_date: "2025-01-22",
+      title: "중요 일정",
+      type: "processing",
+    },
+    {
+      start_date: "2025-01-24",
+      end_date: "2025-01-25",
+      title: "회의 예정",
+      type: "warning",
+    },
+    {
+      start_date: "2025-01-22",
+      end_date: "2025-01-25",
+      title: "중복 일정",
+      type: "success",
+    },
+  ];
   const dateCellRender = (date) => {
-    // 특정 날짜에 문구를 추가
-    const customData = [
-      {
-        start_date: "2025-01-20",
-        end_date: "2025-01-22",
-        title: "중요 일정",
-        type: "processing",
-      },
-      {
-        start_date: "2025-01-24",
-        end_date: "2025-01-25",
-        title: "회의 예정",
-        type: "warning",
-      },
-      {
-        start_date: "2025-01-22",
-        end_date: "2025-01-25",
-        title: "중복 일정",
-        type: "success",
-      },
-    ];
-
     // 현재 셀의 날짜가 customData의 날짜 범위에 포함된 모든 항목 필터링
     const matchingData = customData.filter((item) => {
       const startDate = dayjs(item.start_date, "YYYY-MM-DD");
@@ -209,6 +199,22 @@ const RCalendar = ({ setDateRange, currentUser }) => {
     }
   };
 
+  // 날짜 선택 이벤트
+  const handleSelectDate = (date) => {
+    const matchingData = customData.filter((item) => {
+      const startDate = dayjs(item.start_date, "YYYY-MM-DD");
+      const endDate = dayjs(item.end_date, "YYYY-MM-DD");
+      return date.isBetween(startDate, endDate, "day", "[]");
+    });
+
+    if (matchingData.length) {
+      setModalData(matchingData); // 선택된 날짜의 데이터를 모달에 전달
+      setModalOpen(true); // 모달 열기
+    } else {
+      message.info("선택한 날짜에 일정이 없습니다.");
+    }
+  };
+
   return (
     <ConfigProvider locale={locale}>
       {currentUser?.permission === "1" && (
@@ -230,6 +236,12 @@ const RCalendar = ({ setDateRange, currentUser }) => {
         visible={visible}
         onClose={onClose}
         onFinish={onFinish}
+      />
+
+      <DetailModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        data={modalData}
       />
     </ConfigProvider>
   );
@@ -322,6 +334,14 @@ const AddDrawer = ({ form, visible, onClose, onFinish }) => {
         </Row>
       </Form>
     </Drawer>
+  );
+};
+
+const DetailModal = ({ open, onClose }) => {
+  return (
+    <Modal title="일정 상세">
+      <div>일정 상세</div>
+    </Modal>
   );
 };
 
