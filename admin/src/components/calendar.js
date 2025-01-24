@@ -130,29 +130,29 @@ const RCalendar = ({ setDateRange, currentUser }) => {
   };
 
   // 더미
-  const customData = [
-    {
-      start_date: "2025-01-20",
-      end_date: "2025-01-22",
-      title: "중요 일정",
-      type: "processing",
-    },
-    {
-      start_date: "2025-01-24",
-      end_date: "2025-01-25",
-      title: "회의 예정",
-      type: "warning",
-    },
-    {
-      start_date: "2025-01-22",
-      end_date: "2025-01-25",
-      title: "중복 일정",
-      type: "success",
-    },
-  ];
+  // const customData = [
+  //   {
+  //     start_date: "2025-01-20",
+  //     end_date: "2025-01-22",
+  //     title: "중요 일정",
+  //     type: "processing",
+  //   },
+  //   {
+  //     start_date: "2025-01-24",
+  //     end_date: "2025-01-25",
+  //     title: "회의 예정",
+  //     type: "warning",
+  //   },
+  //   {
+  //     start_date: "2025-01-22",
+  //     end_date: "2025-01-25",
+  //     title: "중복 일정",
+  //     type: "success",
+  //   },
+  // ];
   const dateCellRender = (date) => {
     // 현재 셀의 날짜가 customData의 날짜 범위에 포함된 모든 항목 필터링
-    const matchingData = customData.filter((item) => {
+    const matchingData = calendars?.filter((item) => {
       const startDate = dayjs(item.start_date, "YYYY-MM-DD");
       const endDate = dayjs(item.end_date, "YYYY-MM-DD");
       return date.isBetween(startDate, endDate, "day", "[]"); // []는 경계 포함
@@ -201,7 +201,7 @@ const RCalendar = ({ setDateRange, currentUser }) => {
 
   // 날짜 선택 이벤트
   const handleSelectDate = (date) => {
-    const matchingData = customData.filter((item) => {
+    const matchingData = calendars.filter((item) => {
       const startDate = dayjs(item.start_date, "YYYY-MM-DD");
       const endDate = dayjs(item.end_date, "YYYY-MM-DD");
       return date.isBetween(startDate, endDate, "day", "[]");
