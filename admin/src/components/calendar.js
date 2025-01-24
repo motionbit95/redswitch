@@ -256,6 +256,7 @@ const RCalendar = ({ setDateRange, currentUser }) => {
       .then(() => {
         message.success("일정 삭제 성공");
         fetchPlans();
+        setModalOpen(false);
       })
       .catch((error) => {
         console.error("일정 삭제 오류:", error);

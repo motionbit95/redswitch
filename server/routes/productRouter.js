@@ -1627,7 +1627,7 @@ router.get("/search", async (req, res) => {
 router.get("/search/:branch_id", async (req, res) => {
   try {
     const { branch_id } = req.params;
-    const products = await Product.searchByBranchId(branch_id);
+    const products = await Product.search("branch_id", branch_id);
     console.log("products: ", products);
     res.status(200).json(products);
   } catch (error) {

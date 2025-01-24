@@ -856,7 +856,7 @@ router.put("/calendars/:id", async (req, res) => {
 router.delete("/calendars/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const calendars = await Calendar.deleteById(id);
+    const calendars = await Calendar.delete(id);
     res.status(200).json(calendars);
   } catch (error) {
     res.status(400).json({ message: error.message });
