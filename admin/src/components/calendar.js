@@ -16,12 +16,13 @@ import {
   Select,
   message,
   Modal,
+  Card,
 } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import locale from "antd/lib/locale/ko_KR";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
-import { AxiosGet, AxiosPost } from "../api";
+import { AxiosDelete, AxiosGet, AxiosPost } from "../api";
 
 dayjs.locale("ko");
 
@@ -103,12 +104,73 @@ const AddDrawer = ({ form, visible, onClose, onFinish }) => {
 /**
  * 일정 상세 Modal 컴포넌트
  */
-const DetailModal = ({ open, onClose, data }) => (
-  <Modal title="일정 상세" open={open} onCancel={onClose} footer={null}>
-    {/* 여기 부분 이쁘게 꾸며줘! data는 일정 배열로 들어옴 */}
-    <div>{JSON.stringify(data, null, 2)}</div>
-  </Modal>
-);
+const DetailModal = ({ open, onClose, data, currentUser, onDelete }) => {
+  return (
+    <Modal
+      title="상세 보기"
+      open={open}
+      width={700}
+      onCancel={onClose}
+      footer={[
+        <Button key="back" onClick={onClose} style={{ borderRadius: "8px" }}>
+          닫기
+        </Button>,
+      ]}
+    >
+      {/* 여기 부분 이쁘게 꾸며줘! data는 일정 배열로 들어옴 */}
+      {/* <div>{JSON.stringify(data, null, 2)}</div> */}
+      <Space size={"large"} direction="vertical" style={{ width: "100%" }}>
+        {data.map((item, index) => (
+          <Card key={index}>
+            <Space direction="vertical" style={{ width: "100%" }}>
+              <Space
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Typography.Title level={4} style={{ margin: 0 }}>
+                  {item.title}
+                </Typography.Title>
+                <Typography.Text style={{ color: "#888" }}>
+                  {`등록일 : ${dayjs(item.createdAt).format("YYYY-MM-DD")}`}
+                </Typography.Text>
+              </Space>
+              <Typography.Text style={{ color: "#888" }}>
+                {dayjs(item.start_date).format("YYYY-MM-DD")} ~{" "}
+                {dayjs(item.end_date).format("YYYY-MM-DD")}
+              </Typography.Text>
+              <div
+                style={{
+                  marginTop: "10px",
+                  padding: "10px",
+                  backgroundColor: "#f9f9f9",
+                  borderRadius: "8px",
+                  minHeight: "100px",
+                  whiteSpace: "pre-wrap",
+                  wordWrap: "break-word",
+                }}
+              >
+                <Typography.Text>{item.content}</Typography.Text>
+              </div>
+              {currentUser?.permission === "1" && (
+                <Popconfirm
+                  title="삭제하시겠습니까?"
+                  onConfirm={() => {
+                    onDelete(item.id);
+                  }}
+                >
+                  <Button danger>삭제</Button>
+                </Popconfirm>
+              )}
+            </Space>
+          </Card>
+        ))}
+      </Space>
+    </Modal>
+  );
+};
 
 /**
  * RCalendar 컴포넌트
@@ -188,6 +250,18 @@ const RCalendar = ({ setDateRange, currentUser }) => {
     }
   };
 
+  const onDelete = async (id) => {
+    console.log(id);
+    await AxiosDelete(`/posts/calendars/${id}`)
+      .then(() => {
+        message.success("일정 삭제 성공");
+        fetchPlans();
+      })
+      .catch((error) => {
+        console.error("일정 삭제 오류:", error);
+      });
+  };
+
   return (
     <ConfigProvider locale={locale}>
       {currentUser?.permission === "1" && (
@@ -212,6 +286,8 @@ const RCalendar = ({ setDateRange, currentUser }) => {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         data={modalData}
+        currentUser={currentUser}
+        onDelete={onDelete}
       />
     </ConfigProvider>
   );

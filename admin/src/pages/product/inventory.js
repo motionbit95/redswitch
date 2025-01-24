@@ -190,7 +190,7 @@ const Inventory = (props) => {
       fetchProducts();
       fetchInventories();
     } else {
-      message.error("지점을 선택해주세요.");
+      // message.error("지점을 선택해주세요.");
     }
   }, [selectedBranch]);
 
