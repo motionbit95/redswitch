@@ -70,7 +70,7 @@ const App = (props) => {
 
   return (
     <div style={{ overflowX: "hidden", minHeight: "100vh" }}>
-      {/* <AdCarousel position={0} /> */}
+      <AdCarousel position={0} />
       <Space direction={size === "small" ? "vertical" : "horizontal"}>
         <Row>
           <Col
@@ -389,7 +389,7 @@ const App = (props) => {
           🔥 BDSM 테스트하러 가기
         </Button> */}
       </div>
-      {/* <AdCarousel position={1} /> */}
+      <AdCarousel position={1} />
     </div>
   );
 };

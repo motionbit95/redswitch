@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AxiosGet, AxiosPost } from "../api";
 import ResultChart from "../component/result_chart";
 import Footer from "../component/Footer";
+import AdCarousel from "../component/advertise";
 
 function TestResult(props) {
   const { theme, setPage } = props;
@@ -65,6 +66,7 @@ function TestResult(props) {
       size="large"
       style={{ minHeight: "100vh", width: "100%", maxWidth: "770px" }}
     >
+      <AdCarousel position={0} />
       <div>
         <Typography.Title level={2}>BDSM TEST 결과</Typography.Title>
         <Typography.Text>
@@ -141,8 +143,8 @@ function TestResult(props) {
             )
         )}
       </Row>
-
       <Footer theme={theme} />
+      <AdCarousel position={1} />
     </Space>
   );
 }

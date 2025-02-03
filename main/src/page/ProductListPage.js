@@ -86,7 +86,7 @@ function ProductListPage(props) {
     };
 
     fetchCategories();
-  }, []);
+  }, [branchProducts]);
 
   // 필터링된 상품 데이터 계산
   const filteredProducts =

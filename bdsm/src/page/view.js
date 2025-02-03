@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { Button, Col, Image, Row, Typography } from "antd";
 import { useMediaQuery } from "react-responsive";
+import AdCarousel from "../component/advertise";
 
 function View(props) {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ function View(props) {
 
   return (
     <div style={{ overflowX: "hidden" }}>
+      <AdCarousel position={0} />
       <div className={`container-${size} section-${theme}`}>
         <Typography.Title level={1} className={`title-${size}`}>
           알고 싶은 성향을 선택하세요.
@@ -64,6 +66,7 @@ function View(props) {
           🔥 BDSM 테스트하러 가기
         </Button>
       </div>
+      <AdCarousel position={1} />
     </div>
   );
 }

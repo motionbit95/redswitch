@@ -11,7 +11,13 @@ const AdCarousel = ({ position, ...props }) => {
           `${process.env.REACT_APP_SERVER_URL}/advertisements`
         );
         const result = await response.json();
-        setImages(result.data);
+        const now = new Date(); // 현재 시간 가져오기
+        const filteredImages = result.data.filter((item) => {
+          const expireDate = new Date(item.expire_datetime); // expire_datetime을 Date 객체로 변환
+          return expireDate > now; // 현재 시간보다 큰 것만 남김
+        });
+
+        setImages(filteredImages);
       } catch (error) {
         console.error("Error fetching advertise banner:", error);
       }
@@ -19,7 +25,7 @@ const AdCarousel = ({ position, ...props }) => {
     fetchAdvertiseBanner();
   }, []);
   return (
-    <Carousel autoplay>
+    <Carousel autoplay style={{ zIndex: 10 }}>
       {images.map(
         (image, index) =>
           image.banner_position === position && (
