@@ -209,7 +209,15 @@ const RCalendar = ({ setDateRange, currentUser }) => {
             <Tooltip key={index} title={item.title}>
               <Tag
                 color={item.type || "gray"}
-                style={{ textAlign: "center", width: "100%" }}
+                style={{
+                  textAlign: "center",
+                  width: "100%",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: "100px",
+                  margin: 0,
+                }}
               >
                 {item.title}
               </Tag>
@@ -274,7 +282,7 @@ const RCalendar = ({ setDateRange, currentUser }) => {
         </Button>
       )}
 
-      <Calendar dateCellRender={dateCellRender} onSelect={handleSelectDate} />
+      <Calendar cellRender={dateCellRender} onSelect={handleSelectDate} />
 
       <AddDrawer
         form={form}

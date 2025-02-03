@@ -306,7 +306,7 @@ const NoticeBoard = (props) => {
       {/* 게시판 추가/수정 모달 */}
       <Modal
         title={currentNotice ? "게시판 수정" : "게시판 추가"}
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleOk}
         onCancel={() => setIsModalVisible(false)}
         cancelText="닫기"
@@ -395,7 +395,7 @@ const NoticeBoard = (props) => {
                   >
                     {user.user_id} ({user.user_name}) -{" "}
                     {user.permission === "1"
-                      ? "최고관리자"
+                      ? "본사관리자"
                       : user.permission === "2"
                       ? "지사관리자"
                       : "지점관리자"}
@@ -591,7 +591,7 @@ export const NoticeDetailModal = ({
   return (
     <Modal
       title="상세보기"
-      visible={isDetailModalVisible}
+      open={isDetailModalVisible}
       onCancel={() => setIsDetailModalVisible(false)}
       footer={[
         <Button

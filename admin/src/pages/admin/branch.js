@@ -75,7 +75,7 @@ const BranchModal = ({
   return (
     <Modal
       title={isEditMode ? "지점 수정" : "지점 추가"}
-      visible={visible}
+      open={visible}
       width={950}
       onCancel={() => {
         onCancel();

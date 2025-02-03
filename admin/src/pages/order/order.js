@@ -76,7 +76,6 @@ const Order = (props) => {
   }, [branches]);
 
   useEffect(() => {
-    console.log("orders", orders, selectedBranch);
     if (selectedBranch) {
       onSearch();
     } else {

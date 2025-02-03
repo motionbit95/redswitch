@@ -54,7 +54,7 @@ const Addproduct = ({
       </Button>
 
       <Modal
-        visible={isModalOpen}
+        open={isModalOpen}
         title="상품 추가"
         centered
         onCancel={() => setIsModalOpen(false)}

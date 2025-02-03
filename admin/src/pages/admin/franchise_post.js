@@ -3,6 +3,7 @@ import {
   Descriptions,
   Form,
   Input,
+  message,
   Modal,
   Popconfirm,
   Select,
@@ -16,7 +17,8 @@ import React, { useEffect, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import useSearchFilter from "../../hook/useSearchFilter";
-import { AxiosGet, AxiosPut } from "../../api";
+import { AxiosDelete, AxiosGet, AxiosPut } from "../../api";
+import useCurrentUser from "../../hook/useCurrentUser";
 
 const { Option } = Select;
 
@@ -62,12 +64,21 @@ const FranchisePost = () => {
 
     setIsModalOpen(false);
   };
-  const handleDelete = (record) => {
-    console.log("Delete", record);
+  const handleDelete = async (id) => {
+    await AxiosDelete(`/posts/franchises/${id}`)
+      .then(() => {
+        message.success("가맹점 삭제 성공");
+        // 상태에서 삭제한 항목 제거
+        setFranchisePost(franchise_post.filter((post) => post.id !== id));
+        setIsModalOpen(false);
+      })
+      .catch((error) => {
+        console.error("게시판 삭제 오류:", error);
+      });
   };
 
   const handleEdit = (post) => {
-    console.log("Edit", post);
+    console.log("상세정보", post);
     setCurrentPost(post);
     form.setFieldsValue(post); // Set the form fields to current account values
     setIsModalOpen(true);
@@ -84,6 +95,7 @@ const FranchisePost = () => {
       title: "가맹점명",
       dataIndex: "franchise_name",
       key: "franchise_name",
+      fixed: "left",
       ...getColumnSearchProps("franchise_name"),
     },
     {
@@ -127,6 +139,7 @@ const FranchisePost = () => {
       title: "태그",
       dataIndex: "flag",
       key: "flag",
+      fixed: "right",
       filters: [
         {
           text: "상담요청",
@@ -153,10 +166,10 @@ const FranchisePost = () => {
             record.flag === "0"
               ? "red"
               : record.flag === "1"
-              ? "green"
+              ? "orange"
               : record.flag === "2"
               ? "blue"
-              : "orange"
+              : "green"
           }
         >
           {record.flag === "0"
@@ -172,6 +185,7 @@ const FranchisePost = () => {
     {
       title: "자세히보기",
       key: "action",
+      fixed: "right",
       render: (_, record) => (
         <Button icon={<SearchOutlined />} onClick={() => handleEdit(record)} />
       ),
@@ -185,12 +199,15 @@ const FranchisePost = () => {
         columns={columns}
         dataSource={franchise_post}
         loading={loading}
+        scroll={{ x: "max-content" }} // 가로 스크롤 활성화
+        className="no-wrap-table"
       />
       <PostDetailModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         currentPost={currentPost}
         handleOk={handleOk}
+        onDelete={() => handleDelete(currentPost.id)}
       />
     </>
   );
@@ -201,10 +218,12 @@ export const PostDetailModal = ({
   setIsModalOpen,
   currentPost,
   handleOk,
+  onDelete,
 }) => {
   const [form] = Form.useForm();
   const [memo, setMemo] = useState("");
   const [salesAccounts, setSalesAccounts] = useState([]);
+  const { currentUser } = useCurrentUser();
 
   const flagOptions = [
     { label: "상담요청", value: "0" },
@@ -246,13 +265,43 @@ export const PostDetailModal = ({
       {currentPost && (
         <Modal
           title="상세 정보"
-          visible={isModalOpen}
-          onOk={() => handleOk(form.getFieldsValue())}
+          open={isModalOpen}
           centered
           onCancel={() => setIsModalOpen(false)}
           width={800}
-          okText="저장"
-          cancelText="닫기"
+          footer={
+            <Space
+              style={{
+                width: "100%",
+                justifyContent: "space-between",
+                direction: "rtl",
+              }}
+            >
+              <Space style={{ direction: "ltr" }}>
+                <Button key="cancel" onClick={() => setIsModalOpen(false)}>
+                  취소
+                </Button>
+                <Button
+                  key="submit"
+                  type="primary"
+                  onClick={() => {
+                    handleOk(form.getFieldsValue());
+                  }}
+                >
+                  저장
+                </Button>
+              </Space>
+              {currentUser.permission === "1" && currentPost.flag === "3" && (
+                <Popconfirm
+                  title="삭제하시겠습니까?"
+                  description={"삭제 시 더이상 해당 내용을 볼 수 없습니다."}
+                  onConfirm={onDelete}
+                >
+                  <Button danger>삭제</Button>
+                </Popconfirm>
+              )}
+            </Space>
+          }
         >
           <Form form={form} layout="vertical" initialValues={currentPost}>
             <Descriptions bordered column={2}>
@@ -286,22 +335,25 @@ export const PostDetailModal = ({
                 {currentPost.franchise_manager_email}
               </Descriptions.Item>
               <Descriptions.Item label="영업담당자">
-                <Space>
-                  <Form.Item name="sales_manager" style={{ marginBottom: 0 }}>
-                    <Select
-                      defaultValue={currentPost.sales_manager}
-                      style={{ width: "100%" }}
-                      popupMatchSelectWidth={false}
-                    >
-                      <Option value={null}>선택</Option>
-                      {salesAccounts.map(({ id, user_name }) => (
-                        <Option key={id} value={user_name}>
-                          {user_name}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Space>
+                <Form.Item name="sales_manager" style={{ marginBottom: 0 }}>
+                  <Select
+                    defaultValue={currentPost.sales_manager}
+                    style={{ width: "100%", minWidth: "190px" }}
+                    popupMatchSelectWidth={false}
+                  >
+                    <Option value={null}>선택</Option>
+                    {salesAccounts.map(({ id, user_name, permission }) => (
+                      <Option key={id} value={user_name}>
+                        {user_name} -{" "}
+                        {permission === "1"
+                          ? "본사관리자"
+                          : permission === "2"
+                          ? "지사관리자"
+                          : "지점관리자"}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
               </Descriptions.Item>
             </Descriptions>
 

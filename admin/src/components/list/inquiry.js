@@ -31,7 +31,6 @@ const InquiryList = ({ currentUser }) => {
   }, []);
 
   useEffect(() => {
-    console.log(inquiries, currentUser);
     if (inquiries.length > 0 && currentUser) {
       const filtered = inquiries.filter((inquiry) => {
         // 계정 권한 "1"인 경우 전체 목록을 불러옴

@@ -159,8 +159,8 @@ const SearchBranch = ({
         content={content}
         title="지점를 선택해주세요."
         trigger="click"
-        visible={popoverVisible}
-        onVisibleChange={setPopoverVisible}
+        open={popoverVisible}
+        onOpenChange={setPopoverVisible}
         placement="bottomLeft" // 버튼 아래 왼쪽 정렬
       >
         <Button>{selectedBranch?.branch_name || "지점 선택"}</Button>

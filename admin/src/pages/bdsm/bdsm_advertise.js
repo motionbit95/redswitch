@@ -183,7 +183,7 @@ const BDSMAdvertisement = () => {
       {/* 광고 생성/수정 모달 */}
       <Modal
         title={selectedAd ? "광고 수정" : "광고 생성"}
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={() => setIsModalVisible(false)} // 모달 닫기
         footer={[
           <Button key="back" onClick={() => setIsModalVisible(false)}>

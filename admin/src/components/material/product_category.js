@@ -149,8 +149,8 @@ const ProductCategory = ({ materialList }) => {
             content={editPopoverContent(record)}
             title="카테고리 수정"
             trigger="click"
-            visible={isEditingRowKey === record.pk}
-            onVisibleChange={(visible) =>
+            open={isEditingRowKey === record.pk}
+            onOpenChange={(visible) =>
               visible ? handleEdit(record) : closeEditPopover()
             }
             placement="bottomRight"

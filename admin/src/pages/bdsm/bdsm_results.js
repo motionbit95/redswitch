@@ -200,7 +200,7 @@ const BDSMResults = () => {
       />
       <Modal
         title={modalTitle}
-        visible={visible}
+        open={visible}
         onCancel={() => setVisible(false)}
         footer={null}
         centered

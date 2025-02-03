@@ -49,7 +49,6 @@ function Product(props) {
   const { currentUser } = useCurrentUser();
 
   useEffect(() => {
-    console.log(currentUser);
     if (currentUser) {
       onSearch(filter, keyword);
     }
@@ -68,13 +67,11 @@ function Product(props) {
           );
           if (!currentUser.branch_id) {
             setProducts(response.data);
-            console.log("1");
           } else {
             const filteredProducts = response.data.filter((product) => {
               return currentUser.branch_id.includes(product.branch_id);
             });
             setProducts(filteredProducts);
-            console.log("2");
           }
         } else {
           const response = await AxiosGet(`/products`);
@@ -83,11 +80,9 @@ function Product(props) {
               return currentUser.branch_id.includes(product.branch_id);
             });
             setProducts(filteredProducts);
-            console.log("3");
           } else {
             if (currentUser.permission === "1") {
               setProducts(response.data);
-              console.log("4");
             }
           }
         }

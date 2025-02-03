@@ -392,7 +392,7 @@ const InquiryBoard = (props) => {
             </Col>
 
             {currentUser.permission === "1" && (
-              <Col span={12}>
+              <Col span={6}>
                 {/* 상단 고정 체크박스 - 관리자만 가능 */}
                 <Form.Item
                   label="상단 고정 여부"
@@ -407,16 +407,46 @@ const InquiryBoard = (props) => {
                 </Form.Item>
               </Col>
             )}
+            <Col span={6}>
+              <Form.Item
+                label="지점 선택"
+                tooltip="게시물 내용의 주체가 되는 담당 지점을 선택해주세요."
+                rules={[{ required: true, message: "지점을 선택해주세요" }]}
+              >
+                {currentInquiry?.branch_id ? (
+                  <Space>
+                    {/* <div>{currentInquiry?.branch_id}</div> */}
+                    <SearchBranch
+                      currentUser={currentUser}
+                      selectedBranch={selectedBranch}
+                      setSelectedBranch={(branches) => {
+                        setSelectedBranch(branches[0]);
+                      }}
+                      multiple={false}
+                    />
+                  </Space>
+                ) : (
+                  <SearchBranch
+                    currentUser={currentUser}
+                    selectedBranch={selectedBranch}
+                    setSelectedBranch={(branches) => {
+                      setSelectedBranch(branches[0]);
+                    }}
+                    multiple={false}
+                  />
+                )}
+              </Form.Item>
+            </Col>
           </Row>
 
-          <Row gutter={8}>
+          <Row gutter={8} style={{ minHeight: "87px" }}>
             {currentUser.permission === "1" && (
-              <Col span={4}>
+              <Col span={6}>
                 <Checkbox
                   checked={ischecked} // isChecked 상태를 반영
                   onChange={toggleChecked} // 체크박스 클릭 시 상태 변경
                 >
-                  직접 지정
+                  열람 권한 지정
                 </Checkbox>
                 <Tooltip
                   placement="bottom"
@@ -426,7 +456,7 @@ const InquiryBoard = (props) => {
                 </Tooltip>
               </Col>
             )}
-            <Col span={20}>
+            <Col span={18}>
               {currentUser.permission === "1" && (
                 <>
                   {ischecked && (
@@ -456,7 +486,7 @@ const InquiryBoard = (props) => {
                           >
                             {user.user_id} ({user.user_name}) -{" "}
                             {user.permission === "1"
-                              ? "최고관리자"
+                              ? "본사관리자"
                               : user.permission === "2"
                               ? "지사관리자"
                               : "지점관리자"}
@@ -466,36 +496,6 @@ const InquiryBoard = (props) => {
                     </Form.Item>
                   )}
                 </>
-              )}
-              {!ischecked && (
-                <Form.Item
-                  label="지점 선택"
-                  tooltip="게시물 내용의 주체가 되는 담당 지점을 선택해주세요."
-                  rules={[{ required: true, message: "지점을 선택해주세요" }]}
-                >
-                  {currentInquiry?.branch_id ? (
-                    <Space>
-                      {/* <div>{currentInquiry?.branch_id}</div> */}
-                      <SearchBranch
-                        currentUser={currentUser}
-                        selectedBranch={selectedBranch}
-                        setSelectedBranch={(branches) => {
-                          setSelectedBranch(branches[0]);
-                        }}
-                        multiple={false}
-                      />
-                    </Space>
-                  ) : (
-                    <SearchBranch
-                      currentUser={currentUser}
-                      selectedBranch={selectedBranch}
-                      setSelectedBranch={(branches) => {
-                        setSelectedBranch(branches[0]);
-                      }}
-                      multiple={false}
-                    />
-                  )}
-                </Form.Item>
               )}
             </Col>
           </Row>
@@ -694,7 +694,7 @@ export const InquiryDetailModal = ({
   return (
     <Modal
       title="상세보기"
-      visible={isDetailModalVisible}
+      open={isDetailModalVisible}
       onCancel={() => setIsDetailModalVisible(false)}
       footer={[
         <Button

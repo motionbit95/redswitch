@@ -42,7 +42,7 @@ const ProviderModal = ({
   return (
     <Modal
       title={isEditMode ? "거래처 수정" : "거래처 추가"}
-      visible={visible}
+      open={visible}
       width={800}
       onCancel={() => {
         onCancel();
