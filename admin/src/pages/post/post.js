@@ -301,6 +301,7 @@ const NoticeBoard = (props) => {
         dataSource={sortedNotices}
         rowClassName={rowClassName}
         size="small"
+        pagination={{ pageSize: 10, position: ["bottomCenter"] }}
       />
 
       {/* 게시판 추가/수정 모달 */}

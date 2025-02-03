@@ -7,6 +7,7 @@ import {
   Space,
   Table,
   message,
+  Typography,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
@@ -183,6 +184,8 @@ const Inventory = (props) => {
   const [editRowKey, setEditRowKey] = useState(null);
   const [editedInventory, setEditedInventory] = useState({});
 
+  const [errorMessage, setErrorMessage] = useState("");
+
   const { pagination, setPagination, handleTableChange } = usePagination(10); // Default page size is 10
 
   useEffect(() => {
@@ -192,7 +195,9 @@ const Inventory = (props) => {
     }
 
     if (!selectedBranch) {
-      message.error("지점을 선택해주세요.");
+      setErrorMessage("지점을 선택해주세요.");
+    } else {
+      setErrorMessage("");
     }
   }, [selectedBranch]);
 
@@ -458,7 +463,9 @@ const Inventory = (props) => {
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
       <Space style={{ width: "100%", justifyContent: "space-between" }}>
-        <div />
+        <Typography.Text style={{ fontWeight: "bold" }}>
+          {errorMessage}
+        </Typography.Text>
         <Button
           type="primary"
           icon={<PlusOutlined />}

@@ -16,6 +16,7 @@ import {
   Select,
   Space,
   Table,
+  Tooltip,
 } from "antd";
 import useSelectedBranch from "../../hook/useSelectedBranch";
 import SearchMaterial from "../../components/popover/searchmaterial";
@@ -45,6 +46,8 @@ function Product(props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const { selectedBranch } = useSelectedBranch();
 
   const { currentUser } = useCurrentUser();
 
@@ -208,13 +211,25 @@ function Product(props) {
       <Space style={{ width: "100%", justifyContent: "space-between" }}>
         <Filter onChange={setFilter} value={filter} onSearch={onSearch} />
         <Space style={{ marginBottom: 16 }}>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => showModal()}
-          >
-            상품 추가
-          </Button>
+          {selectedBranch ? (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => showModal()}
+            >
+              상품 추가
+            </Button>
+          ) : (
+            <Tooltip
+              placement="left"
+              title="상품을 추가하려면 지점을 선택해주세요."
+            >
+              <Button type="primary" icon={<PlusOutlined />} disabled>
+                상품 추가
+              </Button>
+            </Tooltip>
+          )}
+
           <Button
             style={{ float: "right" }}
             icon={<DownloadOutlined />}
@@ -246,15 +261,15 @@ function Product(props) {
           onSearch(filter, keyword);
         }}
         currentProduct={currentProduct}
+        selectedBranch={selectedBranch}
       />
     </Space>
   );
 }
 
 const ProductModal = (props) => {
-  const { open, setOpen, currentProduct } = props;
+  const { open, setOpen, currentProduct, selectedBranch } = props;
   // const [visible, setVisible] = useState(false);
-  const { selectedBranch } = useSelectedBranch();
   const [selectedMaterial, setSelectedMaterial] = useState();
   // currentProduct || null
   const [product, setProduct] = useState(null);
@@ -280,11 +295,11 @@ const ProductModal = (props) => {
         form.setFieldsValue(currentProduct);
         setProduct(currentProduct);
         setRelatedProducts(currentProduct.related_products);
-        if (currentProduct.product_code === "지점 전용 상품") {
+        if (currentProduct.product_code === "지점전용상품") {
           setProduct((prevProduct) => ({
             ...prevProduct,
-            product_code: "지점 전용 상품",
-            product_category_code: "기타",
+            product_code: "지점전용상품",
+            product_category_code: "지점전용상품",
           }));
         }
       }
@@ -373,9 +388,9 @@ const ProductModal = (props) => {
           branch_id: selectedBranch.id,
           material_id: ischecked ? null : product.pk,
           blind_image: product.blind_image || null,
-          product_code: ischecked ? "지점 전용 상품" : product.product_code,
+          product_code: ischecked ? "지점전용상품" : product.product_code,
           product_category_code: ischecked
-            ? "기타"
+            ? "지점전용상품"
             : product.product_category_code,
         });
         console.log("response", response);
@@ -400,9 +415,9 @@ const ProductModal = (props) => {
     setIschecked(check); // 상태 업데이트
     setProduct((prevProduct) => ({
       ...prevProduct,
-      product_code: check ? "지점 전용 상품" : null,
+      product_code: check ? "지점전용상품" : null,
       product_category_code: check
-        ? "기타"
+        ? "지점전용상품"
         : prevProduct?.product_category_code,
     }));
   };

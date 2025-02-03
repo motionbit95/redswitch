@@ -72,7 +72,14 @@ function ProductListPage(props) {
           `${process.env.REACT_APP_SERVER_URL}/products/categories`
         );
         const categoriesData = await categoriesResponse.json();
-        setCategories(categoriesData);
+        const filteredCategories = categoriesData.filter((category) =>
+          branchProducts.some(
+            (product) =>
+              product.product_category_code === category.product_category_code
+          )
+        );
+        console.log(filteredCategories);
+        setCategories(filteredCategories);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }

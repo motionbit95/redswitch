@@ -258,6 +258,10 @@ const Order = (props) => {
         columns={columns}
         dataSource={filteredOrders}
         rowKey={(record) => record.order_code}
+        pagination={{
+          pageSize: 10,
+          position: ["bottomCenter"],
+        }}
         rowClassName={(record) =>
           record.checked === 0 || !record.checked ? "highlight-row" : ""
         }
