@@ -561,7 +561,9 @@ function Branch(props) {
       key: "id",
       fixed: "left",
       render: (text) => (
-        <a href={`${"http://localhost:3001"}/spot/${text}`}>바로가기</a>
+        <a href={`https://redswitch-customer.netlify.app/spot/${text}`}>
+          바로가기
+        </a>
       ),
     },
     {
