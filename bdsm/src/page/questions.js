@@ -150,6 +150,10 @@ function Questions(props) {
           showInfo={false}
           style={{ marginBottom: "20px" }}
         />
+        <div style={{ textAlign: "center", fontSize: "16px", fontWeight: "bold" }}>
+    {answeredCount} / {questions.length}
+  </div>
+
       </div>
       <div style={{ padding: "20px" }}>
         {isSmallScreen ? (

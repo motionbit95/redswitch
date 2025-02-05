@@ -61,6 +61,7 @@ const ResultChart = ({ data }) => {
     const result = results.find(
       (res) => res.type === type.replaceAll("total", "")
     );
+    console.log(result);
     return result ? result : null;
   };
 
@@ -190,11 +191,14 @@ const ResultChart = ({ data }) => {
                     opacity: 0.8,
                   }}
                 >
-                  <Text style={{ whiteSpace: "pre-line" }}>
+                  <Image 
+                    preview={false}
+                    src={require(`../assets/bdsm_type/${getResult(key).key}.jpg`)}
+                    width="100%"
+                  />
+                  {/* <Text style={{ whiteSpace: "pre-line" }}>
                     {getResult(key) ? getResult(key).description : dataMap[key]}
-                    에 대한 상세 설명을 여기에 입력합니다. 이 부분은 해당 항목에
-                    대한 설명이나 추가적인 정보를 보여줄 수 있는 곳입니다.
-                  </Text>
+                  </Text> */}
                 </div>
               )}
             </Row>

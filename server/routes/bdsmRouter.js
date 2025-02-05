@@ -972,10 +972,10 @@ router.post("/calculate-scores", async (req, res) => {
     for (const [question_pk, step] of Object.entries(answers)) {
       // 해당 question_pk에 해당하는 Answer 데이터를 찾음
 
-      const answerData = Object.values(allAnswers).filter(
+
+      const answerData = Object.values(allAnswers).find(
         (answer) =>
-          answer.question_pk === parseInt(question_pk) &&
-          answer.step === parseInt(step)
+          parseInt(answer.question_pk) === parseInt(question_pk) && parseInt(answer.step) === parseInt(step)
       );
 
       if (answerData) {
@@ -1003,6 +1003,7 @@ router.post("/calculate-scores", async (req, res) => {
         scores.switch_total += answerData.switch_ || 0;
         scores.vanilla_total += answerData.vanilla_ || 0;
       }
+
     }
 
     // 결과 반환
